@@ -1,0 +1,178 @@
+{
+  "id": "did:kash:21UhTqUdjZYWvw3jPz5emqdYskRqdQBLofo3MupZN3Jt/rule/income-six-months",
+  "version": 1,
+  "author": "did:kash:21UhTqUdjZYWvw3jPz5emqdYskRqdQBLofo3MupZN3Jt",
+  "title": "Income you can show — six months (SAMPLE)",
+  "purpose": "A lender reviews a loan against income the applicant's payers confirmed. SAMPLE figures; practice only.",
+  "visibility": "public",
+  "parameters": {
+    "minMonthly": {
+      "type": "number",
+      "value": 1000
+    },
+    "minPayers": {
+      "type": "number",
+      "value": 2
+    }
+  },
+  "dates": {
+    "published": "2026-10-01T00:00:00Z",
+    "renewBy": "2027-09-30T00:00:00Z",
+    "endsAt": "2028-09-30T00:00:00Z"
+  },
+  "decider": {
+    "role": "Credit officer"
+  },
+  "outcome": {
+    "grants": "A loan offer, made by a credit officer.",
+    "binds": true,
+    "sensitive": false,
+    "automaticYes": false
+  },
+  "reasons": [
+    {
+      "code": "income-shown",
+      "outcome": "yes",
+      "text": "The confirmed income meets the rule; the credit officer makes the offer."
+    },
+    {
+      "code": "months-missing",
+      "outcome": "not-yet",
+      "text": "Some months, or a second payer, are not yet confirmed."
+    },
+    {
+      "code": "declined-after-review",
+      "outcome": "no",
+      "text": "The credit officer does not make an offer, for the reason they give."
+    }
+  ],
+  "contest": {
+    "windowDays": 30,
+    "answerDays": 14,
+    "how": "Ask for a review at the lender's desk; an officer who did not make the first decision answers, with a fresh assessment."
+  },
+  "anotherWay": "Bank statements or payslips, brought to the lender's office, are read by a credit officer.",
+  "criteria": [
+    {
+      "id": "monthly",
+      "label": "At least the monthly amount, each month for six months",
+      "purpose": "The loan's repayment is monthly, so the rule looks for income arriving every month, as the payers confirmed it.",
+      "answer": {
+        "by": "receipts",
+        "query": [
+          {
+            "id": "monthly",
+            "format": "dc+sd-jwt",
+            "multiple": true,
+            "meta": {
+              "vct_values": [
+                "https://practice.invalid/vct/payment-confirmed/1"
+              ]
+            },
+            "claims": [
+              {
+                "id": "record",
+                "path": [
+                  "recordId"
+                ]
+              },
+              {
+                "id": "amount",
+                "path": [
+                  "amount"
+                ]
+              },
+              {
+                "id": "currency",
+                "path": [
+                  "currency"
+                ],
+                "values": [
+                  "USD"
+                ]
+              },
+              {
+                "id": "paidOn",
+                "path": [
+                  "paidOn"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "predicate": {
+        "issuers": [
+          {
+            "id": "did:kash:DnaeU6DTGVNs3fgcy5XkzHLfCtuEB7Fo7B76ugLp3YxV5LQ7",
+            "name": "Duedale (practice)"
+          }
+        ],
+        "freshDays": 31
+      },
+      "condition": {
+        "feel": "every m in [1, 2, 3, 4, 5, 6] satisfies sum(receipts[paidOn > date(asOf) - m * duration(\"P1M\") and paidOn <= date(asOf) - (m - 1) * duration(\"P1M\")].amount) >= minMonthly",
+        "types": {
+          "amount": "number",
+          "paidOn": "date"
+        }
+      }
+    },
+    {
+      "id": "payers",
+      "label": "From at least two payers",
+      "purpose": "Income from more than one payer is what the lender's rule treats as steady; each payer confirms their own payments.",
+      "answer": {
+        "by": "receipts",
+        "query": [
+          {
+            "id": "payers",
+            "format": "dc+sd-jwt",
+            "multiple": true,
+            "meta": {
+              "vct_values": [
+                "https://practice.invalid/vct/payment-confirmed/1"
+              ]
+            },
+            "claims": [
+              {
+                "id": "record",
+                "path": [
+                  "recordId"
+                ]
+              },
+              {
+                "id": "amount",
+                "path": [
+                  "amount"
+                ]
+              },
+              {
+                "id": "currency",
+                "path": [
+                  "currency"
+                ],
+                "values": [
+                  "USD"
+                ]
+              },
+              {
+                "id": "paidOn",
+                "path": [
+                  "paidOn"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "condition": {
+        "feel": "count(distinct values(receipts[paidOn > date(asOf) - duration(\"P6M\")].issuer)) >= minPayers",
+        "types": {
+          "paidOn": "date"
+        }
+      }
+    }
+  ],
+  "practice": true
+}

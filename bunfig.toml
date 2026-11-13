@@ -1,0 +1,6 @@
+[install]
+exact = false
+peer = true
+
+[install.scopes]
+"@kashscript" = { default = "workspace:*" }

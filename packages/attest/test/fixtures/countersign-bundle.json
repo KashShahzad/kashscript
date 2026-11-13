@@ -1,0 +1,80 @@
+{
+  "formatVersion": "kashscript-countersign/1",
+  "subject": {
+    "payloadType": "application/vnd.example.delivery+json",
+    "payload": "eyJkZWxpdmVyZWRBdFVuaXgiOjE2OTk5OTk0MDAsIml0ZW1zIjozLCJvcmRlclJlZiI6IkEtNzcifQ==",
+    "signatures": [
+      {
+        "keyid": "did:kash:Gm5X11NtUJuCnVPxt4iXcoqv17bVb5fDqijxmQpmi96v",
+        "sig": "8nV+qfceNxVBL1Ivs4wtGz0fSpUNiuHi75S1Yc0/3jDrlLP2X+vJh/f7gqyLhxuEcR6eRbu3VuViVfKp37/8DA=="
+      },
+      {
+        "keyid": "did:kash:76j1pcne5UPv1xjoA4mbYjiPdN8W1BRLAyp7YfhamL5j",
+        "sig": "WO2ALI4exqQNXy5S3tO2rh9GljyYn5wSSwP7+L3nQUQXl4Cn4inYrF0jdQ+hulAOzq/+smbOHR7YR6gwbvo4Cg=="
+      }
+    ]
+  },
+  "request": {
+    "header": {
+      "typ": "countersign-request",
+      "v": 1
+    },
+    "body": {
+      "requestId": "csr_1f4c9a2b7e6d05834ac1b9e27d6f3a55",
+      "requesterDid": "did:kash:Gm5X11NtUJuCnVPxt4iXcoqv17bVb5fDqijxmQpmi96v",
+      "subjectPayloadType": "application/vnd.example.delivery+json",
+      "subjectDigestSha256": "472a2fa251dccddd7f88da5b1ed01d1d7cd44f177b480a0fcd67bb66ee9bdf5b",
+      "statement": "Confirm you received the delivery for order A-77.",
+      "disclosures": [
+        {
+          "label": "Order",
+          "value": "A-77"
+        },
+        {
+          "label": "Items",
+          "value": "3"
+        }
+      ],
+      "nonceB64": "WlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlo=",
+      "issuedAtUnix": 1700000000,
+      "expiresAtUnix": 1701209600,
+      "relationshipContext": "book-demo",
+      "withdrawalFeed": null
+    },
+    "signature": {
+      "alg": "ed25519",
+      "sig": "z46J8xYK3ERqjoCiScBdtyxVTHow59MYGDL34wUGCc63XdvStEfCzV8qkd8Poehn2SNkc8aBX4doHDv9RzmCrCJsn",
+      "dst": "kash-countersign-request-v1\n"
+    }
+  },
+  "acceptances": [
+    {
+      "header": {
+        "typ": "countersign",
+        "v": 1
+      },
+      "body": {
+        "act": "countersign",
+        "requestId": "csr_1f4c9a2b7e6d05834ac1b9e27d6f3a55",
+        "requestDigestSha256": "79148ea488481363b3e26f46bab249b403bb4a0fd03ad4513b4e4bd818091c42",
+        "subjectPayloadType": "application/vnd.example.delivery+json",
+        "subjectDigestSha256": "472a2fa251dccddd7f88da5b1ed01d1d7cd44f177b480a0fcd67bb66ee9bdf5b",
+        "countersignerDid": "did:kash:76j1pcne5UPv1xjoA4mbYjiPdN8W1BRLAyp7YfhamL5j",
+        "keyCustody": "subject-generated",
+        "signedAtUnix": 1700003600
+      },
+      "signature": {
+        "alg": "ed25519",
+        "sig": "z4Y9vwcZvhk36F3MYnLvxdWfkLguAPY5gCVrqCPXJ6KYRf85LZ8vBFZAixAtqvKBKktucyezzxrCEPeYLkqm4kYN5",
+        "dst": "kash-countersign-v1\n"
+      }
+    }
+  ],
+  "withdrawal": null,
+  "verify": {
+    "spec": "DSSE/PAE (two signatures over identical bytes) + RFC 8785 JCS Kash-Events",
+    "steps": [
+      "verify with: attest verify countersign-bundle.json  (no --key: the DIDs carry the keys)"
+    ]
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "name": "@kashscript/identity-core",
+  "version": "0.4.0-alpha.2",
+  "description": "Zero-dependency cryptographic primitives + did:kash DID Document formatter + Kash-Event sign/verify. Pure deterministic logic — no network, no storage.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "sideEffects": false,
+  "exports": {
+    ".":           "./src/index.ts",
+    "./keys":      "./src/keys.ts",
+    "./p256":      "./src/p256.ts",
+    "./runtime":   "./src/runtime.ts",
+    "./did":       "./src/did.ts",
+    "./document":  "./src/document.ts",
+    "./canonical": "./src/canonical.ts",
+    "./signatures":"./src/signatures.ts",
+    "./signer":    "./src/signer.ts",
+    "./errors":    "./src/errors.ts",
+    "./base58":    "./src/base58.ts",
+    "./base64url": "./src/base64url.ts",
+    "./hex":       "./src/hex.ts",
+    "./license":   "./src/license.ts",
+    "./types":     "./src/types/index.ts"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build":          "tsc -p tsconfig.json",
+    "typecheck":      "tsc --noEmit",
+    "typecheck:test": "tsc --noEmit -p tsconfig.test.json",
+    "test":           "bun run typecheck:test && bun test src/",
+    "clean":          "rm -rf dist .turbo"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "Apache-2.0",
+  "repository": { "type": "git", "url": "git+https://github.com/KashShahzad/kashscript.git", "directory": "packages/identity-core" },
+  "publishConfig": {
+    "access":   "public",
+    "registry": "https://registry.npmjs.org/",
+    "main":     "./dist/index.js",
+    "types":    "./dist/index.d.ts",
+    "exports": {
+      ".":            { "types": "./dist/index.d.ts",            "import": "./dist/index.js" },
+      "./keys":       { "types": "./dist/keys.d.ts",             "import": "./dist/keys.js" },
+      "./p256":       { "types": "./dist/p256.d.ts",             "import": "./dist/p256.js" },
+      "./runtime":    { "types": "./dist/runtime.d.ts",          "import": "./dist/runtime.js" },
+      "./did":        { "types": "./dist/did.d.ts",              "import": "./dist/did.js" },
+      "./document":   { "types": "./dist/document.d.ts",         "import": "./dist/document.js" },
+      "./canonical":  { "types": "./dist/canonical.d.ts",        "import": "./dist/canonical.js" },
+      "./signatures": { "types": "./dist/signatures.d.ts",       "import": "./dist/signatures.js" },
+      "./signer":     { "types": "./dist/signer.d.ts",           "import": "./dist/signer.js" },
+      "./errors":     { "types": "./dist/errors.d.ts",           "import": "./dist/errors.js" },
+      "./base58":     { "types": "./dist/base58.d.ts",           "import": "./dist/base58.js" },
+      "./base64url":  { "types": "./dist/base64url.d.ts",        "import": "./dist/base64url.js" },
+      "./hex":        { "types": "./dist/hex.d.ts",              "import": "./dist/hex.js" },
+      "./license":    { "types": "./dist/license.d.ts",          "import": "./dist/license.js" },
+      "./types":      { "types": "./dist/types/index.d.ts",      "import": "./dist/types/index.js" }
+    }
+  }
+}

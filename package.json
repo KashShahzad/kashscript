@@ -1,0 +1,23 @@
+{
+  "name": "kashscript",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The KashScript open protocol: identity, evidence, the wallet and countersigning, under Apache-2.0.",
+  "workspaces": ["packages/*"],
+  "packageManager": "bun@1.2.5",
+  "scripts": {
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "test": "bun scripts/test-packages.ts",
+    "check": "bun scripts/check-boundary.ts && bun scripts/check-public-tree.ts ."
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0",
+    "typescript": "^5.6.3",
+    "@types/bun": "^1.2.5"
+  },
+  "engines": {
+    "bun": ">=1.2.5"
+  },
+  "type": "module"
+}

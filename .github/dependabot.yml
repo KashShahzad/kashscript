@@ -1,0 +1,27 @@
+# Dependency updates (P6, ECOSYSTEM d84(f)): the package manager and GitHub Actions.
+# Minor and patch bumps arrive as one grouped PR a week; a major bump is its own PR.
+# Nothing merges itself: CI (typecheck, boundary, secret scan, Semgrep) runs on each PR.
+version: 2
+updates:
+  - package-ecosystem: "bun"
+    directories:
+      - "/"
+      - "/packages/*"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: ["minor", "patch"]
+    labels: ["dependencies"]
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    groups:
+      actions:
+        patterns: ["*"]
+    labels: ["dependencies", "ci"]

@@ -1,0 +1,66 @@
+{
+  "name": "@kashscript/kash",
+  "version": "0.5.0",
+  "description": "@kashscript/kash — the `kash` CLI, the station kit. Makes a station's own keys, issues a cohort record as a file, countersigns it as the station, checks any record offline, and signs a trust list with the publisher key. Local files only: no server, no upload, no wallet delivery. Node 20+, Bun 1+.",
+  "type": "module",
+  "keywords": ["kashscript", "kash", "cli", "station", "did", "attest", "countersign", "trust-list", "offline", "npx"],
+  "homepage": "https://www.kashscript.com",
+  "repository": { "type": "git", "url": "git+https://github.com/KashShahzad/kashscript.git", "directory": "packages/kash" },
+  "bugs":    "https://github.com/KashShahzad/kashscript/issues",
+  "bin": {
+    "kash": "./src/bin/kash.ts"
+  },
+  "main":  "./src/bin/kash.ts",
+  "types": "./src/bin/kash.ts",
+  "exports": {
+    ".":           "./src/bin/kash.ts",
+    "./utils/env": "./src/utils/env.ts"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build":          "tsc -p tsconfig.json && bun run build:bin",
+    "build:bin":      "bun scripts/bundle-bin.ts",
+    "typecheck":      "tsc --noEmit",
+    "typecheck:test": "tsc --noEmit -p tsconfig.test.json",
+    "test":           "bun run typecheck:test && bun test",
+    "dev":            "bun run src/bin/kash.ts",
+    "kash":           "bun run src/bin/kash.ts",
+    "prepack":        "bun run build",
+    "clean":          "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@kashscript/attest": "workspace:*",
+    "commander":          "^12.1.0",
+    "enquirer":           "^2.4.1"
+  },
+  "devDependencies": {
+    "@kashscript/identity-core":   "workspace:*",
+    "@kashscript/identity-server": "workspace:*",
+    "@types/bun":    "^1.2.5",
+    "@types/node":   "^22.0.0",
+    "typescript":    "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20",
+    "bun":  ">=1.0"
+  },
+  "license": "Apache-2.0",
+  "publishConfig": {
+    "access":   "public",
+    "registry": "https://registry.npmjs.org/",
+    "main":  "./dist/bin/kash.js",
+    "types": "./dist/bin/kash.d.ts",
+    "bin": {
+      "kash": "./dist/bin/kash.js"
+    },
+    "exports": {
+      ".":           "./dist/bin/kash.js",
+      "./utils/env": "./dist/utils/env.js"
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "report": {
+    "meta": {
+      "reportId": "report_demo_1700010000",
+      "programId": "prog_demo",
+      "programName": "Demo Program",
+      "funderDid": "did:kash:funder:demo",
+      "generatedAtUnix": 1700010000,
+      "simulation": true,
+      "anomalies": 0,
+      "disclaimers": [
+        "SIMULATION — figures illustrate the format, not a real disbursement."
+      ]
+    },
+    "grants": [
+      {
+        "grantId": "grant_001",
+        "purposeTag": "food",
+        "amountPaisa": 250000,
+        "state": "REDEEMED",
+        "issuedAtUnix": 1700000000,
+        "deliveredAtUnix": 1700001000,
+        "redeemedAtUnix": 1700003600,
+        "redeemedByVendorDid": "did:kash:vendor:demo",
+        "expiryUnix": 1800000000,
+        "signatureValid": true
+      }
+    ],
+    "vendors": [
+      {
+        "vendorDid": "did:kash:vendor:demo",
+        "redeemedCount": 1,
+        "redeemedPaisa": 250000
+      }
+    ],
+    "totals": {
+      "issuedCount": 1,
+      "issuedPaisa": 250000,
+      "redeemedCount": 1,
+      "redeemedPaisa": 250000,
+      "expiredCount": 0,
+      "unspentPaisa": 0,
+      "settledPaisa": 0,
+      "refundedPaisa": 0
+    },
+    "chain": {
+      "algorithm": "sha256-jcs-linked",
+      "genesisLabel": "duedale-every-rupee-chain-v1",
+      "transitionCount": 2,
+      "headHashHex": "dead8334f67f748c2aeac2e8a57d7100a62f69321e418dd9eb5e13e75f48838a",
+      "computedAtRender": true,
+      "durablyAnchored": false,
+      "links": [
+        {
+          "seq": 0,
+          "row": {
+            "grantId": "grant_001",
+            "toState": "ISSUED",
+            "actorDid": "did:kash:funder:demo",
+            "actorClass": "FUNDER",
+            "reason": "grant issued",
+            "code": null,
+            "atUnix": 1700000000
+          },
+          "rowHashHex": "3cb96e516f4d663604b4b696fc2763b35367e52976cb765680c97e32e68e619e",
+          "prevHashHex": "d79f6088132d979c4e1ed09a5ff26d47ba52aa706a63dda63e266322828934f8"
+        },
+        {
+          "seq": 1,
+          "row": {
+            "grantId": "grant_001",
+            "toState": "REDEEMED",
+            "actorDid": "did:kash:vendor:demo",
+            "actorClass": "VENDOR",
+            "reason": "voucher redeemed at approved vendor",
+            "code": null,
+            "atUnix": 1700003600
+          },
+          "rowHashHex": "dead8334f67f748c2aeac2e8a57d7100a62f69321e418dd9eb5e13e75f48838a",
+          "prevHashHex": "3cb96e516f4d663604b4b696fc2763b35367e52976cb765680c97e32e68e619e"
+        }
+      ]
+    }
+  },
+  "signature": {
+    "alg": "ed25519",
+    "sig": "zTVp3tg6t2wAdqxdfX9SnevoZH2fJRD8ZrpEB4xJvt6aq7CaiJUPrqx4BJgR4Uhv7kEUyyN1ksAWHMpnEMr5X8Xs",
+    "dst": "kash-report-v1\n"
+  },
+  "operatorPublicKeyHex": "30f28a55d3965a977391a9d03bcbd276be856a6e4ca2232cff7f1f25ec96862e",
+  "verify": {
+    "spec": "RFC 8785 (JCS) + Ed25519",
+    "dst": "kash-report-v1\n",
+    "steps": [
+      "verify with: attest verify duedale-report.json"
+    ]
+  }
+}

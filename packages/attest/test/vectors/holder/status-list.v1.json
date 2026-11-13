@@ -1,0 +1,10 @@
+{
+  "payloadType": "application/vnd.kash.status-list+json",
+  "payload": "eyJlbmNvZGVkTGlzdCI6InVINHNJQUFBQUFBQUFDdTNPQVFrQUFBZ0RzRWV3ZjFwTEhFVFlFaXdCQUFBQUFBQUFBQUFBQUQ2YTZ3QUFBQUFBVUxXTlc5bmhBRUFBQUEiLCJmb3JtYXQiOiJrYXNoc2NyaXB0LXN0YXR1cy1saXN0LzEiLCJpZCI6Imh0dHBzOi8vc3RhdHVzLmV4YW1wbGUub3JnL29yZW9hc2lzLWRlbW8vcHJlZGljYXRlcy8yMDI2LXEzIiwiaXNzdWVkQXRVbml4IjoxNzkwMTIxNjAwLCJpc3N1ZXIiOiJkaWQ6a2FzaDpBcXBmb1ZFZGhqYzczRzNuNEhxZ21qWlp5N2RZTWhxczNTYVFQb1dMdkZSdiIsInN0YXR1c1B1cnBvc2UiOiJyZXZvY2F0aW9uIiwidHRsIjo4NjQwMDAwMCwidHlwZSI6IkJpdHN0cmluZ1N0YXR1c0xpc3QiLCJ2YWxpZFVudGlsVW5peCI6bnVsbH0=",
+  "signatures": [
+    {
+      "keyid": "did:kash:AqpfoVEdhjc73G3n4HqgmjZZy7dYMhqs3SaQPoWLvFRv",
+      "sig": "sNrzaAPvAHGPvbP6Lv/aNbtloFZpVsnMRa/yPBESaMzjDBw6Dn/rl6h8+yI38PGjdlqsx5yGJx8/Xu5vSOa1BA=="
+    }
+  ]
+}

@@ -1,0 +1,52 @@
+{
+  "note": "The anchoring host's own view of the batch. It is never shipped with a receipt; it is here only so the tests can show that no receipt carries any of it.",
+  "root": "163b3d005a47482da1cdd1538b66ce04181f5b70f2945c97daa1637fe30ce46a",
+  "treeSize": 5,
+  "sessions": [
+    {
+      "sessionId": "ses_01JB8ANCHORCOFFEE000000",
+      "parties": {
+        "establishment": "did:kash:2achcqAQzhjkNdLa3zJiqCA8ffAXhrXrjGMK1S21iLCF",
+        "person": "did:kash:ANyq2fKJxWWwqufgmqaamZYNsLjpGkeVVBh16hvdrAMy"
+      },
+      "headSha256": "3a02dbc04731f4e13b5f37611383c89a5c05057a9f80289f892aba51964974fe",
+      "coversSeq": 3
+    },
+    {
+      "sessionId": "ses_01JB8ANCHORGUIDEDDAY000",
+      "parties": {
+        "establishment": "did:kash:H2EC33PQ1i7FTmD5h5bhFr4aNdazPrpr31bdbdPNNX4D",
+        "person": "did:kash:A7xfBkTvQ2KvbnLthNpCfagBvt6v3qmx5WgahJcT6tyG"
+      },
+      "headSha256": "403e2b36afda29261bf5b174392dc735447044f0b241b8ae04d67828630d5d82",
+      "coversSeq": 5
+    },
+    {
+      "sessionId": "ses_01JB7REPAIRDEMO000000000",
+      "parties": {
+        "establishment": "did:kash:EVLWYjSVUS8guK595gGbcRek8N3f279j1dAxE1WbiCeZ",
+        "person": "did:kash:F7FHsdszXMDRFLLiRG39fAgFPhKyRnbyVLNrLsgtT1Gq"
+      },
+      "headSha256": "6ae2504eff8182d9ab1e2cf85b8e4f9d9b7e396518e41b8c238dde9d97f55c37",
+      "coversSeq": 5
+    },
+    {
+      "sessionId": "ses_01JB8ANCHORTRANCHE00000",
+      "parties": {
+        "establishment": "did:kash:9sLx3kJwT1u1BghkNaExFs4KVd1DqfwfHo7fJzeRowQN",
+        "person": "did:kash:6eSZxY1tzvJpjVdgnQTTSNy1MjXrSfjZnZBpGFjCEUa3"
+      },
+      "headSha256": "e2d555fc3d59a39ddce345a60bbd4e77e1404058bf975478029484a98810d137",
+      "coversSeq": 3
+    },
+    {
+      "sessionId": "ses_01JB8ANCHORTAILOR000000",
+      "parties": {
+        "establishment": "did:kash:4X8ozpNJr1XY77YVvbNDCC3RbdUes1oFPH3DXvkmpbWe",
+        "person": "did:kash:C17vLn5Gt2YpadTQPf9qz82XQDRTF4YCd2KhZfZC2kyC"
+      },
+      "headSha256": "89a9c3f9cc195340eb1c3340ca3ed7d98c6baf2708e854d47e650f8414335c38",
+      "coversSeq": 3
+    }
+  ]
+}

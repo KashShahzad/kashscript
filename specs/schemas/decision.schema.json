@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kashscript.com/lexicons/kash.decision@1.1.0",
+  "title": "A decision receipt",
+  "description": "The outcome under one version of a rule (and the anchor's adoption it was made under), its reasons, the rows that fired and the hashes of the receipts relied on — never their content. The person's own record: signed to them, never published.",
+  "type": "object",
+  "properties": {
+    "rule": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/rule\\/[a-z0-9][a-z0-9-]{0,62}$"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "hash"
+      ]
+    },
+    "adoption": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/adoption\\/[a-z0-9][a-z0-9-]{0,62}$"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "hash"
+      ]
+    },
+    "outcome": {
+      "enum": [
+        "yes",
+        "not-yet",
+        "no",
+        "partial"
+      ]
+    },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+      },
+      "minItems": 1,
+      "maxItems": 32
+    },
+    "rows": {
+      "type": "object",
+      "properties": {
+        "fired": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+          },
+          "maxItems": 32
+        },
+        "missing": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+          },
+          "maxItems": 32
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "fired",
+        "missing"
+      ]
+    },
+    "reliedOn": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+      },
+      "maxItems": 256
+    },
+    "decidedBy": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "standing"
+            },
+            "standing": {
+              "type": "string",
+              "pattern": "^standing:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}$"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "standing"
+          ]
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "person"
+            },
+            "role": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 64
+            },
+            "seat": {
+              "type": "string",
+              "format": "did-ks",
+              "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}$"
+            },
+            "signature": {
+              "type": "string",
+              "maxLength": 1024,
+              "pattern": "^[A-Za-z0-9_-]+\\.\\.[A-Za-z0-9_-]+$"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "role",
+            "seat",
+            "signature"
+          ]
+        }
+      ]
+    },
+    "automatic": {
+      "type": "boolean"
+    },
+    "refusal": {
+      "type": "object",
+      "properties": {
+        "unmet": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+          },
+          "minItems": 1,
+          "maxItems": 32
+        },
+        "receiptsRead": {
+          "const": true
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "unmet",
+        "receiptsRead"
+      ]
+    },
+    "decidedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "contestUntil": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "practice": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "rule",
+    "outcome",
+    "reasons",
+    "rows",
+    "reliedOn",
+    "decidedBy",
+    "automatic",
+    "decidedAt",
+    "contestUntil"
+  ]
+}

@@ -1,0 +1,258 @@
+{
+  "note": "attest's own Ed25519 cases (AU-3, A7-07). webcryptoAlone is what one engine said with no pre-check, for the record; expected.v1.json carries the rule's verdict.",
+  "message": "attest ed25519 vector — the rule, not the engine, decides",
+  "cases": [
+    {
+      "name": "honest",
+      "pk": "0053a38bebca9c550100b03fa753beee57670492a83b28728d2ce04936c7a56b",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "d40f9b7aa6cc5de551fe0027294a58166483b3b2d64fb798f4c3e4c0b083b8213c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "ok",
+      "webcryptoAlone": true,
+      "note": "a fresh key's signature over the message"
+    },
+    {
+      "name": "s-plus-l",
+      "pk": "0053a38bebca9c550100b03fa753beee57670492a83b28728d2ce04936c7a56b",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "d40f9b7aa6cc5de551fe0027294a58166483b3b2d64fb798f4c3e4c0b083b821292381aa2e0b2674a3ab62f31d1d1fdecc2256081e0041f7eabf613e8f6a2d16",
+      "precheck": "S_NOT_CANONICAL",
+      "webcryptoAlone": false,
+      "note": "the honest S plus L — the malleated twin, non-canonical"
+    },
+    {
+      "name": "s-equals-l",
+      "pk": "0053a38bebca9c550100b03fa753beee57670492a83b28728d2ce04936c7a56b",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "d40f9b7aa6cc5de551fe0027294a58166483b3b2d64fb798f4c3e4c0b083b821edd3f55c1a631258d69cf7a2def9de1400000000000000000000000000000010",
+      "precheck": "S_NOT_CANONICAL",
+      "webcryptoAlone": false,
+      "note": "S = L exactly"
+    },
+    {
+      "name": "s-canonical-wrong",
+      "pk": "0053a38bebca9c550100b03fa753beee57670492a83b28728d2ce04936c7a56b",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "d40f9b7aa6cc5de551fe0027294a58166483b3b2d64fb798f4c3e4c0b083b821ecd3f55c1a631258d69cf7a2def9de1400000000000000000000000000000010",
+      "precheck": "ok",
+      "webcryptoAlone": false,
+      "note": "a canonical S that is not the signature — refused by the equation, not the rule"
+    },
+    {
+      "name": "r-non-canonical-p-plus-one",
+      "pk": "0053a38bebca9c550100b03fa753beee57670492a83b28728d2ce04936c7a56b",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "eeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f3c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "R_INVALID",
+      "webcryptoAlone": false,
+      "note": "R encoded as y = p + 1"
+    },
+    {
+      "name": "r-non-canonical-p",
+      "pk": "0053a38bebca9c550100b03fa753beee57670492a83b28728d2ce04936c7a56b",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f3c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "R_INVALID",
+      "webcryptoAlone": false,
+      "note": "R encoded as y = p"
+    },
+    {
+      "name": "r-identity-with-sign",
+      "pk": "0053a38bebca9c550100b03fa753beee57670492a83b28728d2ce04936c7a56b",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "01000000000000000000000000000000000000000000000000000000000000803c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "R_INVALID",
+      "webcryptoAlone": false,
+      "note": "R = the identity with the sign bit set"
+    },
+    {
+      "name": "r-not-on-curve",
+      "pk": "0053a38bebca9c550100b03fa753beee57670492a83b28728d2ce04936c7a56b",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "02000000000000000000000000000000000000000000000000000000000000003c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "R_INVALID",
+      "webcryptoAlone": false,
+      "note": "R with a y that has no x on the curve"
+    },
+    {
+      "name": "a-non-canonical-p-plus-one",
+      "pk": "eeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "d40f9b7aa6cc5de551fe0027294a58166483b3b2d64fb798f4c3e4c0b083b8213c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "A_INVALID",
+      "webcryptoAlone": false,
+      "note": "A encoded as y = p + 1"
+    },
+    {
+      "name": "a-non-canonical-p",
+      "pk": "edffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "d40f9b7aa6cc5de551fe0027294a58166483b3b2d64fb798f4c3e4c0b083b8213c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "A_INVALID",
+      "webcryptoAlone": false,
+      "note": "A encoded as y = p"
+    },
+    {
+      "name": "a-identity-with-sign",
+      "pk": "0100000000000000000000000000000000000000000000000000000000000080",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "d40f9b7aa6cc5de551fe0027294a58166483b3b2d64fb798f4c3e4c0b083b8213c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "A_INVALID",
+      "webcryptoAlone": false,
+      "note": "A = the identity with the sign bit set"
+    },
+    {
+      "name": "a-not-on-curve",
+      "pk": "0200000000000000000000000000000000000000000000000000000000000000",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "d40f9b7aa6cc5de551fe0027294a58166483b3b2d64fb798f4c3e4c0b083b8213c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "A_INVALID",
+      "webcryptoAlone": false,
+      "note": "A with a y that has no x on the curve"
+    },
+    {
+      "name": "r-small-order-0",
+      "pk": "0053a38bebca9c550100b03fa753beee57670492a83b28728d2ce04936c7a56b",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "01000000000000000000000000000000000000000000000000000000000000003c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "R_SMALL_ORDER",
+      "webcryptoAlone": false,
+      "note": "R = torsion point 0 (the identity)"
+    },
+    {
+      "name": "a-small-order-0-zero-signature",
+      "pk": "0100000000000000000000000000000000000000000000000000000000000000",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "precheck": "A_SMALL_ORDER",
+      "webcryptoAlone": true,
+      "note": "A = torsion point 0 with R = identity and S = 0 — verifies any message under a cofactorless engine that accepts small-order keys"
+    },
+    {
+      "name": "r-small-order-1",
+      "pk": "0053a38bebca9c550100b03fa753beee57670492a83b28728d2ce04936c7a56b",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac03fa3c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "R_SMALL_ORDER",
+      "webcryptoAlone": false,
+      "note": "R = torsion point 1 (small order)"
+    },
+    {
+      "name": "a-small-order-1-zero-signature",
+      "pk": "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac03fa",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "precheck": "A_SMALL_ORDER",
+      "webcryptoAlone": false,
+      "note": "A = torsion point 1 with R = identity and S = 0 — verifies any message under a cofactorless engine that accepts small-order keys"
+    },
+    {
+      "name": "r-small-order-2",
+      "pk": "0053a38bebca9c550100b03fa753beee57670492a83b28728d2ce04936c7a56b",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "00000000000000000000000000000000000000000000000000000000000000003c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "R_SMALL_ORDER",
+      "webcryptoAlone": false,
+      "note": "R = torsion point 2 (small order)"
+    },
+    {
+      "name": "a-small-order-2-zero-signature",
+      "pk": "0000000000000000000000000000000000000000000000000000000000000000",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "precheck": "A_SMALL_ORDER",
+      "webcryptoAlone": false,
+      "note": "A = torsion point 2 with R = identity and S = 0 — verifies any message under a cofactorless engine that accepts small-order keys"
+    },
+    {
+      "name": "r-small-order-3",
+      "pk": "0053a38bebca9c550100b03fa753beee57670492a83b28728d2ce04936c7a56b",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc853c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "R_SMALL_ORDER",
+      "webcryptoAlone": false,
+      "note": "R = torsion point 3 (small order)"
+    },
+    {
+      "name": "a-small-order-3-zero-signature",
+      "pk": "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc85",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "precheck": "A_SMALL_ORDER",
+      "webcryptoAlone": false,
+      "note": "A = torsion point 3 with R = identity and S = 0 — verifies any message under a cofactorless engine that accepts small-order keys"
+    },
+    {
+      "name": "r-small-order-4",
+      "pk": "0053a38bebca9c550100b03fa753beee57670492a83b28728d2ce04936c7a56b",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f3c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "R_SMALL_ORDER",
+      "webcryptoAlone": false,
+      "note": "R = torsion point 4 (small order)"
+    },
+    {
+      "name": "a-small-order-4-zero-signature",
+      "pk": "ecffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff7f",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "precheck": "A_SMALL_ORDER",
+      "webcryptoAlone": false,
+      "note": "A = torsion point 4 with R = identity and S = 0 — verifies any message under a cofactorless engine that accepts small-order keys"
+    },
+    {
+      "name": "r-small-order-5",
+      "pk": "0053a38bebca9c550100b03fa753beee57670492a83b28728d2ce04936c7a56b",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc053c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "R_SMALL_ORDER",
+      "webcryptoAlone": false,
+      "note": "R = torsion point 5 (small order)"
+    },
+    {
+      "name": "a-small-order-5-zero-signature",
+      "pk": "26e8958fc2b227b045c3f489f2ef98f0d5dfac05d3c63339b13802886d53fc05",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "precheck": "A_SMALL_ORDER",
+      "webcryptoAlone": false,
+      "note": "A = torsion point 5 with R = identity and S = 0 — verifies any message under a cofactorless engine that accepts small-order keys"
+    },
+    {
+      "name": "r-small-order-6",
+      "pk": "0053a38bebca9c550100b03fa753beee57670492a83b28728d2ce04936c7a56b",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "00000000000000000000000000000000000000000000000000000000000000803c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "R_SMALL_ORDER",
+      "webcryptoAlone": false,
+      "note": "R = torsion point 6 (small order)"
+    },
+    {
+      "name": "a-small-order-6-zero-signature",
+      "pk": "0000000000000000000000000000000000000000000000000000000000000080",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "precheck": "A_SMALL_ORDER",
+      "webcryptoAlone": false,
+      "note": "A = torsion point 6 with R = identity and S = 0 — verifies any message under a cofactorless engine that accepts small-order keys"
+    },
+    {
+      "name": "r-small-order-7",
+      "pk": "0053a38bebca9c550100b03fa753beee57670492a83b28728d2ce04936c7a56b",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac037a3c4f8b4d14a8131ccd0e6b503f2340c9cc2256081e0041f7eabf613e8f6a2d06",
+      "precheck": "R_SMALL_ORDER",
+      "webcryptoAlone": false,
+      "note": "R = torsion point 7 (small order)"
+    },
+    {
+      "name": "a-small-order-7-zero-signature",
+      "pk": "c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac037a",
+      "msg": "617474657374206564323535313920766563746f7220e28094207468652072756c652c206e6f742074686520656e67696e652c2064656369646573",
+      "sig": "01000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "precheck": "A_SMALL_ORDER",
+      "webcryptoAlone": false,
+      "note": "A = torsion point 7 with R = identity and S = 0 — verifies any message under a cofactorless engine that accepts small-order keys"
+    }
+  ]
+}

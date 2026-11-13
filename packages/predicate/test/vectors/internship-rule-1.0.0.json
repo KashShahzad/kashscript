@@ -1,0 +1,155 @@
+{
+  "id": "did:kash:21UhTqUdjZYWvw3jPz5emqdYskRqdQBLofo3MupZN3Jt/rule/internship-credit",
+  "version": 1,
+  "author": "did:kash:21UhTqUdjZYWvw3jPz5emqdYskRqdQBLofo3MupZN3Jt",
+  "title": "Internship credit (SAMPLE rule)",
+  "purpose": "The campus awards the internship course's credit hours for a supervised internship its own record shows was completed. SAMPLE figures until the campus supplies its own.",
+  "visibility": "public",
+  "parameters": {
+    "minWeeks": {
+      "type": "number",
+      "value": 6
+    },
+    "minHours": {
+      "type": "number",
+      "value": 120
+    },
+    "course": {
+      "type": "string",
+      "value": "SAMPLE-INT-300"
+    }
+  },
+  "dates": {
+    "published": "2026-10-01T00:00:00Z",
+    "renewBy": "2027-09-30T00:00:00Z",
+    "endsAt": "2028-09-30T00:00:00Z"
+  },
+  "decider": {
+    "role": "Internship coordinator"
+  },
+  "outcome": {
+    "grants": "The internship course's three credit hours (SAMPLE course code).",
+    "binds": false,
+    "sensitive": false,
+    "automaticYes": true
+  },
+  "reasons": [
+    {
+      "code": "supervised-and-reviewed",
+      "outcome": "yes",
+      "text": "The internship record shows the weeks approved and the final review signed: the credit is awarded."
+    },
+    {
+      "code": "record-incomplete",
+      "outcome": "not-yet",
+      "text": "The record does not yet show every approved week, the hours, or the final review."
+    },
+    {
+      "code": "not-awarded",
+      "outcome": "no",
+      "text": "The coordinator does not award the credit, for the reason they give."
+    },
+    {
+      "code": "partial-credit",
+      "outcome": "partial",
+      "text": "The coordinator awards part of the credit, for the reason they give."
+    }
+  ],
+  "contest": {
+    "windowDays": 30,
+    "answerDays": 21,
+    "how": "Ask the department office for a review; the head of department, who did not make the first decision, answers."
+  },
+  "anotherWay": "A signed paper logbook and the academic supervisor's letter, handed to the department office, are read by the coordinator in person.",
+  "criteria": [
+    {
+      "id": "supervised-internship",
+      "label": "The weeks approved by the site supervisor, and the final review signed",
+      "purpose": "The credit is for a supervised internship: each week approved where it happened, and reviewed by the academic supervisor at the end.",
+      "answer": {
+        "by": "receipts",
+        "query": [
+          {
+            "id": "supervised-internship",
+            "format": "dc+sd-jwt",
+            "meta": {
+              "vct_values": [
+                "https://practice.invalid/vct/internship-record/1"
+              ]
+            },
+            "trusted_authorities": [
+              {
+                "type": "kash_issuer",
+                "values": [
+                  "did:kash:21UhTqUdjZYWvw3jPz5emqdYskRqdQBLofo3MupZN3Jt"
+                ]
+              }
+            ],
+            "claims": [
+              {
+                "id": "weeksApproved",
+                "path": [
+                  "weeks",
+                  null,
+                  "approvedOn"
+                ]
+              },
+              {
+                "id": "finalReviewOn",
+                "path": [
+                  "finalReviewOn"
+                ]
+              },
+              {
+                "id": "hoursStated",
+                "path": [
+                  "hoursStated"
+                ]
+              }
+            ]
+          }
+        ],
+        "names": {
+          "did:kash:21UhTqUdjZYWvw3jPz5emqdYskRqdQBLofo3MupZN3Jt": "the campus (practice)"
+        }
+      },
+      "condition": {
+        "feel": "some r in receipts satisfies count(r.weeksApproved) >= minWeeks and r.hoursStated >= minHours and r.finalReviewOn <= date(asOf)",
+        "types": {
+          "weeksApproved": "list of date",
+          "finalReviewOn": "date",
+          "hoursStated": "number"
+        }
+      },
+      "basis": {
+        "title": "HEC: professional certifications and internships for undergraduate degrees (2025-09-25)",
+        "url": "https://www.hec.gov.pk/english/news/news/Pages/HEC-Announces-Mandatory-Professional-Certifications-&-Internships-for-Undergraduate-Degrees.aspx",
+        "clause": "at least three credit hours of supervised internship"
+      }
+    },
+    {
+      "id": "course",
+      "label": "The course this credit counts toward",
+      "purpose": "The credit is recorded against one course; the student names the course code their programme lists.",
+      "answer": {
+        "by": "own-word",
+        "statement": "The internship counts toward this course on my programme.",
+        "fields": {
+          "courseCode": "string"
+        }
+      },
+      "condition": {
+        "feel": "courseCode = course",
+        "types": {}
+      }
+    }
+  ],
+  "answers": [
+    {
+      "criterion": "supervised-internship",
+      "code": "SINGLE_ISSUER",
+      "text": "The credit is the campus's own course credit, and only the campus keeps the record of its own supervised internships; the paper route covers anyone whose record the campus does not hold."
+    }
+  ],
+  "practice": true
+}

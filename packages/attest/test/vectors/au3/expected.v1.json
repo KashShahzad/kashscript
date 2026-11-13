@@ -1,0 +1,83 @@
+{
+  "sdjwt-kid-not-iss.v1.txt": {
+    "kind": "sd-jwt",
+    "reason": "KID_NOT_ISSUER",
+    "audience": "https://door.practice.invalid",
+    "nonce": "au3-nonce-7f3a9c1e",
+    "nowSec": 1794000000,
+    "note": "the attacker's key in kid, the victim's DID in iss, a valid key binding — the forgery A7-01 names"
+  },
+  "sdjwt-kid-self-iss-listed.v1.txt": {
+    "kind": "sd-jwt",
+    "reason": "KID_NOT_ISSUER",
+    "nowSec": 1794000000,
+    "note": "a self-certifying kid beside a trust-listed iss"
+  },
+  "sdjwt-no-iss.v1.txt": {
+    "kind": "sd-jwt",
+    "reason": "ISSUER_KEY_UNRESOLVED",
+    "nowSec": 1794000000,
+    "note": "no iss: there is no issuer to bind the key to"
+  },
+  "sdjwt-kid-fragment-ok.v1.txt": {
+    "kind": "sd-jwt",
+    "reason": null,
+    "nowSec": 1794000000,
+    "note": "kid is iss with a fragment — it selects among the issuer's keys"
+  },
+  "sdjwt-listed-iss-ok.v1.txt": {
+    "kind": "sd-jwt",
+    "reason": null,
+    "nowSec": 1794000000,
+    "note": "a listed issuer, its key found under iss alone"
+  },
+  "countersign-alias.v1.json": {
+    "kind": "countersign",
+    "reason": "COUNTERSIGNER_IS_REQUESTER",
+    "independentSignatureCount": 1,
+    "countersigners": [],
+    "nowSec": 1794000000,
+    "note": "did:kash:X and did:kash:X#c are one key — one signer, no proof"
+  },
+  "countersign-requester-accepts.v1.json": {
+    "kind": "countersign",
+    "reason": null,
+    "independentSignatureCount": 2,
+    "countersigners": [
+      "did:kash:CxVhaSzfSrwyuMvnkaFDeCfiBD7uHMAGxPV77nqw7iUW"
+    ],
+    "nowSec": 1794000000,
+    "note": "the requester's own acceptance is a signature, never a countersignature; the independent one makes the proof"
+  },
+  "countersign-junk-sibling.v1.json": {
+    "kind": "countersign",
+    "reason": null,
+    "independentSignatureCount": 2,
+    "countersigners": [
+      "did:kash:CxVhaSzfSrwyuMvnkaFDeCfiBD7uHMAGxPV77nqw7iUW"
+    ],
+    "nowSec": 1794000000,
+    "note": "a sibling signature that is not base64 is skipped, not thrown"
+  },
+  "countersign-custody-missing.v1.json": {
+    "kind": "countersign",
+    "reason": null,
+    "independentSignatureCount": 2,
+    "countersigners": [
+      "did:kash:CxVhaSzfSrwyuMvnkaFDeCfiBD7uHMAGxPV77nqw7iUW"
+    ],
+    "custody": "unknown",
+    "nowSec": 1794000000,
+    "note": "no keyCustody stated: unknown, not subject-held"
+  },
+  "countersign-nonjson-subject.v1.json": {
+    "kind": "countersign",
+    "reason": null,
+    "independentSignatureCount": 2,
+    "countersigners": [
+      "did:kash:CxVhaSzfSrwyuMvnkaFDeCfiBD7uHMAGxPV77nqw7iUW"
+    ],
+    "nowSec": 1794000000,
+    "note": "a subject that is bytes, not JSON, is judged as bytes"
+  }
+}

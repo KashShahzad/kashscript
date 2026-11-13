@@ -1,0 +1,207 @@
+{
+  "id": "did:kash:21UhTqUdjZYWvw3jPz5emqdYskRqdQBLofo3MupZN3Jt/rule/cpd-cycle",
+  "version": 1,
+  "author": "did:kash:21UhTqUdjZYWvw3jPz5emqdYskRqdQBLofo3MupZN3Jt",
+  "title": "CPD cycle confirmation (SAMPLE figures)",
+  "purpose": "The body confirms a member's continuing professional development for the cycle from providers' accepted records. SAMPLE figures, not the body's own.",
+  "visibility": "public",
+  "parameters": {
+    "cycle": {
+      "type": "years and months duration",
+      "value": "P3Y"
+    },
+    "minHours": {
+      "type": "number",
+      "value": 120
+    },
+    "minStructured": {
+      "type": "number",
+      "value": 60
+    }
+  },
+  "dates": {
+    "published": "2026-10-01T00:00:00Z",
+    "renewBy": "2027-09-30T00:00:00Z",
+    "endsAt": "2028-09-30T00:00:00Z"
+  },
+  "decider": {
+    "role": "CPD officer"
+  },
+  "outcome": {
+    "grants": "Confirmation that this cycle's CPD requirement is met.",
+    "binds": false,
+    "sensitive": false,
+    "automaticYes": true
+  },
+  "reasons": [
+    {
+      "code": "cycle-met",
+      "outcome": "yes",
+      "text": "The cycle's hours and structured hours are met, from listed providers."
+    },
+    {
+      "code": "hours-short",
+      "outcome": "not-yet",
+      "text": "The records do not yet reach the cycle's hours or structured hours."
+    },
+    {
+      "code": "not-confirmed",
+      "outcome": "no",
+      "text": "The CPD officer does not confirm the cycle, for the reason they give."
+    }
+  ],
+  "contest": {
+    "windowDays": 30,
+    "answerDays": 30,
+    "how": "Ask the body's CPD office for a review; an officer who did not make the first decision answers."
+  },
+  "anotherWay": "Certificates of attendance and a signed log, sent to the CPD office, are read by an officer.",
+  "criteria": [
+    {
+      "id": "cycle-hours",
+      "label": "The cycle's hours, from listed providers",
+      "purpose": "The body requires a number of development hours in each cycle; providers' accepted records show them.",
+      "answer": {
+        "by": "receipts",
+        "query": [
+          {
+            "id": "cycle-hours",
+            "format": "dc+sd-jwt",
+            "multiple": true,
+            "meta": {
+              "vct_values": [
+                "https://practice.invalid/vct/cpd-record/1"
+              ]
+            },
+            "trusted_authorities": [
+              {
+                "type": "kash_trust_list",
+                "values": [
+                  "did:kash:DnaeU6DTGVNs3fgcy5XkzHLfCtuEB7Fo7B76ugLp3YxV5LQ7#providers"
+                ]
+              }
+            ],
+            "claims": [
+              {
+                "id": "record",
+                "path": [
+                  "recordId"
+                ]
+              },
+              {
+                "id": "hours",
+                "path": [
+                  "hours"
+                ]
+              },
+              {
+                "id": "structured",
+                "path": [
+                  "structured"
+                ]
+              },
+              {
+                "id": "completedOn",
+                "path": [
+                  "completedOn"
+                ]
+              }
+            ]
+          }
+        ],
+        "names": {
+          "did:kash:DnaeU6DTGVNs3fgcy5XkzHLfCtuEB7Fo7B76ugLp3YxV5LQ7#providers": "the practice list of CPD providers"
+        }
+      },
+      "condition": {
+        "feel": "sum(receipts[completedOn > date(asOf) - cycle].hours) >= minHours",
+        "types": {
+          "hours": "number",
+          "completedOn": "date"
+        }
+      }
+    },
+    {
+      "id": "structured-hours",
+      "label": "Part of them structured",
+      "purpose": "Part of the hours must be structured learning — courses or events a provider ran, not reading alone.",
+      "answer": {
+        "by": "receipts",
+        "query": [
+          {
+            "id": "structured-hours",
+            "format": "dc+sd-jwt",
+            "multiple": true,
+            "meta": {
+              "vct_values": [
+                "https://practice.invalid/vct/cpd-record/1"
+              ]
+            },
+            "trusted_authorities": [
+              {
+                "type": "kash_trust_list",
+                "values": [
+                  "did:kash:DnaeU6DTGVNs3fgcy5XkzHLfCtuEB7Fo7B76ugLp3YxV5LQ7#providers"
+                ]
+              }
+            ],
+            "claims": [
+              {
+                "id": "record",
+                "path": [
+                  "recordId"
+                ]
+              },
+              {
+                "id": "hours",
+                "path": [
+                  "hours"
+                ]
+              },
+              {
+                "id": "structured",
+                "path": [
+                  "structured"
+                ]
+              },
+              {
+                "id": "completedOn",
+                "path": [
+                  "completedOn"
+                ]
+              }
+            ]
+          }
+        ],
+        "names": {
+          "did:kash:DnaeU6DTGVNs3fgcy5XkzHLfCtuEB7Fo7B76ugLp3YxV5LQ7#providers": "the practice list of CPD providers"
+        }
+      },
+      "condition": {
+        "feel": "sum(receipts[completedOn > date(asOf) - cycle and structured].hours) >= minStructured",
+        "types": {
+          "hours": "number",
+          "completedOn": "date",
+          "structured": "boolean"
+        }
+      }
+    },
+    {
+      "id": "declaration",
+      "label": "The member's declaration",
+      "purpose": "The member declares the records are their own and complete for the cycle, as the body's rules ask every member to.",
+      "answer": {
+        "by": "own-word",
+        "statement": "These records are my own and complete for this cycle.",
+        "fields": {
+          "declared": "boolean"
+        }
+      },
+      "condition": {
+        "feel": "declared = true",
+        "types": {}
+      }
+    }
+  ],
+  "practice": true
+}

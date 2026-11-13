@@ -1,0 +1,50 @@
+{
+  "name": "@kashscript/predicate",
+  "version": "0.3.0-alpha.2",
+  "description": "The rule engine for doors (ECOSYSTEM d59, d84): a published rule's criteria as OpenID4VP DCQL queries plus FEEL conditions (a DMN subset, tested against the TCK cases it claims); validation that refuses an ask for a refusal, a sensitive category or an ascribed identity; a checklist on the person's side, never a score; the packet, a copy per viewer; the desk's routing, which never refuses; and the decision receipt; the rule's address (ISIC Rev 5 and the seven givens), parameter bounds and an anchor's signed adoption. Pure, deterministic, no third-party dependency. Apache-2.0.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "sideEffects": false,
+  "exports": {
+    ".":            "./src/index.ts",
+    "./feel":       "./src/feel/index.ts",
+    "./dcql":       "./src/dcql.ts",
+    "./rule":       "./src/rule.ts",
+    "./adoption":   "./src/adoption.ts",
+    "./checklist":  "./src/checklist.ts",
+    "./packet":     "./src/packet.ts",
+    "./route":      "./src/route.ts",
+    "./decision":   "./src/decision.ts",
+    "./fixtures":   "./src/fixtures/index.ts"
+  },
+  "dependencies": {
+    "@kashscript/attest": "workspace:*",
+    "@kashscript/identity-core": "workspace:*",
+    "@kashscript/lexicons": "workspace:*"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build":          "tsc -p tsconfig.json",
+    "typecheck":      "tsc --noEmit",
+    "typecheck:test": "tsc --noEmit -p tsconfig.test.json",
+    "test":           "bun run typecheck:test && bun test",
+    "tck:extract":    "bun scripts/tck-extract.ts",
+    "clean":          "rm -rf dist .turbo"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "@types/bun": "^1.2.5"
+  },
+  "license": "Apache-2.0",
+  "repository": { "type": "git", "url": "git+https://github.com/KashShahzad/kashscript.git", "directory": "packages/predicate" },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

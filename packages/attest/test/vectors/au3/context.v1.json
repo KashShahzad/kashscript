@@ -1,0 +1,17 @@
+{
+  "note": "Public facts a verifier would already know. The listed issuer's key is the one a trust list would carry under this keyid.",
+  "nowSec": 1794000000,
+  "audience": "https://door.practice.invalid",
+  "nonce": "au3-nonce-7f3a9c1e",
+  "listedKeyid": "https://issuer.practice.invalid#k1",
+  "listedPublicKeyHex": "a9b9d84a0a39e9cbd68f389b3c76777c0972441b2d61e90f5d788f395e1ac703",
+  "sdJwt": {
+    "victim": "did:kash:CEPwWjzzz1aais3syuyyy7wG2CLCLpBSGnUsSL7u5EcA",
+    "attacker": "did:kash:4JgdFYKWc34qTYiWqjc8ppcR7TnqBUtHWALv2hPVqNsg",
+    "holder": "did:kash:6THjJGA3tkT63nLh6up9nX15yqZTXvrmfWuDHA4ZpfUg"
+  },
+  "countersign": {
+    "requester": "did:kash:4WiuyJnfRofmP9fxmYaowFSPZj26Jgjad1b5tXXwkHBs",
+    "independent": "did:kash:CxVhaSzfSrwyuMvnkaFDeCfiBD7uHMAGxPV77nqw7iUW"
+  }
+}

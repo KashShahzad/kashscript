@@ -1,0 +1,30 @@
+{
+  "note": "Public facts a verifier would already know. Simulation only.",
+  "nowUnix": 1790301600,
+  "predicateIssuer": "did:kash:3FhD2fRLkkMYVkeEZve3mXwWrQREs6wSLTNjsUTrUR6m",
+  "verifiers": {
+    "a": {
+      "did": "did:kash:Eg5isBkQ8xd7Z134hxDRo1TnRn9s1XPfY7XovkiXNjas",
+      "nonce": "nonce-a-7f3c9e"
+    },
+    "b": {
+      "did": "did:kash:E2z37vwtqJwzoSuQX5ZqiptfCUopjCiE37nwAdYNnRiV",
+      "nonce": "nonce-b-12d4a0"
+    },
+    "c": {
+      "did": "did:kash:E6KdwtybaS64BLhDikWHM8cZh2Bn5hU29gFH72EpboG6",
+      "nonce": "nonce-c-9e1b77"
+    },
+    "revoked": {
+      "did": "did:kash:Eg5isBkQ8xd7Z134hxDRo1TnRn9s1XPfY7XovkiXNjas",
+      "nonce": "nonce-d-40aa19"
+    }
+  },
+  "restsOn": [
+    "a7bacf86fc0483c08656c532c0bedee29647d1b6d9b457d6031b26053d81435f",
+    "7344996c1775a777af3a73045dc008854677ccb6653f511d49cde9f8800cd429"
+  ],
+  "cafe": "did:kash:CAngheeeSdD1QUuj7eCuxbu4Xp1MLZ7nQLJPPvrdos5N",
+  "redemptionNonce": "redeem-nonce-5c2e",
+  "redemptionNowUnix": 1790899320
+}

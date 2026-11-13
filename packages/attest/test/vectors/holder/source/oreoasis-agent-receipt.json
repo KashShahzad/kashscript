@@ -1,0 +1,15 @@
+{
+  "provenance": "Copied unmodified from Oreoasis 2.0/packages/sdk/vectors/agent-receipt-v1.json (sha256 of that file: 2d448099b41b7ca92405b8578402f28a17099630897e6e64d548fca674658bac). Only the envelope and its public key are carried; the vector private key is not.",
+  "keyid": "did:kash:agent:b44640ae287f4879c45bd33d36405160158ee5f6fe6e1afdacb3af592ed7df41",
+  "publicKeyHex": "b44640ae287f4879c45bd33d36405160158ee5f6fe6e1afdacb3af592ed7df41",
+  "envelope": {
+    "payloadType": "application/vnd.oreoasis.agent-receipt+json",
+    "payload": "eyJhY3Rpb24iOnsic3VtbWFyeSI6IkJvb2tlZCBTRUHihpJMSFIgZm9yIHRoZSB1c2VyIiwidG9vbCI6InNlYXJjaF9mbGlnaHRzIiwidHlwZSI6InRvb2wuY2FsbCJ9LCJhZ2VudCI6ImRpZDprYXNoOmFnZW50OmI0NDY0MGFlMjg3ZjQ4NzljNDViZDMzZDM2NDA1MTYwMTU4ZWU1ZjZmZTZlMWFmZGFjYjNhZjU5MmVkN2RmNDEiLCJpbnB1dHMiOlt7Im5hbWUiOiJxdWVyeSIsInNoYTI1NiI6ImQ5ZjcyNDQxYzg3NzZiNTUyNjE4NzJjODU1ZDIwOWZkODdhZWZlMjNjZjNlYmI1NDUzMjJmMGRhNzUwOGFkMDEifV0sIm9yZyI6ImFjbWUiLCJvdXRwdXRzIjpbeyJuYW1lIjoicmVzdWx0Iiwic2hhMjU2IjoiZjQ3NmYyZTdlN2UyOTdkNzE4ZjU4MDExZGZmYzU0OTM4OGQyMGVjZGE3NDhiMjc0MDlkZTcxZjJkNDFiNjYwYiJ9XSwicmVjZWlwdElkIjoiMDFKUVYzQ1QwUjAwMDAwMDAwMDAwQVIwMDEiLCJzcGVjIjoib3Jlb2FzaXMuYWdlbnQtcmVjZWlwdC8xIiwic3RhdHVzIjoiY29tcGxldGVkIiwidGltZXN0YW1wIjoiMjAyNi0wNy0xMVQwMDowMDowMC4wMDBaIn0=",
+    "signatures": [
+      {
+        "keyid": "did:kash:agent:b44640ae287f4879c45bd33d36405160158ee5f6fe6e1afdacb3af592ed7df41",
+        "sig": "Vb1J1u/0HTNmp1fkq9y5C0UKoZUIrOOLjb6/zuXm6maQW3e5ty76xHbi7nTsRSzvh3aIE3I+YQNIeetQWa21DA=="
+      }
+    ]
+  }
+}

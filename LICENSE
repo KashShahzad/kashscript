@@ -1,0 +1,39 @@
+Copyright (c) 2026 Kashif Shahzad.
+
+This is the root licence notice of the KashScript open protocol repository.
+
+THE PACKAGES. Each package under packages/ carries its own LICENSE file and is licensed under
+that file, and only that file. Each is the Apache License, Version 2.0:
+
+  packages/attest           @kashscript/attest
+  packages/identity-core    @kashscript/identity-core
+  packages/identity-sdk     @kashscript/identity-sdk
+  packages/identity-server  @kashscript/identity-server
+  packages/identity-zkp     @kashscript/identity-zkp
+  packages/kash             @kashscript/kash
+  packages/lexicons         @kashscript/lexicons
+  packages/muffler          @kashscript/muffler
+  packages/predicate        @kashscript/predicate
+  packages/terms            @kashscript/terms
+  packages/wallet           @kashscript/wallet
+  packages/whiffin          @kashscript/whiffin
+
+THE SPECIFICATION TEXT AND RULEBOOKS. The text of the specifications (specs/*.md) and of the
+rulebooks (docs/rulebooks/) is licensed under the Creative Commons Attribution 4.0 International
+licence (CC BY 4.0): https://creativecommons.org/licenses/by/4.0/ (ecosystem decision 87(b)).
+
+EVERYTHING ELSE. The schemas (specs/schemas/), scripts, workflows, configuration and other
+documentation outside packages/ are licensed under the Apache License, Version 2.0, the same text
+as packages/attest/LICENSE.
+
+A version already published to npm keeps the licence it was published under. identity-zkp up to
+0.2.3 and whiffin up to 0.2.0 were published under the KashScript Sovereign Software License
+Agreement; later versions are Apache-2.0.
+
+THE NAMES. No licence is granted to the names, marks or logos of Indorania, KashScript, Oreoasis,
+Duedale, Indusland or Chakor, or to the "listed" and "conformant" marks. A fork must use names of
+its own.
+
+The copyright is the founder's until the company, Indorania (SMC-Private) Limited, is registered.
+Outside contributions are accepted only under the Contributor Licence Agreement in CLA.md; how, is
+in CONTRIBUTING.md. Questions about licensing: r.kashifshahzad@outlook.com.

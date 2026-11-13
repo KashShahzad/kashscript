@@ -1,0 +1,53 @@
+{
+  "name": "@kashscript/muffler",
+  "version": "0.1.0",
+  "description": "The Data Protocol — a transport-agnostic, did:kash-bound atproto-style PDS client + firehose indexer with CID content-addressing, an injectable Refiner (lexicon validation via @kashscript/lexicons), and pluggable record sinks (in-memory + Supabase adapter). Apache-2.0 — portable hosting is free.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".":               "./src/index.ts",
+    "./cid":           "./src/cid.ts",
+    "./identity":      "./src/identity.ts",
+    "./client":        "./src/client.ts",
+    "./indexer":       "./src/indexer.ts",
+    "./refine":        "./src/refine.ts",
+    "./sink-supabase": "./src/sinks/supabase.ts"
+  },
+  "dependencies": {
+    "@kashscript/identity-core": "workspace:*",
+    "@kashscript/lexicons": "workspace:*"
+  },
+  "peerDependencies": {
+    "@supabase/supabase-js": "^2.74.0"
+  },
+  "peerDependenciesMeta": {
+    "@supabase/supabase-js": {
+      "optional": true
+    }
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build":          "tsc -p tsconfig.json",
+    "typecheck":      "tsc --noEmit",
+    "typecheck:test": "tsc --noEmit -p tsconfig.test.json",
+    "test":           "bun run typecheck:test && bun test",
+    "clean":          "rm -rf dist .turbo"
+  },
+  "devDependencies": {
+    "@supabase/supabase-js": "^2.74.0",
+    "typescript": "^5.6.3",
+    "@types/bun": "^1.2.5"
+  },
+  "license": "Apache-2.0",
+  "repository": { "type": "git", "url": "git+https://github.com/KashShahzad/kashscript.git", "directory": "packages/muffler" },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "note": "RFC 6979 §A.2.5's P-256 test key. Its private scalar is published in the RFC; never use it for anything real.",
+  "privateScalarHex": "c9afa9d845ba75166b5c215767b1d6934e50c3db36e89b127b8a622b120f6721",
+  "publicKeyCompressedHex": "0360fed4ba255a9d31c961eb74c6356d68c049b8923b61fa6ce669622e60f29fb6",
+  "did": "did:kash:DnaepBuvsQ8cpsWrVKw8fbpGpvPeNSjVPTWoq6cRqaYzBKVP",
+  "didDocument": {
+    "@context": [
+      "https://www.w3.org/ns/did/v1",
+      "https://w3id.org/security/multikey/v1",
+      "https://kashscript.com/ns/did/v1"
+    ],
+    "id": "did:kash:DnaepBuvsQ8cpsWrVKw8fbpGpvPeNSjVPTWoq6cRqaYzBKVP",
+    "verificationMethod": [
+      {
+        "id": "did:kash:DnaepBuvsQ8cpsWrVKw8fbpGpvPeNSjVPTWoq6cRqaYzBKVP#sig-1",
+        "type": "Multikey",
+        "controller": "did:kash:DnaepBuvsQ8cpsWrVKw8fbpGpvPeNSjVPTWoq6cRqaYzBKVP",
+        "publicKeyMultibase": "zDnaepBuvsQ8cpsWrVKw8fbpGpvPeNSjVPTWoq6cRqaYzBKVP"
+      }
+    ],
+    "authentication": [
+      "did:kash:DnaepBuvsQ8cpsWrVKw8fbpGpvPeNSjVPTWoq6cRqaYzBKVP#sig-1"
+    ],
+    "assertionMethod": [
+      "did:kash:DnaepBuvsQ8cpsWrVKw8fbpGpvPeNSjVPTWoq6cRqaYzBKVP#sig-1"
+    ],
+    "capabilityInvocation": [
+      "did:kash:DnaepBuvsQ8cpsWrVKw8fbpGpvPeNSjVPTWoq6cRqaYzBKVP#sig-1"
+    ],
+    "service": [
+      {
+        "id": "did:kash:DnaepBuvsQ8cpsWrVKw8fbpGpvPeNSjVPTWoq6cRqaYzBKVP#pds",
+        "type": "PersonalDataStore",
+        "serviceEndpoint": "https://pds.practice.invalid"
+      }
+    ]
+  }
+}

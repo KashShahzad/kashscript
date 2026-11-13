@@ -1,0 +1,17 @@
+node_modules
+dist
+.next
+.turbo
+.env*
+!.env.example
+*.log
+.DS_Store
+coverage
+*.tsbuildinfo
+.npmrc
+# scripts/publish-to-npmjs.ts's output: tarballs, CycloneDX SBOMs, published.json (RW-2)
+release/
+# Gradle — the wallet's Android module. Caches and build output are generated, and
+# committing them showed every verification run as modified files (KS-R8).
+.gradle/
+**/android/build/

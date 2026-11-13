@@ -1,0 +1,18 @@
+# Semgrep skips what .gitignore skips and, below, what is not our source:
+# vendored output, the conformance suite's logs, and committed test vectors.
+node_modules/
+dist/
+.next/
+.turbo/
+docs/conformance/
+packages/attest/test/vectors/
+packages/attest/test/fixtures/
+
+# Test code. Semgrep's own default ignore list skips test/ and tests/, and a
+# custom .semgrepignore replaces that default, so it is restated here (as in
+# Oreoasis). Tests spawn the built CLIs through a shell on Windows and carry
+# published test vectors (a shared secret among them) on purpose. Secrets in
+# tests stay Gitleaks's job: its provider rules (npm, GitHub, AWS, PEM keys)
+# apply to test paths (.gitleaks.toml).
+test/
+tests/

@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src/**/*"],
+  "//exclude": "test files stay out of the published dist; they're typechecked via tsconfig.test.json",
+  "exclude": ["**/*.test.ts"]
+}

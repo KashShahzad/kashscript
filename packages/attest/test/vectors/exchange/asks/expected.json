@@ -1,0 +1,18 @@
+{
+  "invalid-r1-record-demanded.json": "R1-predicates-only",
+  "invalid-r1-answer-rests-on-records.json": "R1-predicates-only",
+  "invalid-r2-no-why.json": "R2-says-why",
+  "invalid-r3-declining-costs-more.json": "R3-no-is-answerable",
+  "invalid-r4-never-expires.json": "R4-expires",
+  "invalid-r4-lives-too-long.json": "R4-expires",
+  "invalid-r5-not-published.json": "R5-public",
+  "invalid-r6-joined.json": "R6-no-joining",
+  "invalid-r6-same-kind-twice.json": "R6-no-joining",
+  "invalid-r7-no-stable-key.json": "R7-excessive-recordable",
+  "invalid-r8-improvement-item.json": "R8-no-improvement-item",
+  "invalid-forbidden-origin.json": "FORBIDDEN-NEED",
+  "invalid-forbidden-ethnicity.json": "FORBIDDEN-NEED",
+  "invalid-forbidden-sect.json": "FORBIDDEN-NEED",
+  "invalid-forbidden-caste.json": "FORBIDDEN-NEED",
+  "invalid-forbidden-ancestry.json": "FORBIDDEN-NEED"
+}

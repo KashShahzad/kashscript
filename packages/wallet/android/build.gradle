@@ -1,0 +1,34 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+group = 'expo.modules.kashwalletroot'
+version = '0.1.0-alpha.0'
+
+def expoModulesCorePlugin = new File(project(":expo-modules-core").projectDir.absolutePath, "ExpoModulesCorePlugin.gradle")
+apply from: expoModulesCorePlugin
+applyKotlinExpoModulesCorePlugin()
+useCoreDependencies()
+useDefaultAndroidSdkVersions()
+useExpoPublishing()
+
+android {
+  namespace 'expo.modules.kashwalletroot'
+  defaultConfig {
+    // The module loads on older phones and answers "system-too-old" there;
+    // the root itself needs Android 12 (API 31) for PURPOSE_AGREE_KEY.
+    minSdkVersion 24
+  }
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_17
+    targetCompatibility JavaVersion.VERSION_17
+  }
+  kotlinOptions {
+    jvmTarget = '17'
+  }
+}
+
+dependencies {
+  implementation 'androidx.biometric:biometric:1.1.0'
+  implementation 'androidx.fragment:fragment-ktx:1.6.2'
+  implementation 'androidx.core:core-ktx:1.12.0'
+}

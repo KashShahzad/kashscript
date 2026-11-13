@@ -1,0 +1,18 @@
+[
+  {
+    "commitment": "b2b91dfc3f5b894edbbb619b6a4b9c355962de2f952d38082eadd325ff387fa5",
+    "saltHex": "0f1e2d3c4b5a69788796a5b4c3d2e1f0",
+    "item": {
+      "label": "replacement part",
+      "amount": "4000.00"
+    }
+  },
+  {
+    "commitment": "d95d4477c1c550316bdd96eb212a73015c6254e704fe6fd4658d051c7ad747b5",
+    "saltHex": "a1b2c3d4e5f60718293a4b5c6d7e8f90",
+    "item": {
+      "label": "labour",
+      "amount": "500.00"
+    }
+  }
+]

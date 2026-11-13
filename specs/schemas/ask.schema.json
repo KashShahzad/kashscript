@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kashscript.com/schemas/ask/1.json",
+  "title": "kashscript-ask/1 — a published request for evidence",
+  "description": "An ask is answered with a yes, never with the data (ECOSYSTEM d27.2, d42 §5). The eight rules: 1 predicates only · 2 it says why · 3 a no is answerable · 4 it expires · 5 it is public · 6 no joining by default · 7 an excessive ask is recordable by whoever refused it · 8 it may not require the improvement item (d43). No need may refer to origin, ethnicity, sect, caste or ancestry (d36). Two checks cannot be written in JSON Schema and are enforced by the reference validator, validateAsk in @kashscript/attest: a predicate kind asked twice (rule 6), and an expiry later than 366 days after publication (rule 4). The validator also reads every string in a need for rule 8 and the forbidden words, case-insensitively; this schema reads the predicate kind, which is lowercase by its pattern. See specs/presentation.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["format", "key", "version", "title", "who", "needs", "why", "answer", "goodFor", "declining", "linking", "published", "expiresAtUnix", "state"],
+  "x-kash-maxLifetimeSec": 31622400,
+  "properties": {
+    "format": { "const": "kashscript-ask/1" },
+    "key": {
+      "description": "Rule 7: a stable key a holder's excessive-ask note can name.",
+      "type": "string",
+      "pattern": "^ask:[a-z0-9][a-z0-9-]{1,62}$"
+    },
+    "version": { "description": "Rule 7.", "type": "integer", "minimum": 1 },
+    "title": { "type": "string", "minLength": 1 },
+    "who": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "id"],
+      "properties": {
+        "name": { "type": "string" },
+        "id": { "description": "The verifier's identifier; the OpenID4VP client_id and the KB-JWT audience.", "type": "string", "minLength": 1 }
+      }
+    },
+    "needs": {
+      "description": "Rule 1: predicate kinds only — never a record, a field or an attachment.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/need" }
+    },
+    "why": { "description": "Rule 2: why, in plain words, on the request.", "type": "string", "minLength": 12 },
+    "answer": {
+      "description": "Rule 1: a yes, resting on issuers — never on records.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["form", "restsOn"],
+      "properties": { "form": { "const": "yes" }, "restsOn": { "const": "issuers" } }
+    },
+    "goodFor": { "description": "Rule 3: what a yes gets the holder.", "type": "string", "minLength": 1 },
+    "declining": { "description": "Rule 3: declining costs only what goodFor names.", "const": "costs-only-goodFor" },
+    "linking": { "description": "Rule 6: presentations stay separate; only the holder links them.", "const": "separate" },
+    "published": {
+      "description": "Rule 5: in a public library.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["library", "atUnix"],
+      "properties": { "library": { "type": "string", "pattern": "^https://" }, "atUnix": { "type": "integer" } }
+    },
+    "expiresAtUnix": { "description": "Rule 4: it expires — at most 366 days after publication (validator).", "type": "integer" },
+    "state": { "enum": ["published", "withdrawn", "expired"] }
+  },
+  "$defs": {
+    "need": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "predicate", "withinDays"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "predicate": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+          "allOf": [
+            { "description": "Rule 8: never the improvement item.", "not": { "pattern": "improv" } },
+            { "description": "d36: never origin, ethnicity, sect, caste or ancestry.", "not": { "pattern": "\\b(origins?|ethnic|ethnicity|ethnicities|sects?|sectarian|castes?|ancestry|ancestries|ancestral|ancestors?)\\b" } }
+          ]
+        },
+        "withinDays": { "type": "integer", "minimum": 1 },
+        "issuers": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

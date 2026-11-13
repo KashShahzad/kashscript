@@ -1,0 +1,12 @@
+{
+  "keys": [
+    {
+      "kty": "OKP",
+      "crv": "Ed25519",
+      "x": "zzv-c4oXlMDOP1y5rP7aQWF8PaqZIoKhnRwMVS99tuA",
+      "kid": "indus.platform.vfc.v1",
+      "use": "sig",
+      "alg": "EdDSA"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "name": "@kashscript/terms",
+  "version": "0.1.0",
+  "description": "Agreements with a declared split — booking, pass, ticket, bounty, cohort. A deterministic state machine, a dust-free declared split, a sealed manifest and a signed completion receipt. It moves nothing and holds no balance. Apache-2.0.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".":                      "./src/index.ts",
+    "./fsm":                  "./src/fsm.ts",
+    "./splitter":             "./src/splitter.ts",
+    "./manifest":             "./src/manifest.ts",
+    "./completion-receipt":   "./src/completion-receipt.ts",
+    "./subscription-thread":  "./src/subscription-thread.ts",
+    "./types":                "./src/types.ts",
+    "./errors":               "./src/errors.ts"
+  },
+  "dependencies": {
+    "@kashscript/identity-core": "workspace:*",
+    "@noble/hashes": "^1.7.0"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build":          "tsc -p tsconfig.json",
+    "typecheck":      "tsc --noEmit",
+    "typecheck:test": "tsc --noEmit -p tsconfig.test.json",
+    "test":           "bun run typecheck:test && bun test",
+    "clean":          "rm -rf dist .turbo"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "@types/bun": "^1.2.5"
+  },
+  "license": "Apache-2.0",
+  "repository": { "type": "git", "url": "git+https://github.com/KashShahzad/kashscript.git", "directory": "packages/terms" },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

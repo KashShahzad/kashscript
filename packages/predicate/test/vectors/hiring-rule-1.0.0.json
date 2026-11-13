@@ -1,0 +1,260 @@
+{
+  "id": "did:kash:21UhTqUdjZYWvw3jPz5emqdYskRqdQBLofo3MupZN3Jt/rule/contract-developer",
+  "version": 1,
+  "author": "did:kash:21UhTqUdjZYWvw3jPz5emqdYskRqdQBLofo3MupZN3Jt",
+  "title": "Contract developer — paid trial project",
+  "purpose": "We hire developers for client work. Accepted client projects show the work was delivered; React is what the trial uses; the client calls are in English.",
+  "visibility": "public",
+  "parameters": {
+    "minProjects": {
+      "type": "number",
+      "value": 3
+    },
+    "window": {
+      "type": "years and months duration",
+      "value": "P24M"
+    },
+    "startWithin": {
+      "type": "days and time duration",
+      "value": "P28D"
+    }
+  },
+  "dates": {
+    "published": "2026-10-01T00:00:00Z",
+    "renewBy": "2027-09-30T00:00:00Z",
+    "endsAt": "2028-09-30T00:00:00Z"
+  },
+  "decider": {
+    "role": "Hiring lead"
+  },
+  "outcome": {
+    "grants": "An invitation to a paid trial project.",
+    "binds": false,
+    "sensitive": false,
+    "automaticYes": true
+  },
+  "reasons": [
+    {
+      "code": "meets-all",
+      "outcome": "yes",
+      "text": "Every criterion is met: you are invited to the paid trial project."
+    },
+    {
+      "code": "missing-evidence",
+      "outcome": "not-yet",
+      "text": "Something the rule asks for is missing; the list says what, and who may supply it."
+    },
+    {
+      "code": "not-met",
+      "outcome": "no",
+      "text": "A criterion is not met, as the hiring lead explains with the receipts they read."
+    }
+  ],
+  "contest": {
+    "windowDays": 30,
+    "answerDays": 14,
+    "how": "Reply to the decision receipt, or write to the hiring desk's address on the door's page. A person who did not make the first decision answers."
+  },
+  "anotherWay": "Send your work by any route the door's page lists — a portfolio and two references — and the hiring lead reads it in person.",
+  "criteria": [
+    {
+      "id": "projects",
+      "label": "Three projects accepted by clients in the last 24 months",
+      "purpose": "Client work is what we hire for; a client's countersigned acceptance shows the work was delivered and taken.",
+      "answer": {
+        "by": "receipts",
+        "query": [
+          {
+            "id": "projects",
+            "format": "kash-artifact",
+            "multiple": true,
+            "meta": {
+              "dst_values": [
+                "application/vnd.oreoasis.work-record+json"
+              ],
+              "attestation": "countersigned",
+              "holder_path": [
+                "actor",
+                "id"
+              ]
+            },
+            "claims": [
+              {
+                "id": "acceptedAt",
+                "path": [
+                  "timestamp"
+                ]
+              },
+              {
+                "id": "skills",
+                "path": [
+                  "meta",
+                  "stack"
+                ]
+              },
+              {
+                "id": "shape",
+                "path": [
+                  "shape"
+                ],
+                "values": [
+                  "accepted"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "predicate": {
+        "issuers": [
+          {
+            "id": "did:kash:DnaeU6DTGVNs3fgcy5XkzHLfCtuEB7Fo7B76ugLp3YxV5LQ7",
+            "name": "Oreoasis (practice)"
+          }
+        ],
+        "freshDays": 31
+      },
+      "condition": {
+        "feel": "count(receipts[acceptedAt >= asOf - window]) >= minProjects",
+        "types": {
+          "acceptedAt": "date and time"
+        }
+      }
+    },
+    {
+      "id": "react",
+      "label": "React in one of those projects",
+      "purpose": "The trial project is built in React, so one accepted project should have used it.",
+      "answer": {
+        "by": "receipts",
+        "query": [
+          {
+            "id": "react",
+            "format": "kash-artifact",
+            "multiple": true,
+            "meta": {
+              "dst_values": [
+                "application/vnd.oreoasis.work-record+json"
+              ],
+              "attestation": "countersigned",
+              "holder_path": [
+                "actor",
+                "id"
+              ]
+            },
+            "claims": [
+              {
+                "id": "acceptedAt",
+                "path": [
+                  "timestamp"
+                ]
+              },
+              {
+                "id": "skills",
+                "path": [
+                  "meta",
+                  "stack"
+                ]
+              },
+              {
+                "id": "shape",
+                "path": [
+                  "shape"
+                ],
+                "values": [
+                  "accepted"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "condition": {
+        "feel": "some p in receipts[acceptedAt >= asOf - window] satisfies list contains(p.skills, \"React\")",
+        "types": {
+          "acceptedAt": "date and time",
+          "skills": "list of string"
+        }
+      }
+    },
+    {
+      "id": "english",
+      "label": "English at B2 or above, from a listed assessor",
+      "purpose": "Client calls and written briefs are in English; an independent assessor's level shows it without an interview.",
+      "answer": {
+        "by": "receipts",
+        "query": [
+          {
+            "id": "english",
+            "format": "dc+sd-jwt",
+            "meta": {
+              "vct_values": [
+                "https://practice.invalid/vct/language-assessment/1"
+              ]
+            },
+            "trusted_authorities": [
+              {
+                "type": "kash_trust_list",
+                "values": [
+                  "did:kash:DnaeU6DTGVNs3fgcy5XkzHLfCtuEB7Fo7B76ugLp3YxV5LQ7#assessors"
+                ]
+              }
+            ],
+            "claims": [
+              {
+                "id": "language",
+                "path": [
+                  "language"
+                ],
+                "values": [
+                  "en"
+                ]
+              },
+              {
+                "id": "framework",
+                "path": [
+                  "framework"
+                ],
+                "values": [
+                  "CEFR"
+                ]
+              },
+              {
+                "id": "level",
+                "path": [
+                  "level"
+                ]
+              }
+            ]
+          }
+        ],
+        "names": {
+          "did:kash:DnaeU6DTGVNs3fgcy5XkzHLfCtuEB7Fo7B76ugLp3YxV5LQ7#assessors": "the practice list of language assessors"
+        }
+      },
+      "condition": {
+        "feel": "some r in receipts satisfies r.level in (\"B2\", \"C1\", \"C2\")",
+        "types": {
+          "level": "string"
+        }
+      }
+    },
+    {
+      "id": "availability",
+      "label": "Available to start within four weeks",
+      "purpose": "The trial project starts within the month, and only the applicant can say when they are free.",
+      "answer": {
+        "by": "own-word",
+        "statement": "I can start the trial project on or before the date I give.",
+        "fields": {
+          "availableFrom": "date"
+        }
+      },
+      "condition": {
+        "feel": "availableFrom <= date(asOf + startWithin)",
+        "types": {}
+      }
+    }
+  ],
+  "practice": true
+}

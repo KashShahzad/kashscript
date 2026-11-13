@@ -1,0 +1,66 @@
+{
+  "name": "@kashscript/identity-zkp",
+  "version": "0.2.4",
+  "description": "Zero-knowledge primitives for did:kash — selective disclosure via Merkle commitments, plus a Web Worker-dispatched prover/verifier for Groth16 / PLONK circuits.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "//sideEffects": "worker.ts registers a top-level message handler (ctx.addEventListener); everything else is pure. Narrow so bundlers tree-shake the rest but keep the worker.",
+  "sideEffects": ["./dist/worker.js", "./src/worker.ts"],
+  "exports": {
+    ".":              "./src/index.ts",
+    "./merkle":       "./src/merkle.ts",
+    "./disclosure":   "./src/disclosure.ts",
+    "./prover":       "./src/prover.ts",
+    "./verifier":     "./src/verifier.ts",
+    "./worker":       "./src/worker.ts",
+    "./circuits":     "./src/circuits/index.ts",
+    "./errors":       "./src/errors.ts"
+  },
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build":          "tsc -p tsconfig.json",
+    "typecheck":      "tsc --noEmit",
+    "typecheck:test": "tsc --noEmit -p tsconfig.test.json",
+    "test":           "bun run typecheck:test && bun test use-cases",
+    "clean":          "rm -rf dist .turbo"
+  },
+  "dependencies": {
+    "@kashscript/identity-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "snarkjs": "^0.7.0"
+  },
+  "peerDependenciesMeta": {
+    "snarkjs": { "optional": true }
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "Apache-2.0",
+  "repository": { "type": "git", "url": "git+https://github.com/KashShahzad/kashscript.git", "directory": "packages/identity-zkp" },
+  "publishConfig": {
+    "access":   "public",
+    "registry": "https://registry.npmjs.org/",
+    "main":     "./dist/index.js",
+    "types":    "./dist/index.d.ts",
+    "exports": {
+      ".":            { "types": "./dist/index.d.ts",            "import": "./dist/index.js" },
+      "./merkle":     { "types": "./dist/merkle.d.ts",           "import": "./dist/merkle.js" },
+      "./disclosure": { "types": "./dist/disclosure.d.ts",       "import": "./dist/disclosure.js" },
+      "./prover":     { "types": "./dist/prover.d.ts",           "import": "./dist/prover.js" },
+      "./verifier":   { "types": "./dist/verifier.d.ts",         "import": "./dist/verifier.js" },
+      "./worker":     { "types": "./dist/worker.d.ts",           "import": "./dist/worker.js" },
+      "./circuits":   { "types": "./dist/circuits/index.d.ts",   "import": "./dist/circuits/index.js" },
+      "./errors":     { "types": "./dist/errors.d.ts",           "import": "./dist/errors.js" }
+    }
+  }
+}

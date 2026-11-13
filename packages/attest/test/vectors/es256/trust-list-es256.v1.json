@@ -1,0 +1,10 @@
+{
+  "payloadType": "application/vnd.kash.trust-list+json",
+  "payload": "eyJmb3JtYXQiOiJrYXNoc2NyaXB0LXRydXN0LWxpc3QvMSIsImlzc3VlZEF0VW5peCI6MTc5MDgxMjgwMCwiaXNzdWVycyI6W3siZHN0cyI6WyJodHRwczovL2thc2hzY3JpcHQuY29tL3ZjdC9wcmVkaWNhdGUvMSIsImthc2gtcmVjb3JkLXYxXG4iXSwiaXNzdWVySWQiOiJkaWQ6a2FzaDpEbmFlZzFtaVZRZ20xMWdjak5aWmR0eURERnVEazg5cFo2ZE1BWlppTjhDTmdKNVAiLCJrZXlzIjpbXSwibGFiZWwiOiJBIHByYWN0aWNlIHJlY29yZHMgZGVzayIsInZhbGlkRnJvbVVuaXgiOjE3OTA4MTI4MDAsInZhbGlkVW50aWxVbml4IjoxODIyMzQ4ODAwfV0sImxpc3RJZCI6InByYWN0aWNlLWVzMjU2LWxpc3QiLCJwdWJsaXNoZXIiOiJkaWQ6a2FzaDpEbmFlcDVwd3k2Ynk5bWRKV0d0bjRMNXBtcUJaRU5MSGMyREp3WkxjRjQ0WHdDcFkiLCJ2YWxpZEZyb21Vbml4IjoxNzkwODEyODAwLCJ2YWxpZFVudGlsVW5peCI6MTgyMjM0ODgwMCwidmVyc2lvbiI6MX0=",
+  "signatures": [
+    {
+      "keyid": "did:kash:Dnaep5pwy6by9mdJWGtn4L5pmqBZENLHc2DJwZLcF44XwCpY",
+      "sig": "MEQCIEJeqPRDtR0eP/vqspKz+1tqw0GWYbxG03sfdhucw/YbAiBXK5m4XDkYQYK+hlY32YR9DC77neVfQH3DiY4a2Inisg=="
+    }
+  ]
+}

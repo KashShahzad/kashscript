@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kashscript.com/lexicons/kash.adoption@1.0.0",
+  "title": "An anchor's adoption of a rule",
+  "description": "An organisation adopts one version of a rule with its own values for the parameters the rule bounds. Public, signed by the anchor.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/adoption\\/[a-z0-9][a-z0-9-]{0,62}$"
+    },
+    "anchor": {
+      "type": "string",
+      "format": "did-ks",
+      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}$"
+    },
+    "rule": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/rule\\/[a-z0-9][a-z0-9-]{0,62}$"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "version",
+        "hash"
+      ]
+    },
+    "parameters": {
+      "type": "object",
+      "additionalProperties": {
+        "anyOf": [
+          {
+            "type": "string",
+            "maxLength": 256
+          },
+          {
+            "type": "number"
+          },
+          {
+            "type": "boolean"
+          }
+        ]
+      },
+      "propertyNames": {
+        "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,63}$"
+      }
+    },
+    "dates": {
+      "type": "object",
+      "properties": {
+        "adopted": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "renewBy": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "endsAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "adopted",
+        "renewBy",
+        "endsAt"
+      ]
+    },
+    "practice": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "anchor",
+    "rule",
+    "parameters",
+    "dates"
+  ]
+}

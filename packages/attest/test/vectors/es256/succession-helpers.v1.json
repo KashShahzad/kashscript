@@ -1,0 +1,72 @@
+{
+  "note": "relOld (Ed25519, on a lost phone) named three helper keys in advance; two of them and the new P-256 key moved its authority.",
+  "helpers": [
+    "did:kash:Dnaea15tEvQJcoQrFFcNW4wBFga5np6xcWJdsyt9kjM1ZW6Q",
+    "did:kash:6jL25WBU98eiYr9VnwS4GEmRi4fZXvnQ1MGpSEPqWhpU",
+    "did:kash:Dhg8AQHrQHwyBuaQAAXLGbhe5yFNBUgG1BTyVwUnY7xh"
+  ],
+  "claim": {
+    "header": {
+      "typ": "key-claim",
+      "v": 1
+    },
+    "body": {
+      "act": "claim-key",
+      "priorDid": "did:kash:7QLeiiAGYY9e5LgAr6ZMiXyJnnFKszdUyNbSTp9aH1V9",
+      "successorDid": "did:kash:DnaegSSgUD1vYx2oAMxAAFPdek3GHP8TttW6RoSVfK3LLXpF",
+      "successorKeyCustody": "subject-generated",
+      "claimedAtUnix": 1790812800,
+      "by": "helpers",
+      "helperSetSha256": "e3dc25b16012c79329c23d8eb7ec04827ea8c66537045d40680856ca7850255f"
+    },
+    "signatures": {
+      "successor": {
+        "alg": "es256",
+        "sig": "z45fZikEDkCC9WV9hp6BZ3Usb9LYpEfAVtVCpMNLMeTmR2coDGnMhNip5Z1j3FnMT4myuKxntTMbefwZUZmReHAXx",
+        "dst": "kash-key-claim-v1\n"
+      },
+      "helpers": [
+        {
+          "did": "did:kash:Dnaea15tEvQJcoQrFFcNW4wBFga5np6xcWJdsyt9kjM1ZW6Q",
+          "signature": {
+            "alg": "es256",
+            "sig": "z61kHAtny5UbT8k8HYYU263ddmCQmFtFraUpxC6ooEjC7EUkpVE5VMd5g2hdHq7CVzVhX7YN6gCBoompV21zs1RcN",
+            "dst": "kash-key-claim-v1\n"
+          }
+        },
+        {
+          "did": "did:kash:Dhg8AQHrQHwyBuaQAAXLGbhe5yFNBUgG1BTyVwUnY7xh",
+          "signature": {
+            "alg": "ed25519",
+            "sig": "z4HSP4SDZUMLcaDabfYjWCNCpf2QZkZsoQ9JsmCAr4zRjYyVCHurh2Bt3eXSDcnrmQ5sa7cnx7Cfeot6XEjzdM3DE",
+            "dst": "kash-key-claim-v1\n"
+          }
+        }
+      ]
+    },
+    "helperSet": {
+      "header": {
+        "typ": "recovery-helpers",
+        "v": 1
+      },
+      "body": {
+        "act": "name-helpers",
+        "subjectDid": "did:kash:7QLeiiAGYY9e5LgAr6ZMiXyJnnFKszdUyNbSTp9aH1V9",
+        "helpers": [
+          "did:kash:Dnaea15tEvQJcoQrFFcNW4wBFga5np6xcWJdsyt9kjM1ZW6Q",
+          "did:kash:6jL25WBU98eiYr9VnwS4GEmRi4fZXvnQ1MGpSEPqWhpU",
+          "did:kash:Dhg8AQHrQHwyBuaQAAXLGbhe5yFNBUgG1BTyVwUnY7xh"
+        ],
+        "need": 2,
+        "sequence": 1,
+        "issuedAtUnix": 1785628800,
+        "expiresAtUnix": null
+      },
+      "signature": {
+        "alg": "ed25519",
+        "sig": "z45EBsctBhLCh1EfgNr4Wgg7j48nLemJEsNpwoBUJKcTCGko4GnPxJS4PoGt1714VzTYNhmBtBUAGti8KUFgV8ad5",
+        "dst": "kash-recovery-helpers-v1\n"
+      }
+    }
+  }
+}

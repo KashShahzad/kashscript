@@ -1,0 +1,222 @@
+{
+  "id": "did:kash:KashScriptDidGoesHereSwapBeforeSigning/rule/signed-down-the-chain",
+  "version": 1,
+  "author": "did:kash:KashScriptDidGoesHereSwapBeforeSigning",
+  "title": "Signed down the chain — a piece of a client's work done by another organisation",
+  "purpose": "The prime — the organisation a client contracted with — sometimes passes a bounded piece of the client's work to another organisation, the house. This rule says when one such step, a hop, is well-formed and may be shown on the client's proof page: the client consented first, in a record it accepted; the house signs its own work as itself; each delivery cites the client's scope; the tools are declared; and so is what the house receives, with nobody's activity monitored.",
+  "visibility": "public",
+  "dates": {
+    "published": "2026-11-07T00:00:00Z",
+    "renewBy": "2027-10-07T00:00:00Z",
+    "endsAt": "2027-11-07T00:00:00Z"
+  },
+  "decider": { "role": "A named person at the prime, who answers for the engagement" },
+  "outcome": {
+    "grants": "The hop may be shown on the client's proof page, under the engagement it belongs to.",
+    "binds": false,
+    "sensitive": false,
+    "automaticYes": true
+  },
+  "reasons": [
+    { "code": "well-formed", "outcome": "yes", "text": "Every criterion is met: the hop is well-formed and may be shown on the client's proof page." },
+    { "code": "criterion-missing", "outcome": "not-yet", "text": "A criterion is not met yet. The result names which one, C1 to C5, and what record would answer it." },
+    { "code": "not-shown", "outcome": "no", "text": "A named person at the prime decides the hop is not shown, and gives the reasons in writing." }
+  ],
+  "contest": {
+    "windowDays": 30,
+    "answerDays": 14,
+    "how": "Reply to the decision receipt. A named person at the prime who did not make the first decision answers in writing; the client may also raise it under its engagement terms."
+  },
+  "anotherWay": "The client's consent in writing and the house's signed delivery note, on paper or by email, read by a named person at the prime.",
+  "address": {
+    "sector": { "classification": "ISIC", "revision": "5", "code": "62" },
+    "anchorFamily": "work",
+    "authority": { "kind": "institution", "name": "KashScript (the studio)", "url": "https://www.kashscript.com" },
+    "journey": "earn-and-spend",
+    "givens": {
+      "area": { "text": "Online, across a border: the client, the prime and the house may each be in a different country.", "anywhere": true },
+      "spaces": { "text": "Each organisation's own workplace, and online.", "kinds": ["workplace", "online"] },
+      "capitals": {
+        "text": "A named person at the prime to read what the machine cannot, and each organisation's book, where it signs as itself.",
+        "needs": [
+          { "kind": "people", "what": "A named person at the prime who answers for the engagement" },
+          { "kind": "systems", "what": "Each organisation's book, where it signs its own records" }
+        ]
+      },
+      "culture": {
+        "text": "The client's rules come first: its own security and data terms bind every organisation that does a piece.",
+        "codes": [
+          { "title": "The client's own security and data terms" },
+          { "title": "KashScript's engagement terms: the subcontracting clause, version 1", "url": "https://www.kashscript.com/services" }
+        ],
+        "languages": ["en"]
+      },
+      "economy": { "text": "Services: software work sold between organisations, scoped and priced in writing.", "level": "tertiary" },
+      "time": { "text": "Per engagement: each hop runs within the term of the client's scope it belongs to. The rule is renewed by a new version within the year.", "renews": "P1Y" },
+      "relations": {
+        "text": "Client to prime to house: the client contracts with the prime; the prime passes a bounded piece to the house with the client's consent; each organisation signs as itself.",
+        "within": [{ "id": "KashScript's engagement terms: the subcontracting clause, version 1" }]
+      }
+    }
+  },
+  "criteria": [
+    {
+      "id": "c1-consent",
+      "subject": "organisation",
+      "label": "The client accepted a consent naming the house and the piece",
+      "purpose": "The client agrees in advance, in a record it signs, before any piece of its work is passed on: which house, which piece, what done means, and what the house receives. A client's reviewer asks for exactly this (GDPR Art. 28(2): no sub-processor without the controller's prior written authorisation).",
+      "answer": {
+        "by": "receipts",
+        "query": [
+          {
+            "id": "c1-consent",
+            "format": "kash-artifact",
+            "meta": { "dst_values": ["application/vnd.oreoasis.work-record+json"], "attestation": "countersigned" },
+            "claims": [
+              { "id": "kind", "path": ["meta", "profile"], "values": ["engagement.subcontract-consent/1"] },
+              { "id": "upstreamScopeHash", "path": ["meta", "upstreamScopeHash"] },
+              { "id": "houseDid", "path": ["meta", "houseDid"] },
+              { "id": "pieceTitle", "path": ["meta", "pieceTitle"] },
+              { "id": "doneMeans", "path": ["meta", "doneMeans"] },
+              { "id": "dataScope", "path": ["meta", "dataScope"] }
+            ]
+          }
+        ]
+      },
+      "condition": {
+        "feel": "some r in receipts satisfies r.pieceTitle != \"\" and r.doneMeans != \"\" and r.houseDid != r.issuer",
+        "types": { "pieceTitle": "string", "doneMeans": "string", "houseDid": "string" }
+      },
+      "basis": { "title": "KashScript's engagement terms: the subcontracting clause, version 1", "url": "https://www.kashscript.com/services", "clause": "1 — consent before any piece is passed, naming the organisation and the piece" }
+    },
+    {
+      "id": "c2-house-signs",
+      "subject": "organisation",
+      "label": "The house signs its own work as an organisation",
+      "purpose": "Each organisation answers for its own piece, so its delivery is signed with its own key, under the identifier the client consented to, and never by someone else on its behalf. The proof page shows the signing grade of each acceptance; this version of the rule does not read the grade.",
+      "answer": {
+        "by": "receipts",
+        "query": [
+          {
+            "id": "c2-house-signs_consent",
+            "format": "kash-artifact",
+            "meta": { "dst_values": ["application/vnd.oreoasis.work-record+json"], "attestation": "countersigned" },
+            "claims": [
+              { "id": "kind", "path": ["meta", "profile"], "values": ["engagement.subcontract-consent/1"] },
+              { "id": "house", "path": ["meta", "houseDid"] }
+            ]
+          },
+          {
+            "id": "c2-house-signs_delivery",
+            "format": "kash-artifact",
+            "multiple": true,
+            "meta": { "dst_values": ["application/vnd.oreoasis.work-record+json"], "attestation": "countersigned" },
+            "claims": [
+              { "id": "kind", "path": ["meta", "profile"] },
+              { "id": "house", "path": ["actor", "id"] },
+              { "id": "actorClass", "path": ["actor", "class"], "values": ["organisation"] },
+              { "id": "cites", "path": ["meta", "upstream", "ref"] }
+            ]
+          }
+        ],
+        "options": [["c2-house-signs_consent", "c2-house-signs_delivery"]]
+      },
+      "condition": {
+        "feel": "some c in receipts[kind = \"engagement.subcontract-consent/1\"], d in receipts[kind != \"engagement.subcontract-consent/1\"] satisfies d.issuer = d.house and d.house = c.house",
+        "types": { "kind": "string", "house": "string" }
+      },
+      "basis": { "title": "KashScript's engagement terms: the subcontracting clause, version 1", "url": "https://www.kashscript.com/services", "clause": "2 — that organisation signs for its own piece as itself" }
+    },
+    {
+      "id": "c3-cites-scope",
+      "subject": "organisation",
+      "label": "Each delivery cites the client's scope and the scope version it answers to",
+      "purpose": "A piece is done inside the client's scope, so each delivery the house signs names the client's scope version by its hash, the consent it rests on, and the version of the piece's own scope it answers to. Anyone can follow those references offline.",
+      "answer": {
+        "by": "receipts",
+        "query": [
+          {
+            "id": "c3-cites-scope_consent",
+            "format": "kash-artifact",
+            "meta": { "dst_values": ["application/vnd.oreoasis.work-record+json"], "attestation": "countersigned" },
+            "claims": [
+              { "id": "kind", "path": ["meta", "profile"], "values": ["engagement.subcontract-consent/1"] },
+              { "id": "scope", "path": ["meta", "upstreamScopeHash"] }
+            ]
+          },
+          {
+            "id": "c3-cites-scope_delivery",
+            "format": "kash-artifact",
+            "multiple": true,
+            "meta": { "dst_values": ["application/vnd.oreoasis.work-record+json"], "attestation": "countersigned" },
+            "claims": [
+              { "id": "kind", "path": ["meta", "profile"] },
+              { "id": "scope", "path": ["meta", "upstream", "ref"] },
+              { "id": "consentReceipt", "path": ["meta", "upstream", "consentReceiptNo"] },
+              { "id": "pieceScopeVersion", "path": ["rule", "version"] },
+              { "id": "pieceScopeHash", "path": ["rule", "hash"] }
+            ]
+          }
+        ],
+        "options": [["c3-cites-scope_consent", "c3-cites-scope_delivery"]]
+      },
+      "condition": {
+        "feel": "some c in receipts[kind = \"engagement.subcontract-consent/1\"], d in receipts[kind != \"engagement.subcontract-consent/1\"] satisfies d.scope = c.scope",
+        "types": { "kind": "string", "scope": "string" }
+      },
+      "basis": { "title": "KashScript's engagement terms: the subcontracting clause, version 1", "url": "https://www.kashscript.com/services", "clause": "3 — which organisation did which piece, and who accepted it" }
+    },
+    {
+      "id": "c4-built-with",
+      "subject": "organisation",
+      "label": "Built with is declared on the delivery: the list may be empty, but it is there",
+      "purpose": "A client's reviewer asks what a piece was built with, so each delivery on the hop declares it. An empty list is an answer; a missing one is not.",
+      "answer": {
+        "by": "receipts",
+        "query": [
+          {
+            "id": "c4-built-with",
+            "format": "kash-artifact",
+            "multiple": true,
+            "meta": { "dst_values": ["application/vnd.oreoasis.work-record+json"], "attestation": "countersigned" },
+            "claims": [
+              { "id": "cites", "path": ["meta", "upstream", "ref"] },
+              { "id": "builtWith", "path": ["meta", "stack"] }
+            ]
+          }
+        ]
+      },
+      "condition": {
+        "feel": "some r in receipts satisfies r.builtWith != null",
+        "types": { "builtWith": "list of string" }
+      },
+      "basis": { "title": "KashScript's engagement terms: the subcontracting clause, version 1", "url": "https://www.kashscript.com/services", "clause": "3 — with what tools" }
+    },
+    {
+      "id": "c5-data-scope",
+      "subject": "organisation",
+      "label": "What the house receives is declared, and nobody's activity is monitored",
+      "purpose": "The house receives only what its piece needs, so the consent the client accepted lists what it receives and states that nobody's activity is monitored: the work is proven by accepted deliveries, never by watching anyone.",
+      "answer": {
+        "by": "receipts",
+        "query": [
+          {
+            "id": "c5-data-scope",
+            "format": "kash-artifact",
+            "meta": { "dst_values": ["application/vnd.oreoasis.work-record+json"], "attestation": "countersigned" },
+            "claims": [
+              { "id": "kind", "path": ["meta", "profile"], "values": ["engagement.subcontract-consent/1"] },
+              { "id": "receives", "path": ["meta", "dataScope", "receives"] },
+              { "id": "monitoring", "path": ["meta", "dataScope", "monitoring"], "values": ["none"] }
+            ]
+          }
+        ]
+      },
+      "condition": {
+        "feel": "some r in receipts satisfies r.monitoring = \"none\" and r.receives != null",
+        "types": { "monitoring": "string", "receives": "list of string" }
+      },
+      "basis": { "title": "KashScript's engagement terms: the subcontracting clause, version 1", "url": "https://www.kashscript.com/services", "clause": "4 — only what the piece needs, and nobody's activity is monitored" }
+    }
+  ]
+}

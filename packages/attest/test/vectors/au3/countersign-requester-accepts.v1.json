@@ -1,0 +1,95 @@
+{
+  "formatVersion": "kashscript-countersign/1",
+  "subject": {
+    "payloadType": "application/vnd.oreoasis.work-record+json",
+    "payload": "eyJhY3Rpb24iOnsic3VtbWFyeSI6IkEgcHJhY3RpY2UgbWlsZXN0b25lLiIsInR5cGUiOiJtaWxlc3RvbmUuYWNjZXB0In0sImFjdG9yIjp7ImNsYXNzIjoicGVyc29uIiwiaWQiOiJkaWQ6a2FzaDo0V2l1eUpuZlJvZm1QOWZ4bVlhb3dGU1BaajI2SmdqYWQxYjV0WFh3a0hCcyJ9LCJpbnB1dHMiOltdLCJtZXRhIjp7InByYWN0aWNlIjp0cnVlfSwib3V0cHV0cyI6W10sInJlY2VpcHRJZCI6IjAxS0FVM1BSQUNUSUNFMDAwMDAwMDAwMDAyIiwic2hhcGUiOiJhY2NlcHRlZCIsInNwZWMiOiJvcmVvYXNpcy53b3JrLXJlY29yZC8xIiwic3RhdHVzIjoiY29tcGxldGVkIiwidGltZXN0YW1wIjoiMjAyNi0xMS0wNlQxMzoyMDowMFoifQ==",
+    "signatures": [
+      {
+        "keyid": "did:kash:4WiuyJnfRofmP9fxmYaowFSPZj26Jgjad1b5tXXwkHBs",
+        "sig": "QWMv+VEJjpbmTLS9IfCq2yclgQsSre7yv544WoCE+EUsdT62Y46vWM7NJuPPfGNsptI5WErLk3tzbPiSRKaSCg=="
+      },
+      {
+        "keyid": "did:kash:4WiuyJnfRofmP9fxmYaowFSPZj26Jgjad1b5tXXwkHBs",
+        "sig": "QWMv+VEJjpbmTLS9IfCq2yclgQsSre7yv544WoCE+EUsdT62Y46vWM7NJuPPfGNsptI5WErLk3tzbPiSRKaSCg=="
+      },
+      {
+        "keyid": "did:kash:CxVhaSzfSrwyuMvnkaFDeCfiBD7uHMAGxPV77nqw7iUW",
+        "sig": "34drobfMom68JEJync24jjpULL0QSGvREPi+CbX7ggreyJYJ2PgIN+nnAQc3e6Jc67HnvBTxQEs0irfjVBxZDw=="
+      }
+    ]
+  },
+  "request": {
+    "header": {
+      "typ": "countersign-request",
+      "v": 1
+    },
+    "body": {
+      "requestId": "csr_00000000000000000000000000000002",
+      "requesterDid": "did:kash:4WiuyJnfRofmP9fxmYaowFSPZj26Jgjad1b5tXXwkHBs",
+      "subjectPayloadType": "application/vnd.oreoasis.work-record+json",
+      "subjectDigestSha256": "9396476eb62f88c164537b116e2d3133bc6a31621681fc8bbdb82c67c7586ea1",
+      "statement": "Accept this practice milestone.",
+      "disclosures": [
+        {
+          "label": "Milestone",
+          "value": "practice"
+        }
+      ],
+      "nonceB64": "AgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgI=",
+      "issuedAtUnix": 1794000000,
+      "expiresAtUnix": 1794604800,
+      "relationshipContext": "au3-practice",
+      "withdrawalFeed": null
+    },
+    "signature": {
+      "alg": "ed25519",
+      "sig": "z58p21Z4LfsXKAeexNzEN6BaNFN8CiYxkDjhDnzP3nur3fh2zrYoaVzSH2HqEnRYAz2Uj41nsrXLauiyNBj2u6WbH",
+      "dst": "kash-countersign-request-v1\n"
+    }
+  },
+  "acceptances": [
+    {
+      "header": {
+        "typ": "countersign",
+        "v": 1
+      },
+      "body": {
+        "act": "countersign",
+        "requestId": "csr_00000000000000000000000000000002",
+        "requestDigestSha256": "ccc261cccf594490e7b7599445749c09cd869a39d86753b478ee2bb31dfe2f4e",
+        "subjectPayloadType": "application/vnd.oreoasis.work-record+json",
+        "subjectDigestSha256": "9396476eb62f88c164537b116e2d3133bc6a31621681fc8bbdb82c67c7586ea1",
+        "countersignerDid": "did:kash:4WiuyJnfRofmP9fxmYaowFSPZj26Jgjad1b5tXXwkHBs",
+        "signedAtUnix": 1794000060,
+        "keyCustody": "subject-generated"
+      },
+      "signature": {
+        "alg": "ed25519",
+        "sig": "zpqGjoiADF7XhUPQ52rT6sCQx3vDRcmnfAfEaeHxMDz7ZfpYLdQCyiB2KKYsZvCKZLCmaTE7FLhsGaVeijaY5nx9",
+        "dst": "kash-countersign-v1\n"
+      }
+    },
+    {
+      "header": {
+        "typ": "countersign",
+        "v": 1
+      },
+      "body": {
+        "act": "countersign",
+        "requestId": "csr_00000000000000000000000000000002",
+        "requestDigestSha256": "ccc261cccf594490e7b7599445749c09cd869a39d86753b478ee2bb31dfe2f4e",
+        "subjectPayloadType": "application/vnd.oreoasis.work-record+json",
+        "subjectDigestSha256": "9396476eb62f88c164537b116e2d3133bc6a31621681fc8bbdb82c67c7586ea1",
+        "countersignerDid": "did:kash:CxVhaSzfSrwyuMvnkaFDeCfiBD7uHMAGxPV77nqw7iUW",
+        "signedAtUnix": 1794000060,
+        "keyCustody": "subject-generated"
+      },
+      "signature": {
+        "alg": "ed25519",
+        "sig": "z44tC6FjDV9NjVvJzYozK5n2LNjUyh5qzmtsi5TU4Ks6HDActDifTrFKh4LDSUXMjwF5nezJExdrgnXukFH1YEvf5",
+        "dst": "kash-countersign-v1\n"
+      }
+    }
+  ],
+  "withdrawal": null
+}

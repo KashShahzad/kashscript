@@ -1,0 +1,49 @@
+{
+  "name": "@kashscript/wallet",
+  "version": "0.1.0-alpha.6",
+  "description": "The wallet component — keys first, no account. Receives, holds, presents and exports signed records on the holder's own device: a hardware root that never signs, relationship keys that never leave in the clear, a proof switch that never leaves the device, and deletion at expiry that is real. Headless core, web and Expo adapters, and a headless mode for the simulation. Apache-2.0.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "sideEffects": false,
+  "exports": {
+    ".":          "./src/index.ts",
+    "./headless": "./src/headless/index.ts",
+    "./web":      "./src/web/index.ts",
+    "./expo":     "./src/expo/index.ts"
+  },
+  "dependencies": {
+    "@kashscript/attest": "workspace:*",
+    "@kashscript/identity-core": "workspace:*",
+    "@kashscript/predicate": "workspace:*",
+    "fflate": "^0.8.3"
+  },
+  "files": [
+    "dist",
+    "src",
+    "ios",
+    "android/build.gradle",
+    "android/src",
+    "expo-module.config.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build":          "tsc -p tsconfig.json",
+    "typecheck":      "tsc --noEmit",
+    "typecheck:test": "tsc --noEmit -p tsconfig.test.json",
+    "test":           "bun run typecheck:test && bun test",
+    "headless":       "bun src/headless/cli.ts",
+    "clean":          "rm -rf dist .turbo"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "@types/bun": "^1.2.5"
+  },
+  "license": "Apache-2.0",
+  "repository": { "type": "git", "url": "git+https://github.com/KashShahzad/kashscript.git", "directory": "packages/wallet" },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

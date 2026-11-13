@@ -1,0 +1,344 @@
+{
+  "note": "Each case must FAIL. The P-256 public keys are inside the did:kash identifiers.",
+  "kashEventHighS": {
+    "event": {
+      "header": {
+        "iss": "did:kash:DnaepBuvsQ8cpsWrVKw8fbpGpvPeNSjVPTWoq6cRqaYzBKVP",
+        "typ": "practice-record",
+        "v": 1
+      },
+      "body": {
+        "what": "a practice record, signed ES256",
+        "at": 1790812800
+      },
+      "signature": {
+        "alg": "es256",
+        "sig": "z2YFxuxV1ogffyfuxjHXUDyVyBoJa8GwMSEbCAZvQia49QoXKbkLChYTN2oMXM8eEgNK5isbuUiaJtU3J4wgcWG6f",
+        "dst": "kash-record-v1\n",
+        "kid": "did:kash:DnaepBuvsQ8cpsWrVKw8fbpGpvPeNSjVPTWoq6cRqaYzBKVP#sig-1"
+      }
+    },
+    "publicKeyCompressedHex": "0360fed4ba255a9d31c961eb74c6356d68c049b8923b61fa6ce669622e60f29fb6",
+    "expect": "false: high-S"
+  },
+  "dsseHighS": {
+    "envelope": {
+      "payloadType": "application/vnd.kash.trust-list+json",
+      "payload": "eyJmb3JtYXQiOiJrYXNoc2NyaXB0LXRydXN0LWxpc3QvMSIsImlzc3VlZEF0VW5peCI6MTc5MDgxMjgwMCwiaXNzdWVycyI6W3siZHN0cyI6WyJodHRwczovL2thc2hzY3JpcHQuY29tL3ZjdC9wcmVkaWNhdGUvMSIsImthc2gtcmVjb3JkLXYxXG4iXSwiaXNzdWVySWQiOiJkaWQ6a2FzaDpEbmFlZzFtaVZRZ20xMWdjak5aWmR0eURERnVEazg5cFo2ZE1BWlppTjhDTmdKNVAiLCJrZXlzIjpbXSwibGFiZWwiOiJBIHByYWN0aWNlIHJlY29yZHMgZGVzayIsInZhbGlkRnJvbVVuaXgiOjE3OTA4MTI4MDAsInZhbGlkVW50aWxVbml4IjoxODIyMzQ4ODAwfV0sImxpc3RJZCI6InByYWN0aWNlLWVzMjU2LWxpc3QiLCJwdWJsaXNoZXIiOiJkaWQ6a2FzaDpEbmFlcDVwd3k2Ynk5bWRKV0d0bjRMNXBtcUJaRU5MSGMyREp3WkxjRjQ0WHdDcFkiLCJ2YWxpZEZyb21Vbml4IjoxNzkwODEyODAwLCJ2YWxpZFVudGlsVW5peCI6MTgyMjM0ODgwMCwidmVyc2lvbiI6MX0=",
+      "signatures": [
+        {
+          "keyid": "did:kash:Dnaep5pwy6by9mdJWGtn4L5pmqBZENLHc2DJwZLcF44XwCpY",
+          "sig": "MEUCIEJeqPRDtR0eP/vqspKz+1tqw0GWYbxG03sfdhucw/YbAiEAqNRmRqPG5799QXmpyCZ7grC3/w/BuF4HMDA8qCPZQp8="
+        }
+      ]
+    },
+    "publisher": "did:kash:Dnaep5pwy6by9mdJWGtn4L5pmqBZENLHc2DJwZLcF44XwCpY",
+    "expect": "TRUST_LIST_SIGNATURE_INVALID"
+  },
+  "dsseNonMinimalDer": {
+    "envelope": {
+      "payloadType": "application/vnd.kash.trust-list+json",
+      "payload": "eyJmb3JtYXQiOiJrYXNoc2NyaXB0LXRydXN0LWxpc3QvMSIsImlzc3VlZEF0VW5peCI6MTc5MDgxMjgwMCwiaXNzdWVycyI6W3siZHN0cyI6WyJodHRwczovL2thc2hzY3JpcHQuY29tL3ZjdC9wcmVkaWNhdGUvMSIsImthc2gtcmVjb3JkLXYxXG4iXSwiaXNzdWVySWQiOiJkaWQ6a2FzaDpEbmFlZzFtaVZRZ20xMWdjak5aWmR0eURERnVEazg5cFo2ZE1BWlppTjhDTmdKNVAiLCJrZXlzIjpbXSwibGFiZWwiOiJBIHByYWN0aWNlIHJlY29yZHMgZGVzayIsInZhbGlkRnJvbVVuaXgiOjE3OTA4MTI4MDAsInZhbGlkVW50aWxVbml4IjoxODIyMzQ4ODAwfV0sImxpc3RJZCI6InByYWN0aWNlLWVzMjU2LWxpc3QiLCJwdWJsaXNoZXIiOiJkaWQ6a2FzaDpEbmFlcDVwd3k2Ynk5bWRKV0d0bjRMNXBtcUJaRU5MSGMyREp3WkxjRjQ0WHdDcFkiLCJ2YWxpZEZyb21Vbml4IjoxNzkwODEyODAwLCJ2YWxpZFVudGlsVW5peCI6MTgyMjM0ODgwMCwidmVyc2lvbiI6MX0=",
+      "signatures": [
+        {
+          "keyid": "did:kash:Dnaep5pwy6by9mdJWGtn4L5pmqBZENLHc2DJwZLcF44XwCpY",
+          "sig": "MEUCIQBCXqj0Q7UdHj/76rKSs/tbasNBlmG8RtN7H3YbnMP2GwIgVyuZuFw5GEGCvoZWN9mEfQwu+53lX0B9w4mOGtiJ4rI="
+        }
+      ]
+    },
+    "publisher": "did:kash:Dnaep5pwy6by9mdJWGtn4L5pmqBZENLHc2DJwZLcF44XwCpY",
+    "expect": "TRUST_LIST_SIGNATURE_INVALID"
+  },
+  "kbJwtHighS": {
+    "presentation": "eyJraWQiOiJkaWQ6a2FzaDpEbmFlZzFtaVZRZ20xMWdjak5aWmR0eURERnVEazg5cFo2ZE1BWlppTjhDTmdKNVAiLCJ0eXAiOiJkYytzZC1qd3QiLCJhbGciOiJFUzI1NiJ9.eyJpc3MiOiJkaWQ6a2FzaDpEbmFlZzFtaVZRZ20xMWdjak5aWmR0eURERnVEazg5cFo2ZE1BWlppTjhDTmdKNVAiLCJpYXQiOjE3OTA2NDAwMDAsImV4cCI6MTgyMjM0ODgwMCwidmN0IjoiaHR0cHM6Ly9rYXNoc2NyaXB0LmNvbS92Y3QvcHJlZGljYXRlLzEiLCJjbmYiOnsiandrIjp7Imt0eSI6IkVDIiwiY3J2IjoiUC0yNTYiLCJ4IjoiMUdFRUhpS09ENHJ3Rl9vVU92aXRJQnJxVTdoN1RJOUFkVzQ5UmsxcDRtTSIsInkiOiJQQXBiMVJCTjE5RVF2YWg5ZHlqQTM1QmFiaVk5bW9UT2Itb0tlQlZRU0RFIn19LCJjcmVkZW50aWFsU3RhdHVzIjp7InR5cGUiOiJCaXRzdHJpbmdTdGF0dXNMaXN0RW50cnkiLCJzdGF0dXNQdXJwb3NlIjoicmV2b2NhdGlvbiIsInN0YXR1c0xpc3RJbmRleCI6IjMyMDkiLCJzdGF0dXNMaXN0Q3JlZGVudGlhbCI6Imh0dHBzOi8vcmVjb3Jkcy5wcmFjdGljZS5pbnZhbGlkL3N0YXR1cy9lczI1Ni0xIn0sInByZWRpY2F0ZSI6eyJraW5kIjoicHJhY3RpY2UtdmlzaXRzIiwiYW5zd2VyIjp0cnVlLCJydWxlIjp7ImlkIjoicHJhY3RpY2UtcnVsZSIsInZlcnNpb24iOiIxIiwiaGFzaCI6IjAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAifSwid2luZG93Ijp7ImZyb20iOiIyMDI2LTA3LTAxIiwidG8iOiIyMDI2LTA5LTMwIn19LCJyZXN0c09uIjpbeyIuLi4iOiJZM1pUTkEwcm1lU0hFTC1teC1qNVZ5MUFvcUVEUVVyb0VuaEdTM2lIRFQ0In0seyIuLi4iOiJtQkNBaW9PZ0FNU0Z2SEMyNnl0dS1reVlCY3hWbWtaOHItYWpTT3ZlalpzIn0seyIuLi4iOiJqYXdLUFdqVVJ2YjRqbzBNRHU1N3M2S0syNkNDUnNrVDRDZEF3MDJGdlZVIn0seyIuLi4iOiJIWDhQc1BhMXhxZURUM1lJZ0xHT0swNWpJVktwX2FubHhxWnUyQkU1WnFBIn0seyIuLi4iOiJCM3NveWxuU0VBS1lpdjhWWV9fYktMdjZ5YWMzakVlRmY2NjdQdzJlRnRBIn0seyIuLi4iOiJ3WHNrVktGYkljOWlWZ3VWaElSc3BFTEZPRXE0SzY0VmViTVI3R2FhRWE0In1dLCJfc2QiOlsiQkdkdmhBaEQ5SHFzemNsT0d2UDBwcm1DbTJBZmRVUHhrVDdVbHduNlNGbyIsIlI4c3BsV1pURG43aXlYNml4QlJ2dENaa3VpQVViVnNCeWdreE15WFR1em8iLCJvMHhXUndZOFNUYm5ja29FMzRscU9MWE9QYjZERkh1VVdxeU1ydG1oaUNzIiwicWl1cWQ3N1dLcHVwaTh2NjEwVk9uRG1RQTcwUDZCbUVyWlN6cFRYVEtKUSJdLCJfc2RfYWxnIjoic2hhLTI1NiJ9.70F_a9Mio-wRTC7xdmhMq4M2uBVod20a4MAqHxNbPupJIOgJrIiVhtxSx53yqiwesM8VQ_PPpLFoNXhglItQ-w~eyJ0eXAiOiJrYitqd3QiLCJhbGciOiJFUzI1NiJ9.eyJpYXQiOjE3OTA4MTY0MDAsImF1ZCI6Imh0dHBzOi8vdmVyaWZpZXIucHJhY3RpY2UuaW52YWxpZCIsIm5vbmNlIjoibm9uY2UtZXMyNTYtNWQxYyIsInNkX2hhc2giOiIxVHhLOWVDRnR1NlRWU0lmME5fcE9RV0RiNVFVeS1OWnBqUkt6OXFBaGJVIn0.HVNokvaE6-906shxbPudR0rtm7iBXfYlrZyJwDIR1ZmuSLJW19bE4yJt8e0umNxGLxVd6gf2bDQx3-ozA4Ji6A",
+    "expect": "KEY_BINDING_INVALID"
+  },
+  "ed25519SignatureUnderP256Did": {
+    "envelope": {
+      "payloadType": "application/vnd.kash.trust-list+json",
+      "payload": "eyJmb3JtYXQiOiJrYXNoc2NyaXB0LXRydXN0LWxpc3QvMSIsImlzc3VlZEF0VW5peCI6MTc5MDgxMjgwMCwiaXNzdWVycyI6W3siZHN0cyI6WyJodHRwczovL2thc2hzY3JpcHQuY29tL3ZjdC9wcmVkaWNhdGUvMSIsImthc2gtcmVjb3JkLXYxXG4iXSwiaXNzdWVySWQiOiJkaWQ6a2FzaDpEbmFlZzFtaVZRZ20xMWdjak5aWmR0eURERnVEazg5cFo2ZE1BWlppTjhDTmdKNVAiLCJrZXlzIjpbXSwibGFiZWwiOiJBIHByYWN0aWNlIHJlY29yZHMgZGVzayIsInZhbGlkRnJvbVVuaXgiOjE3OTA4MTI4MDAsInZhbGlkVW50aWxVbml4IjoxODIyMzQ4ODAwfV0sImxpc3RJZCI6InByYWN0aWNlLWVzMjU2LWxpc3QiLCJwdWJsaXNoZXIiOiJkaWQ6a2FzaDpEbmFlcDVwd3k2Ynk5bWRKV0d0bjRMNXBtcUJaRU5MSGMyREp3WkxjRjQ0WHdDcFkiLCJ2YWxpZEZyb21Vbml4IjoxNzkwODEyODAwLCJ2YWxpZFVudGlsVW5peCI6MTgyMjM0ODgwMCwidmVyc2lvbiI6MX0=",
+      "signatures": [
+        {
+          "keyid": "did:kash:Dnaep5pwy6by9mdJWGtn4L5pmqBZENLHc2DJwZLcF44XwCpY",
+          "sig": "ntKheS33FXSxYRO5pjHOweOwDWOogjhqSDn5HzYZABQEKhXuIs3559JgngWr0IS+umfpjWSaf3TTF182rmiWAA=="
+        }
+      ]
+    },
+    "publisher": "did:kash:Dnaep5pwy6by9mdJWGtn4L5pmqBZENLHc2DJwZLcF44XwCpY",
+    "expect": "TRUST_LIST_SIGNATURE_INVALID"
+  },
+  "es256SignatureUnderEd25519Did": {
+    "envelope": {
+      "payloadType": "application/vnd.example.delivery+json",
+      "payload": "eyJwcmFjdGljZSI6ImFuIEVTMjU2IHNpZ25hdHVyZSB1bmRlciBhbiBFZDI1NTE5IGtleWlkIn0=",
+      "signatures": [
+        {
+          "keyid": "did:kash:VfFqZJJbPxh4LCmQjoYTvQ9uCZbcmqNB5XZ66y2YqJj",
+          "sig": "MEUCIQDKGNn/9FUZ97HgZRVJGTFYItUutzAHUrX1nV9TA5Jj/QIgNPC2KKsbYFAPxJO6/5rz1Vm+X/chdOUqHCMvogDOqME="
+        }
+      ]
+    },
+    "keyid": "did:kash:VfFqZJJbPxh4LCmQjoYTvQ9uCZbcmqNB5XZ66y2YqJj",
+    "expect": "no keyid verifies"
+  },
+  "belowQuorum": {
+    "claim": {
+      "header": {
+        "typ": "key-claim",
+        "v": 1
+      },
+      "body": {
+        "act": "claim-key",
+        "priorDid": "did:kash:7QLeiiAGYY9e5LgAr6ZMiXyJnnFKszdUyNbSTp9aH1V9",
+        "successorDid": "did:kash:DnaegSSgUD1vYx2oAMxAAFPdek3GHP8TttW6RoSVfK3LLXpF",
+        "successorKeyCustody": "subject-generated",
+        "claimedAtUnix": 1790812800,
+        "by": "helpers",
+        "helperSetSha256": "e3dc25b16012c79329c23d8eb7ec04827ea8c66537045d40680856ca7850255f"
+      },
+      "signatures": {
+        "successor": {
+          "alg": "es256",
+          "sig": "z45fZikEDkCC9WV9hp6BZ3Usb9LYpEfAVtVCpMNLMeTmR2coDGnMhNip5Z1j3FnMT4myuKxntTMbefwZUZmReHAXx",
+          "dst": "kash-key-claim-v1\n"
+        },
+        "helpers": [
+          {
+            "did": "did:kash:Dnaea15tEvQJcoQrFFcNW4wBFga5np6xcWJdsyt9kjM1ZW6Q",
+            "signature": {
+              "alg": "es256",
+              "sig": "z3aBqNEGjfK4ebcd6zqyxK9RJXceYi3wYXmHqrpeT8cG3pQWoFf8Nm5WyMqRfGs7sdqawhzyAAPfmYmuUo44S2EMM",
+              "dst": "kash-key-claim-v1\n"
+            }
+          }
+        ]
+      },
+      "helperSet": {
+        "header": {
+          "typ": "recovery-helpers",
+          "v": 1
+        },
+        "body": {
+          "act": "name-helpers",
+          "subjectDid": "did:kash:7QLeiiAGYY9e5LgAr6ZMiXyJnnFKszdUyNbSTp9aH1V9",
+          "helpers": [
+            "did:kash:Dnaea15tEvQJcoQrFFcNW4wBFga5np6xcWJdsyt9kjM1ZW6Q",
+            "did:kash:6jL25WBU98eiYr9VnwS4GEmRi4fZXvnQ1MGpSEPqWhpU",
+            "did:kash:Dhg8AQHrQHwyBuaQAAXLGbhe5yFNBUgG1BTyVwUnY7xh"
+          ],
+          "need": 2,
+          "sequence": 1,
+          "issuedAtUnix": 1785628800,
+          "expiresAtUnix": null
+        },
+        "signature": {
+          "alg": "ed25519",
+          "sig": "z45EBsctBhLCh1EfgNr4Wgg7j48nLemJEsNpwoBUJKcTCGko4GnPxJS4PoGt1714VzTYNhmBtBUAGti8KUFgV8ad5",
+          "dst": "kash-recovery-helpers-v1\n"
+        }
+      }
+    },
+    "expect": "BELOW_QUORUM"
+  },
+  "helperSetNotSignedByPrior": {
+    "claim": {
+      "header": {
+        "typ": "key-claim",
+        "v": 1
+      },
+      "body": {
+        "act": "claim-key",
+        "priorDid": "did:kash:7QLeiiAGYY9e5LgAr6ZMiXyJnnFKszdUyNbSTp9aH1V9",
+        "successorDid": "did:kash:DnaegSSgUD1vYx2oAMxAAFPdek3GHP8TttW6RoSVfK3LLXpF",
+        "successorKeyCustody": "subject-generated",
+        "claimedAtUnix": 1790812800,
+        "by": "helpers",
+        "helperSetSha256": "e3dc25b16012c79329c23d8eb7ec04827ea8c66537045d40680856ca7850255f"
+      },
+      "signatures": {
+        "successor": {
+          "alg": "es256",
+          "sig": "zQpFGpUb8oshe8TWpZFUVnWyXt3kK1tAvVofW6zgnwemkGxBYBJhx7QfbrhfLNDSzbNx5repfUdB71nN7EPyRR1n",
+          "dst": "kash-key-claim-v1\n"
+        },
+        "helpers": [
+          {
+            "did": "did:kash:Dnaea15tEvQJcoQrFFcNW4wBFga5np6xcWJdsyt9kjM1ZW6Q",
+            "signature": {
+              "alg": "es256",
+              "sig": "z2p6AXg7JqvZPVbXhnUz62J1PBory7uXTsmgjKBgdiadTe7JBhYknMRFAy9EEqoQQguzvKhjkwG3A3qJjhbHcqNNu",
+              "dst": "kash-key-claim-v1\n"
+            }
+          },
+          {
+            "did": "did:kash:6jL25WBU98eiYr9VnwS4GEmRi4fZXvnQ1MGpSEPqWhpU",
+            "signature": {
+              "alg": "ed25519",
+              "sig": "z4MiqstZTwtZXqWpwjuAoRwGGkYBnE8t7RQa4CnC7UW7NGDC1ZPMTxr7F1VnQJ3aPqaDEDKc66mY4p92ZjLE6Hxf2",
+              "dst": "kash-key-claim-v1\n"
+            }
+          }
+        ]
+      },
+      "helperSet": {
+        "header": {
+          "typ": "recovery-helpers",
+          "v": 1
+        },
+        "body": {
+          "act": "name-helpers",
+          "subjectDid": "did:kash:7QLeiiAGYY9e5LgAr6ZMiXyJnnFKszdUyNbSTp9aH1V9",
+          "helpers": [
+            "did:kash:Dnaea15tEvQJcoQrFFcNW4wBFga5np6xcWJdsyt9kjM1ZW6Q",
+            "did:kash:6jL25WBU98eiYr9VnwS4GEmRi4fZXvnQ1MGpSEPqWhpU",
+            "did:kash:Dhg8AQHrQHwyBuaQAAXLGbhe5yFNBUgG1BTyVwUnY7xh"
+          ],
+          "need": 2,
+          "sequence": 1,
+          "issuedAtUnix": 1785628800,
+          "expiresAtUnix": null
+        },
+        "signature": {
+          "alg": "es256",
+          "sig": "z2YRBvvQMD9oW7huBa9ABytVuwD5XD85HHGMz6Q9shQqgimbMT8t4KaWzLFDQPMit6wPFMyJSfJS3A8yHgtnGghhZ",
+          "dst": "kash-recovery-helpers-v1\n"
+        }
+      }
+    },
+    "expect": "HELPER_SET_INVALID"
+  },
+  "fork": {
+    "claims": [
+      {
+        "header": {
+          "typ": "key-claim",
+          "v": 1
+        },
+        "body": {
+          "act": "claim-key",
+          "priorDid": "did:kash:7QLeiiAGYY9e5LgAr6ZMiXyJnnFKszdUyNbSTp9aH1V9",
+          "successorDid": "did:kash:DnaegSSgUD1vYx2oAMxAAFPdek3GHP8TttW6RoSVfK3LLXpF",
+          "successorKeyCustody": "subject-generated",
+          "claimedAtUnix": 1790812800,
+          "by": "helpers",
+          "helperSetSha256": "e3dc25b16012c79329c23d8eb7ec04827ea8c66537045d40680856ca7850255f"
+        },
+        "signatures": {
+          "successor": {
+            "alg": "es256",
+            "sig": "z45fZikEDkCC9WV9hp6BZ3Usb9LYpEfAVtVCpMNLMeTmR2coDGnMhNip5Z1j3FnMT4myuKxntTMbefwZUZmReHAXx",
+            "dst": "kash-key-claim-v1\n"
+          },
+          "helpers": [
+            {
+              "did": "did:kash:Dnaea15tEvQJcoQrFFcNW4wBFga5np6xcWJdsyt9kjM1ZW6Q",
+              "signature": {
+                "alg": "es256",
+                "sig": "z61kHAtny5UbT8k8HYYU263ddmCQmFtFraUpxC6ooEjC7EUkpVE5VMd5g2hdHq7CVzVhX7YN6gCBoompV21zs1RcN",
+                "dst": "kash-key-claim-v1\n"
+              }
+            },
+            {
+              "did": "did:kash:Dhg8AQHrQHwyBuaQAAXLGbhe5yFNBUgG1BTyVwUnY7xh",
+              "signature": {
+                "alg": "ed25519",
+                "sig": "z4HSP4SDZUMLcaDabfYjWCNCpf2QZkZsoQ9JsmCAr4zRjYyVCHurh2Bt3eXSDcnrmQ5sa7cnx7Cfeot6XEjzdM3DE",
+                "dst": "kash-key-claim-v1\n"
+              }
+            }
+          ]
+        },
+        "helperSet": {
+          "header": {
+            "typ": "recovery-helpers",
+            "v": 1
+          },
+          "body": {
+            "act": "name-helpers",
+            "subjectDid": "did:kash:7QLeiiAGYY9e5LgAr6ZMiXyJnnFKszdUyNbSTp9aH1V9",
+            "helpers": [
+              "did:kash:Dnaea15tEvQJcoQrFFcNW4wBFga5np6xcWJdsyt9kjM1ZW6Q",
+              "did:kash:6jL25WBU98eiYr9VnwS4GEmRi4fZXvnQ1MGpSEPqWhpU",
+              "did:kash:Dhg8AQHrQHwyBuaQAAXLGbhe5yFNBUgG1BTyVwUnY7xh"
+            ],
+            "need": 2,
+            "sequence": 1,
+            "issuedAtUnix": 1785628800,
+            "expiresAtUnix": null
+          },
+          "signature": {
+            "alg": "ed25519",
+            "sig": "z45EBsctBhLCh1EfgNr4Wgg7j48nLemJEsNpwoBUJKcTCGko4GnPxJS4PoGt1714VzTYNhmBtBUAGti8KUFgV8ad5",
+            "dst": "kash-recovery-helpers-v1\n"
+          }
+        }
+      },
+      {
+        "header": {
+          "typ": "key-claim",
+          "v": 1
+        },
+        "body": {
+          "act": "claim-key",
+          "priorDid": "did:kash:7QLeiiAGYY9e5LgAr6ZMiXyJnnFKszdUyNbSTp9aH1V9",
+          "successorDid": "did:kash:DnaeUQMaUBNtdVnumDij6wGymbomCjBpFwqbw1jPbPZquC4R",
+          "successorKeyCustody": "subject-generated",
+          "claimedAtUnix": 1790812830,
+          "by": "helpers",
+          "helperSetSha256": "e3dc25b16012c79329c23d8eb7ec04827ea8c66537045d40680856ca7850255f"
+        },
+        "signatures": {
+          "successor": {
+            "alg": "es256",
+            "sig": "z2obpiGaVEn91PkWWhT7Vb41Kfty1ofuUbRx5owJXcF4z3SciHCdQx3B2ndbccatLg2st81wciWXQU93E85jcJpHo",
+            "dst": "kash-key-claim-v1\n"
+          },
+          "helpers": [
+            {
+              "did": "did:kash:6jL25WBU98eiYr9VnwS4GEmRi4fZXvnQ1MGpSEPqWhpU",
+              "signature": {
+                "alg": "ed25519",
+                "sig": "z2aGFvTtLVbrRoGzQ94GJUWgoQyKzugBCMhs57eg1MHp5BvN6yhscCkhxV7Ckvy4FkRyFsPfYEhpnBvCb9QNYqqNp",
+                "dst": "kash-key-claim-v1\n"
+              }
+            },
+            {
+              "did": "did:kash:Dhg8AQHrQHwyBuaQAAXLGbhe5yFNBUgG1BTyVwUnY7xh",
+              "signature": {
+                "alg": "ed25519",
+                "sig": "z3zrn3igK8NZ6v6u3PMDN5JmXf6zEwGd1vaSgj2gnqUQkXqyChnEDfQqYvUwxyqWYQb5jdVHKHTXwv3cjVeSNRRbA",
+                "dst": "kash-key-claim-v1\n"
+              }
+            }
+          ]
+        },
+        "helperSet": {
+          "header": {
+            "typ": "recovery-helpers",
+            "v": 1
+          },
+          "body": {
+            "act": "name-helpers",
+            "subjectDid": "did:kash:7QLeiiAGYY9e5LgAr6ZMiXyJnnFKszdUyNbSTp9aH1V9",
+            "helpers": [
+              "did:kash:Dnaea15tEvQJcoQrFFcNW4wBFga5np6xcWJdsyt9kjM1ZW6Q",
+              "did:kash:6jL25WBU98eiYr9VnwS4GEmRi4fZXvnQ1MGpSEPqWhpU",
+              "did:kash:Dhg8AQHrQHwyBuaQAAXLGbhe5yFNBUgG1BTyVwUnY7xh"
+            ],
+            "need": 2,
+            "sequence": 1,
+            "issuedAtUnix": 1785628800,
+            "expiresAtUnix": null
+          },
+          "signature": {
+            "alg": "ed25519",
+            "sig": "z45EBsctBhLCh1EfgNr4Wgg7j48nLemJEsNpwoBUJKcTCGko4GnPxJS4PoGt1714VzTYNhmBtBUAGti8KUFgV8ad5",
+            "dst": "kash-recovery-helpers-v1\n"
+          }
+        }
+      }
+    ],
+    "expect": "conflict; signedBoth names h3",
+    "h3": "did:kash:Dhg8AQHrQHwyBuaQAAXLGbhe5yFNBUgG1BTyVwUnY7xh"
+  }
+}

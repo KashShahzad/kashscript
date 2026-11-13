@@ -1,0 +1,15 @@
+{
+  "provenance": "Copied unmodified from Oreoasis 2.0/packages/sdk/vectors/work-record-v1.json (sha256 of that file: fb271d910792bfe74502c297bb3b7512264b8f6b677875fbc2952f813b99a6ec). Only the envelope and its public key are carried; the vector private key is not.",
+  "keyid": "acme/bench/doer-7",
+  "publicKeyHex": "e9551932cfa423a118275de3b563cd04c62cf10487dbfc3951ba14f612720f1a",
+  "envelope": {
+    "payloadType": "application/vnd.oreoasis.work-record+json",
+    "payload": "eyJhY3Rpb24iOnsic3VtbWFyeSI6IkZpdHRlZCBhbmQgc3F1YXJlZCB0aGUgY2FiaW5ldCBkb29yIiwidG9vbCI6ImJlbmNoIiwidHlwZSI6InRhc2suY29tcGxldGUifSwiYWN0b3IiOnsiYXV0aG9yaXR5Ijp7ImV4cGlyZXMiOiIyMDI3LTA2LTMwVDAwOjAwOjAwLjAwMFoiLCJraW5kIjoiY2VydGlmaWNhdGlvbiIsInJlZiI6IkNHLTIyOTEifSwiY2xhc3MiOiJwZXJzb24iLCJpZCI6ImFjbWUvYmVuY2gvZG9lci03In0sImlucHV0cyI6W3sibmFtZSI6ImpvYi1zaGVldCIsInNoYTI1NiI6IjM2YzFhMTJlNjI5YjM1OWU1Y2RkZDg5NzljM2RjMTU3MGZlYWY3MjVlNjdkZWI5YzhjYzlkZmE5YmMyOGI3ODAifV0sIm9yZyI6ImFjbWUiLCJvdXRwdXRzIjpbeyJuYW1lIjoicGhvdG8iLCJzaGEyNTYiOiI1ZTdiOGVmMzI4NWRkNWEyY2U2NTk2MGNlZDUxOWE5Y2U0YWQ2M2Y4ODJlMTM3ZTY0NTg3YTNjYjMzMzk2Y2IzIn1dLCJyZWNlaXB0SWQiOiIwMUpRVjNDVDBSMDAwMDAwMDAwMDBXUjAwMSIsInJ1bGUiOnsiaGFzaCI6IjViMDBlYzA2ZjcyNjQ0MzM4ZDVkZDNhMmJhOGJmYzgyYjc1MWQ4ZThkODMzNTYwZmQ5YjNkMTc3MWM1NWM1NWMiLCJpZCI6InNvcC1jYWJpbmV0LWZpdCIsInZlcnNpb24iOiIzIn0sInNoYXBlIjoiZm9sbG93ZWQiLCJzcGVjIjoib3Jlb2FzaXMud29yay1yZWNvcmQvMSIsInN0YXR1cyI6InN0b3BwZWQiLCJ0aW1lc3RhbXAiOiIyMDI2LTA5LTIzVDAwOjAwOjAwLjAwMFoifQ==",
+    "signatures": [
+      {
+        "keyid": "acme/bench/doer-7",
+        "sig": "Mf2hMFSO35KFnV9LK1BLewbc/LslHf1Vld1t5QqAcTseA3EHoQA3cVqPH/IY68Fyr7LS6q9CCBX2kkgObpRtBg=="
+      }
+    ]
+  }
+}

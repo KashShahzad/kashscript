@@ -1,0 +1,31 @@
+{
+  "format": "kashscript-ask/1",
+  "key": "ask:workshop-safety-check",
+  "version": 1,
+  "title": "Show the workshop followed its safety rule",
+  "who": {
+    "name": "A repair co-op (sample)",
+    "id": "did:kash:Eg5isBkQ8xd7Z134hxDRo1TnRn9s1XPfY7XovkiXNjas"
+  },
+  "needs": [
+    {
+      "id": "n1",
+      "predicate": "ancestry-check",
+      "withinDays": 30
+    }
+  ],
+  "why": "We insure repairs and only cover work done under the safety rule in force at the time.",
+  "answer": {
+    "form": "yes",
+    "restsOn": "issuers"
+  },
+  "goodFor": "The repair is covered by the co-op's insurance.",
+  "declining": "costs-only-goodFor",
+  "linking": "separate",
+  "published": {
+    "library": "https://asks.example.org/library",
+    "atUnix": 1789430400
+  },
+  "expiresAtUnix": 1804982400,
+  "state": "published"
+}

@@ -1,0 +1,8 @@
+cases.json is extracted from the DMN Technology Compatibility Kit
+(https://github.com/dmn-tck/tck), commit 1e349176e5ae689d924a2a2c7a8df25c220d8b07,
+licensed under the Apache License, Version 2.0 (LICENSE-ASL-2.0.txt in that
+repository). Only the expressions, inputs and expected values of literal-expression
+decisions in the folders listed in cases.json were taken; nothing was changed.
+
+Regenerate it with:
+  bun scripts/tck-extract.ts <checkout of dmn-tck/tck at that commit> 1e349176e5ae689d924a2a2c7a8df25c220d8b07

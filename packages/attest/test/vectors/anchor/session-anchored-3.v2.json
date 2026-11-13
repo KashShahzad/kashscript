@@ -1,0 +1,91 @@
+{
+  "formatVersion": "kashscript-session-receipt/1",
+  "sessionId": "ses_01JB8ANCHORTRANCHE00000",
+  "profile": "flow+process",
+  "parties": {
+    "establishment": "did:kash:9sLx3kJwT1u1BghkNaExFs4KVd1DqfwfHo7fJzeRowQN",
+    "person": "did:kash:6eSZxY1tzvJpjVdgnQTTSNy1MjXrSfjZnZBpGFjCEUa3"
+  },
+  "events": [
+    {
+      "payloadType": "application/vnd.indorania.session-event+json",
+      "payload": "eyJhdFVuaXgiOjE3OTAzMzA0MDAsImJvZHkiOnsiY29uc2VudCI6eyJhc2tzIjpbXSwicmVjb3JkcyI6WyJmbG93IiwicHJvY2VzcyJdfSwicGFydGllcyI6eyJlc3RhYmxpc2htZW50IjoiZGlkOmthc2g6OXNMeDNrSndUMXUxQmdoa05hRXhGczRLVmQxRHFmd2ZIbzdmSnplUm93UU4iLCJwZXJzb24iOiJkaWQ6a2FzaDo2ZVNaeFkxdHp2SnBqVmRnblFUVFNOeTFNalhyU2ZqWm5aQnBHRmpDRVVhMyJ9LCJwbGFjZSI6bnVsbCwicHJvZmlsZSI6ImZsb3crcHJvY2VzcyJ9LCJieSI6ImVzdGFibGlzaG1lbnQiLCJraW5kIjoib3BlbiIsInByZXZTaGEyNTYiOiIxZWRiZDUwMmQxZWJlN2RiMmRhMThhZGVkNGNhNDJkMDk5MDFlNTE5NjkwMTA3MDEwZGQ5YjMyZTkxODE2ZmZiIiwic2VxIjowLCJzZXNzaW9uSWQiOiJzZXNfMDFKQjhBTkNIT1JUUkFOQ0hFMDAwMDAiLCJzcGVjIjoiaW5kb3JhbmlhLnNlc3Npb24tZXZlbnQvMSJ9",
+      "signatures": [
+        {
+          "keyid": "did:kash:9sLx3kJwT1u1BghkNaExFs4KVd1DqfwfHo7fJzeRowQN",
+          "sig": "1Mr9GIskwLkQne5VRhLLlHKp+DdksbnR/4ftL1M9IzbgBC0KlKriFInb4FVIhXO8xwbhKFCqp6yt0NtzJwkjBg=="
+        },
+        {
+          "keyid": "did:kash:6eSZxY1tzvJpjVdgnQTTSNy1MjXrSfjZnZBpGFjCEUa3",
+          "sig": "3GpGUM3Tabk7rO16VswCnDboY7LUkaDLvqRA63BbZjlonn6wh3YXswC3JMpd81hGmRv2NifKu+jlxEgWegPHCA=="
+        }
+      ]
+    },
+    {
+      "payloadType": "application/vnd.indorania.session-event+json",
+      "payload": "eyJhdFVuaXgiOjE3OTAzMzA1MDAsImJvZHkiOnsibGluZUl0ZW1zIjpbImRjNWE5NDk3NGE0MDBlMzRiM2QwNjIyMjFlNmI4YWNlZTdlMGFiZmRkNjkyMDMzNWRhZWIzY2ZkNjBlNzNiZjMiXX0sImJ5IjoiZXN0YWJsaXNobWVudCIsImtpbmQiOiJmbG93IiwicHJldlNoYTI1NiI6ImYyN2JjZjUzNTU2Zjk3OGZiNDM3ZDQ2NzE0YzI0YjBlMTZiYWQ3Njg4MWZkMTg1MTcxNDRlNWRiYjkwZTUyNDAiLCJzZXEiOjEsInNlc3Npb25JZCI6InNlc18wMUpCOEFOQ0hPUlRSQU5DSEUwMDAwMCIsInNwZWMiOiJpbmRvcmFuaWEuc2Vzc2lvbi1ldmVudC8xIn0=",
+      "signatures": [
+        {
+          "keyid": "did:kash:9sLx3kJwT1u1BghkNaExFs4KVd1DqfwfHo7fJzeRowQN",
+          "sig": "oVub9vDq0aQO/S8O+s03ZDvP/XTAA45axUhbXHRf+fP7IiaVIlPmjW1GuuwVhwkAuLQ6/ezXBSrMTgdoHeqUCA=="
+        },
+        {
+          "keyid": "did:kash:6eSZxY1tzvJpjVdgnQTTSNy1MjXrSfjZnZBpGFjCEUa3",
+          "sig": "3+UMcNmNj5/YikbRJxhHctCwLK8hK3MUhddsa+jE4G2Tyy06uN7X6KqUt6c+IL+Xa3EH75iZvACNU3PnIs2PDg=="
+        }
+      ]
+    },
+    {
+      "payloadType": "application/vnd.indorania.session-event+json",
+      "payload": "eyJhdFVuaXgiOjE3OTAzMzA2MDAsImJvZHkiOnsicnVsZSI6eyJpZCI6InJ1bGUtZGVtby1ncmFudCIsInZlcnNpb24iOiIxIn0sInN0ZXAiOiJ0aGUgdHJhbmNoZSB3YXMgcmVsZWFzZWQifSwiYnkiOiJlc3RhYmxpc2htZW50Iiwia2luZCI6InByb2Nlc3MiLCJwcmV2U2hhMjU2IjoiZjY2NzdmY2MyMGIyNzQzYjFmYzJlYTliMTNiZmZmZmNmNGVmYWVjNjcwMzI0NGUyYjljMjMwZGJlNTIzYzY1NSIsInNlcSI6Miwic2Vzc2lvbklkIjoic2VzXzAxSkI4QU5DSE9SVFJBTkNIRTAwMDAwIiwic3BlYyI6ImluZG9yYW5pYS5zZXNzaW9uLWV2ZW50LzEifQ==",
+      "signatures": [
+        {
+          "keyid": "did:kash:9sLx3kJwT1u1BghkNaExFs4KVd1DqfwfHo7fJzeRowQN",
+          "sig": "tiWBG4C743+fKQL7X3CJVxBTejhYdX2hlDnsr8PClDLXjpBVQ5xN9ef+PR4zb/RvMe3iMfFymjoW3uKwnXBRDQ=="
+        },
+        {
+          "keyid": "did:kash:6eSZxY1tzvJpjVdgnQTTSNy1MjXrSfjZnZBpGFjCEUa3",
+          "sig": "wi11C2IRL+RHfzwHXbaVauJJJB1J94ANh7h5cGgLYmAbR8oMsijDEJK8JQGGDOrSHfEwQj5ocwokjRa4Y9YoBA=="
+        }
+      ]
+    },
+    {
+      "payloadType": "application/vnd.indorania.session-event+json",
+      "payload": "eyJhdFVuaXgiOjE3OTAzMzA2MTAsImJvZHkiOnsiZXhwaXJlc0F0VW5peCI6MTgyMTgzMDQwMCwibGluZUl0ZW1Db3VudCI6MSwidG90YWwiOnsiYW1vdW50IjoiNTAwMDAuMDAiLCJjdXJyZW5jeSI6IlBLUiJ9fSwiYnkiOiJlc3RhYmxpc2htZW50Iiwia2luZCI6ImNsb3NlIiwicHJldlNoYTI1NiI6IjY1ZmMzZmE1YjQ3ZmYzMjgyY2RkNGVkM2M5MTQ3NDVhOTk5NWM2OGQ3ZjgwMjM2ZTJjMjliNWFmYjhjOGU0ZGEiLCJzZXEiOjMsInNlc3Npb25JZCI6InNlc18wMUpCOEFOQ0hPUlRSQU5DSEUwMDAwMCIsInNwZWMiOiJpbmRvcmFuaWEuc2Vzc2lvbi1ldmVudC8xIn0=",
+      "signatures": [
+        {
+          "keyid": "did:kash:9sLx3kJwT1u1BghkNaExFs4KVd1DqfwfHo7fJzeRowQN",
+          "sig": "yBP5eZEAzEg+wTjZZ/eXnXMyw3G0UozXo1De5W4xW3y7E4E9zes4olqoeBNhhUCQAZkiX+DHqbKTUFQ1ghzUCA=="
+        },
+        {
+          "keyid": "did:kash:6eSZxY1tzvJpjVdgnQTTSNy1MjXrSfjZnZBpGFjCEUa3",
+          "sig": "l6gEpu2VcAqfPnUQ5xunMLGiWEbiK7M0cEqlPxWQ6AfSe2q5rK41VeNblGmWHE1bRWFkDfzPSEQTWy3s5GhbBA=="
+        }
+      ]
+    }
+  ],
+  "anchor": {
+    "formatVersion": "kashscript-session-anchor/2",
+    "headSha256": "e2d555fc3d59a39ddce345a60bbd4e77e1404058bf975478029484a98810d137",
+    "coversSeq": 3,
+    "root": "163b3d005a47482da1cdd1538b66ce04181f5b70f2945c97daa1637fe30ce46a",
+    "inclusion": {
+      "treeSize": 5,
+      "leafIndex": 3,
+      "path": [
+        "f2b593b5ab5e8f9357ccfde81d05c217bd620060db76ea001e49f9cca1fa3888",
+        "8c5a38dbee7dd92a90d01c00f7fe50514092beff7ffff7f8de497b883c09b335",
+        "a576a80c5d03ce634d6d9fad4279d1f33df6a0e1a936f707ef86aca1e1d16226"
+      ]
+    },
+    "witness": {
+      "backend": "none",
+      "receipt": {
+        "witnessed": false,
+        "reason": "practice — not witnessed by any public log",
+        "merkleRoot": "163b3d005a47482da1cdd1538b66ce04181f5b70f2945c97daa1637fe30ce46a"
+      },
+      "witnessedAt": null
+    }
+  }
+}

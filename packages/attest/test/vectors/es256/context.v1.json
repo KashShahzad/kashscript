@@ -1,0 +1,8 @@
+{
+  "nowSec": 1790820000,
+  "audience": "https://verifier.practice.invalid",
+  "nonce": "nonce-es256-5d1c",
+  "trustPublisher": "did:kash:Dnaep5pwy6by9mdJWGtn4L5pmqBZENLHc2DJwZLcF44XwCpY",
+  "holder": "did:kash:DnaewxKefhXsaxJfqJZP6FyiMLq5RqUapjrER2xFHymWgN9x",
+  "issuer": "did:kash:Dnaeg1miVQgm11gcjNZZdtyDDFuDk89pZ6dMAZZiN8CNgJ5P"
+}

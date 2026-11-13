@@ -1,0 +1,17 @@
+{
+  "note": "Directory slugs under packages/ that publish ONLY through .github/workflows/publish.yml (--trusted: OIDC trusted publishing, --provenance, an SBOM each, a Sigstore-signed release); the long-lived-token path in scripts/publish-to-npmjs.ts refuses every one. RW-2 (2026-11-09) listed all twelve open packages; AU-11 (2026-11-13) checks the list equals the open packages in the tree (scripts/check-public-tree.ts). The trusted publisher of each, on npmjs.com, names the PUBLIC repository KashShahzad/kashscript (exported from the private archive with no earlier history, ADR-0028), workflow publish.yml, environment npm-publish; each package's repository.url names it too. A real publish refuses from a private repository, because npm generates provenance only from a public one. See docs/publishing.md, SECURITY.md and docs/adr/0014-npm-publishing-path.md.",
+  "moved": [
+    "identity-core",
+    "lexicons",
+    "attest",
+    "identity-sdk",
+    "identity-zkp",
+    "identity-server",
+    "muffler",
+    "terms",
+    "predicate",
+    "wallet",
+    "whiffin",
+    "kash"
+  ]
+}

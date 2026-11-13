@@ -1,0 +1,117 @@
+{
+  "formatVersion": "kashscript-countersign/1",
+  "subject": {
+    "payloadType": "application/vnd.example.delivery+json",
+    "payload": "eyJhdCI6MTc5MDgxMjgwMCwicHJhY3RpY2UiOiJhIGRlbGl2ZXJ5LCBhY2NlcHRlZCJ9",
+    "signatures": [
+      {
+        "keyid": "did:kash:3gntmPd9guRsrds99GxbatkUMwxCmhHsTcH9XTh1JU89",
+        "sig": "1gCLbXLgPeSBWwK9oKMMqnlOKNz5YnxEcrl7i7+aCNlSZmantXkdm1ezdl+PpnrIwB7jMatpu+5+JfUDqVamAg=="
+      },
+      {
+        "keyid": "did:kash:DnaeycxexyZvDXwpYwdX7AKhTS6hnWSznTY7Nd12p2C7sz4Q",
+        "sig": "MEQCIAgxfDyMcszDw/lHEbzKqGsh+pM0KbUqeaedmPngS1opAiA0lKAPoda4U3DwJ9NOiUvEKvYD7Bh+c8eNtLJEnAKGEA=="
+      }
+    ]
+  },
+  "request": {
+    "header": {
+      "typ": "countersign-request",
+      "v": 1
+    },
+    "body": {
+      "requestId": "csr_55555555555555555555555555555555",
+      "requesterDid": "did:kash:3gntmPd9guRsrds99GxbatkUMwxCmhHsTcH9XTh1JU89",
+      "subjectPayloadType": "application/vnd.example.delivery+json",
+      "subjectDigestSha256": "a9f14e5d7e49fbcbd06831a76b6e795e01007f3abf1c5f2e3ac2dd81e38a5591",
+      "statement": "A practice delivery was accepted.",
+      "disclosures": [],
+      "nonceB64": "BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc=",
+      "issuedAtUnix": 1790812800,
+      "expiresAtUnix": 1792022400,
+      "relationshipContext": "",
+      "withdrawalFeed": null
+    },
+    "signature": {
+      "alg": "ed25519",
+      "sig": "zDeLjrKxeKkkycZX5hUxb7CB7wQfAatCJCkkuxP9jgJmvwuHwS7bgcigEcdUnqG9NCkNF7jq9TwU1yawbnnsfQBU",
+      "dst": "kash-countersign-request-v1\n"
+    }
+  },
+  "acceptances": [
+    {
+      "header": {
+        "typ": "countersign",
+        "v": 1
+      },
+      "body": {
+        "act": "countersign",
+        "requestId": "csr_55555555555555555555555555555555",
+        "requestDigestSha256": "f0593a08c0f074b6e76168de7b79fa31235b2b4baa3d0a3973c2c37901288324",
+        "subjectPayloadType": "application/vnd.example.delivery+json",
+        "subjectDigestSha256": "a9f14e5d7e49fbcbd06831a76b6e795e01007f3abf1c5f2e3ac2dd81e38a5591",
+        "countersignerDid": "did:kash:DnaeycxexyZvDXwpYwdX7AKhTS6hnWSznTY7Nd12p2C7sz4Q",
+        "keyCustody": "subject-generated",
+        "signedAtUnix": 1790813400
+      },
+      "signature": {
+        "alg": "es256",
+        "sig": "zZoRY2stDh7ftcR2gRTt7TsjMqcxdm86mpR5QToqYaWA6a5qMk5hovXP6DRs3QMQGX74Cf6egq6jBXWoQGRscJXD",
+        "dst": "kash-countersign-v1\n"
+      }
+    }
+  ],
+  "withdrawal": null,
+  "keyClaims": [
+    {
+      "header": {
+        "typ": "key-claim",
+        "v": 1
+      },
+      "body": {
+        "act": "claim-key",
+        "priorDid": "did:kash:3gntmPd9guRsrds99GxbatkUMwxCmhHsTcH9XTh1JU89",
+        "successorDid": "did:kash:DnaeiBvm9fWQAz9dMEaiNTUawGThYMdfS6SgeeWS2mQVB8XY",
+        "successorKeyCustody": "subject-generated",
+        "claimedAtUnix": 1790899200
+      },
+      "signatures": {
+        "prior": {
+          "alg": "ed25519",
+          "sig": "z5QQ6rC4zntDegvYmdMgKdTqGA6ZdbHuvKkxYaCbmvjC8pBSv6naUfFUvcyLn1ssa7gKsvn79ujunsB9b48ZHoPBv",
+          "dst": "kash-key-claim-v1\n"
+        },
+        "successor": {
+          "alg": "es256",
+          "sig": "z3PpiHJwH4Zza1n4uA1HVyrmTKCeHeEyKjGCygCzi26x33Qzb75ub9xHvx7Gic1NcTn4UeTJBTvZLFgghDuaoXR8V",
+          "dst": "kash-key-claim-v1\n"
+        }
+      }
+    },
+    {
+      "header": {
+        "typ": "key-claim",
+        "v": 1
+      },
+      "body": {
+        "act": "claim-key",
+        "priorDid": "did:kash:DnaeycxexyZvDXwpYwdX7AKhTS6hnWSznTY7Nd12p2C7sz4Q",
+        "successorDid": "did:kash:D3p22Kwp6BaQT4MpZaaZaNexWzZ75ybLwHPEvrLTGdTt",
+        "successorKeyCustody": "subject-generated",
+        "claimedAtUnix": 1790899200
+      },
+      "signatures": {
+        "prior": {
+          "alg": "es256",
+          "sig": "z4dDazTuH2LVY2sS8c1jkcFRyAy4cwyoxkEhDCNaxPTKv5dFsb4BVHTWEbgrJHCcUEbwvVBAagkFRpKHsqBTaxPuh",
+          "dst": "kash-key-claim-v1\n"
+        },
+        "successor": {
+          "alg": "ed25519",
+          "sig": "z4ApK99XYA9XVvbiRzTHiL965kxQsNzoqNAHzWLuywXeYY7iCPwVhgW9yjxLjUGDf8NEidycxX5ABqxQFSgYtCKcA",
+          "dst": "kash-key-claim-v1\n"
+        }
+      }
+    }
+  ]
+}

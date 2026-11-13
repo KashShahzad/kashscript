@@ -1,0 +1,33 @@
+# Gitleaks configuration (P6, ECOSYSTEM d84(f)) — the open protocol's public repository.
+#
+# This repository's history starts clean (AU-11), so no allowlist names a commit.
+# Run by .github/workflows/ci.yml on every push, and over the full history on
+# manual and weekly runs. Start from the default rules; every allowlist below is
+# narrow (a path or a rule) and says why. A finding that is not listed here is
+# real until proven otherwise: rotate it, then record the decision here.
+
+title = "KashScript open protocol gitleaks config"
+
+[extend]
+useDefault = true
+
+# Committed test vectors and fixtures: deterministic throwaway keys and signed
+# test tokens that the suites read back on purpose.
+[[allowlists]]
+description = "attest test vectors and fixtures"
+paths = ['''^packages/attest/test/(vectors|fixtures)/''']
+
+# Test code writes example secrets, keys and idempotency keys on purpose (a
+# redaction test feeds a fake key to the filter). Only the entropy-based and
+# token rules are relaxed here; the provider-specific rules (npm, GitHub, AWS,
+# Stripe, Anthropic, PEM private keys) still apply to test code.
+[[allowlists]]
+description = "example values in test code"
+targetRules = ["generic-api-key", "jwt"]
+paths = ['''^packages/(attest|wallet|whiffin)/test/''']
+
+# DST_KEY_CLAIM is a public domain-separation tag, not a credential.
+[[allowlists]]
+description = "attest domain-separation constant"
+targetRules = ["generic-api-key"]
+paths = ['''^packages/attest/src/(succession|countersign)\.ts$''']

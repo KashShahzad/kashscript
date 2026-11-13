@@ -1,0 +1,17 @@
+{
+  "header": {
+    "iss": "did:kash:DnaepBuvsQ8cpsWrVKw8fbpGpvPeNSjVPTWoq6cRqaYzBKVP",
+    "typ": "practice-record",
+    "v": 1
+  },
+  "body": {
+    "what": "a practice record, signed ES256",
+    "at": 1790812800
+  },
+  "signature": {
+    "alg": "es256",
+    "sig": "z2YFxuxV1ogffyfuxjHXUDyVyBoJa8GwMSEbCAZvQia49DbPNtFbSoN7bhVxy5doZi27tF7zswKimyFRbD9biooiL",
+    "dst": "kash-record-v1\n",
+    "kid": "did:kash:DnaepBuvsQ8cpsWrVKw8fbpGpvPeNSjVPTWoq6cRqaYzBKVP#sig-1"
+  }
+}
