@@ -19,7 +19,7 @@
     "@kashscript/lexicons": "workspace:*"
   },
   "peerDependencies": {
-    "@supabase/supabase-js": "^2.74.0"
+    "@supabase/supabase-js": "^2.119.0"
   },
   "peerDependenciesMeta": {
     "@supabase/supabase-js": {
@@ -40,9 +40,9 @@
     "clean":          "rm -rf dist .turbo"
   },
   "devDependencies": {
-    "@supabase/supabase-js": "^2.74.0",
+    "@supabase/supabase-js": "^2.119.0",
     "typescript": "^5.6.3",
-    "@types/bun": "^1.2.5"
+    "@types/bun": "^1.4.4"
   },
   "license": "Apache-2.0",
   "repository": { "type": "git", "url": "git+https://github.com/KashShahzad/kashscript.git", "directory": "packages/muffler" },
