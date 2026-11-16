@@ -17,7 +17,11 @@ import { cidForBytes } from "./cid";
 export type RefineErrorCode =
   | "UNKNOWN_COLLECTION"
   | "INVALID_RECORD"
-  | "INVALID_ATTRIBUTES";
+  | "INVALID_ATTRIBUTES"
+  /** The guard (`./guard`): the collection is not a public, organisation-authored record kind (d59). */
+  | "PERSON_RECORD"
+  /** The guard: the record carries a person's identity — an email, a phone number, a DID in words. */
+  | "PERSON_IDENTITY";
 
 /** A record that failed refinement. The indexer treats a `RefineError` as a
  *  skip-with-report (non-fatal); anything else aborts the message. */

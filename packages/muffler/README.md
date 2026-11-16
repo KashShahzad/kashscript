@@ -23,6 +23,14 @@ refine *rules*, `rm_*` projections, and Supabase schema stay venture-side. Full 
 - **`refine`** — the **`Refiner`** seam (`handles` + `refine` → validate · canonicalize · content-address).
   A venture supplies its own; `createLexiconRefiner` is the reference, backed by
   [`@kashscript/lexicons`](../lexicons) (`validateBody`).
+- **`guard`** — `createPublicRecordGuard()`: the `Refiner` for the open protocol's public records (ECOSYSTEM d59:
+  public, organisation-authored, never a person's). It admits only `PUBLIC_RECORD_LEXICONS` from
+  `@kashscript/lexicons/extensions/public` — the door's rule and adoption, places, listings, guides, the trust and
+  status lists — refuses any other `kash.*` collection with a report (`PERSON_RECORD`), refuses a record that carries
+  a person's identity in words (`PERSON_IDENTITY`) or breaks a cross-field rule (`INVALID_ATTRIBUTES`), and verifies
+  no signature (attest does). `composeRefiners(guard, yours)` indexes the public records beside your own `app.*`
+  records through one indexer. It cannot tell a person's key from an organisation's — a trust list says that
+  (KS-Q4). `specs/public-records.md`.
 - **`cid`** — `cidForBytes` (CIDv1, raw codec, sha2-256 over the JCS bytes) — the change-detection key.
 - **`identity`** — `mintOrgIdentity` + `createOrgBindingRecord`/`verifyOrgBindingRecord`: bind a sovereign
   `did:kash` to the atproto repo it publishes to, verifiable with **no server round-trip**.
@@ -42,6 +50,16 @@ const refiner = createLexiconRefiner({
   registry,                                     // a @kashscript/lexicons LexiconRegistry
   collectionToLexiconId: (c) => `${c}@1.0.0`,   // NSID -> lexicon id
 });
+await new MufflerIndexer({ firehose, sink: new MemoryRecordSink(), refiner }).run();
+```
+
+For the protocol's own public records, the refiner is the guard, and an index rebuilt from the records alone
+equals the original (d28 — `test/rebuild.test.ts`):
+
+```ts
+import { MufflerIndexer, MemoryRecordSink, createPublicRecordGuard, composeRefiners } from "@kashscript/muffler";
+
+const refiner = composeRefiners(createPublicRecordGuard(), yourOwnRefiner);
 await new MufflerIndexer({ firehose, sink: new MemoryRecordSink(), refiner }).run();
 ```
 

@@ -1,6 +1,15 @@
 # Kash Lexicon Framework — Developer Guide
 **`specs/lexicon-framework.md` — v1.0 · How to design, register, and evolve a lexicon**
 
+> **Update note (2026-11-16, KS-N1):** the open protocol's **public records** are extensions of this package —
+> `/extensions/door` (`kash.rule`, `kash.adoption`; KS-Q1, KS-Q1b), `/extensions/place` (`kash.place`,
+> `kash.place.pointer`, `kash.listing`, `kash.guide`) and `/extensions/lists` (`kash.trust-list`, `kash.status-list`),
+> listed together as `PUBLIC_RECORD_LEXICONS` in `/extensions/public` with the person-identity scan muffler's guard
+> runs. They are public, organisation-authored records, never a person's (ECOSYSTEM d59); the specification is
+> [`public-records.md`](public-records.md). **The `trade` extension is removed** (d59: trade-core is retired, 2026-10-07;
+> the package left the tree at AU-11): the examples below that imported `TRADE_EXTENSION` now show the public records,
+> and §11.3 is a record of what was. Shipped as lexicons@0.5.0-alpha.0 (not yet published).
+
 > **Update note (2026-05-28):** three new domain extensions shipped
 > (`/extensions/education`, `/extensions/civic`, `/extensions/community`)
 > totalling six new schemas (`kash.education.transcript`, `peer-review`,
@@ -77,13 +86,13 @@ export const LISTING_DEF: LexiconDef = {
 ```typescript
 // 5. Register + validate at app bootstrap
 import { LexiconRegistry, validateEvent, STANDARD_LIBRARY } from "@kashscript/lexicons";
-import { TRADE_EXTENSION } from "@kashscript/lexicons/extensions/trade";
+import { PUBLIC_RECORD_LEXICONS } from "@kashscript/lexicons/extensions/public";
 import { LISTING_DEF } from "./lexicons/listing";
 
 const registry = new LexiconRegistry()
-  .registerAll(STANDARD_LIBRARY)     // identity-tier lexicons (always available)
-  .registerAll(TRADE_EXTENSION)      // opt-in: trade domain
-  .register(LISTING_DEF);            // your app-specific lexicon
+  .registerAll(STANDARD_LIBRARY)          // identity-tier lexicons (always available)
+  .registerAll(PUBLIC_RECORD_LEXICONS)    // opt-in: the open protocol's public records (rules, places, listings, lists)
+  .register(LISTING_DEF);                 // your app-specific lexicon
 
 const result = validateEvent<ListingBody>(envelopeFromPds, registry);
 if (!result.ok) {
@@ -102,7 +111,7 @@ That's the entire authoring path. The rest of this guide explains the rules behi
 - **The Box** — framework primitives (`Schema`, `S` DSL, `KashEvent` envelope, `LexiconRegistry`, `validateEvent`, `getSchemaDefinition`). Knows nothing about any specific domain.
 - **The Content** — actual lexicon definitions. Ships in three flavours:
   - **Standard Library** — identity-tier lexicons (`kash.id.*`). Exported from the main package; every Kash actor needs them.
-  - **Extensions** — domain lexicons (`kash.social.*`, `kash.trade.*`). Subpath imports — `@kashscript/lexicons/extensions/social` and `/extensions/trade`. **Not auto-loaded.**
+  - **Extensions** — the open protocol's public records (`kash.rule`, `kash.place`, `kash.listing`, `kash.trust-list`, … — `@kashscript/lexicons/extensions/{door,place,lists,public}`) and the apps' vocabularies (`kash.social.*` — `/extensions/social`, and the others). **Not auto-loaded.**
   - **Third-party content** — your `app.*` lexicons (see §13).
 
 A consumer that wants a pure-identity product imports only the main package and registers `STANDARD_LIBRARY`. Domain content is opt-in. This is the load-bearing rule that makes the framework sellable as an agnostic infrastructure layer.
@@ -141,7 +150,10 @@ Reverse-DNS, all lowercase, ASCII letters, digits, hyphens. Segments separated b
 | Root            | Owner                            | Examples                                               |
 |-----------------|----------------------------------|--------------------------------------------------------|
 | `kash.id.*`     | `@kashscript/identity-core`           | `kash.id.profile`, `kash.id.audit`, `kash.id.preferences` |
-| `kash.trade.*`  | `@kashscript/trade-core`              | `kash.trade.listing`, `kash.trade.escrow`              |
+| `kash.rule`, `kash.adoption` | `@kashscript/lexicons` `/extensions/door` (meaning: `@kashscript/predicate`) | a door's rule, an anchor's adoption of it — public, organisation-authored (d59, d84(a), d85) |
+| `kash.place`, `kash.place.pointer`, `kash.listing`, `kash.guide` | `@kashscript/lexicons` `/extensions/place` | places by DID and slug (d60), their publisher's pointer, offerings with a published price, guides — public records ([`public-records.md`](public-records.md)) |
+| `kash.trust-list`, `kash.status-list` | `@kashscript/lexicons` `/extensions/lists` (signed and verified by `@kashscript/attest`) | the two lists as public records, mirrorable by any host (d62(d)5) |
+| ~~`kash.trade.*`~~ | ~~`@kashscript/trade-core`~~ | **Removed 2026-11-16 (KS-N1):** trade-core was retired by d59 and left the tree at AU-11; the extension is gone with it |
 | `kash.neuron.*` | `@kashscript/neuron`             | `kash.neuron.context-grant`, `kash.neuron.signal`      |
 | `kash.lexicon.*`| Meta — lexicons describing lexicons | `kash.lexicon.definition`                          |
 | `app.<name>.*`  | Third-party apps                 | `app.indusland.post`, `app.duedale.listing`            |
@@ -449,12 +461,12 @@ The registry is **empty by default**. Consumers explicitly load what they need.
 import { LexiconRegistry } from "@kashscript/lexicons";
 import { STANDARD_LIBRARY } from "@kashscript/lexicons";
 import { SOCIAL_EXTENSION } from "@kashscript/lexicons/extensions/social";
-import { TRADE_EXTENSION  } from "@kashscript/lexicons/extensions/trade";
+import { PUBLIC_RECORD_LEXICONS } from "@kashscript/lexicons/extensions/public";
 
 const registry = new LexiconRegistry()
-  .registerAll(STANDARD_LIBRARY)    // identity tier — kash.id.*
-  .registerAll(SOCIAL_EXTENSION)    // opt-in   — kash.social.*
-  .registerAll(TRADE_EXTENSION);    // opt-in   — kash.trade.*
+  .registerAll(STANDARD_LIBRARY)           // identity tier — kash.id.*
+  .registerAll(SOCIAL_EXTENSION)           // opt-in   — kash.social.*
+  .registerAll(PUBLIC_RECORD_LEXICONS);    // opt-in   — the open protocol's public records
 
 // Register a single custom lexicon by ID + schema
 registry.register("app.duedale.listing@1.0.0", LISTING_BODY_SCHEMA, {
@@ -656,19 +668,26 @@ import { SOCIAL_EXTENSION } from "@kashscript/lexicons/extensions/social";
 | `kash.social.interaction@1.0.0`      | Unified like / share / react event against a post.                 |
 | `kash.social.follow@1.0.0`           | Directed follow relationship between two DIDs.                     |
 
-### 11.3 Trade Extension — `kash.trade.*`
+### 11.3 Trade Extension — `kash.trade.*` — removed 2026-11-16 (KS-N1)
+
+The `trade` extension (`kash.trade.offer`, `kash.trade.receipt`, `kash.trade.status`; `@kashscript/lexicons/extensions/trade`) shipped with
+lexicons 0.1.x for the retired `@kashscript/trade-core`. ECOSYSTEM d59 retired trade-core (2026-10-07), AU-11 removed it from the tree
+(2026-11-13), and KS-N1 removed the extension: nothing in the repository imported it, and an offering with its published price is now
+`kash.listing@1.0.0` ([`public-records.md`](public-records.md) §2.3), without a rating and without a rail. Its text is in git history.
+`@kashscript/terms`' completion receipt keeps its own permanent `kash.trade.completion` header type; that string is not a lexicon.
+
+### 11.3b The public records — `kash.rule`, `kash.adoption`, `kash.place`, `kash.listing`, `kash.guide`, the two lists
 
 ```ts
-import { TRADE_EXTENSION } from "@kashscript/lexicons/extensions/trade";
+import { PUBLIC_RECORD_LEXICONS, findPersonIdentity } from "@kashscript/lexicons/extensions/public";
 ```
 
-| Lexicon                              | Purpose                                                            |
-|--------------------------------------|--------------------------------------------------------------------|
-| `kash.trade.offer@1.0.0`             | An item or service for sale — ISO 4217 price, optional location.   |
-| `kash.trade.receipt@1.0.0`           | Cryptographically signed completed transaction (dual-receipt).     |
-| `kash.trade.status@1.0.0`            | Lightweight logistics update bound to a receipt.                   |
+Public, organisation-authored records, never a person's (d59): each identified by its publisher's DID plus a path (d60), each a
+closed shape with a JSON Schema in `specs/schemas/`, each with the cross-field checks the DSL cannot write. `@kashscript/muffler`
+publishes them behind its guard, which admits this list only. [`public-records.md`](public-records.md) · [`rule.md`](rule.md) ·
+[`adoption.md`](adoption.md).
 
-### 11.4 Cross-Domain Interop
+### 11.4 Cross-Domain Interop (as written for the removed trade extension; the shape it describes is `RecordRef`, which stays)
 
 The single load-bearing interop point is the optional `linkedPost` field on `kash.trade.receipt`:
 

@@ -44,17 +44,13 @@
  */
 
 import type { LexiconDef } from "../registry";
-import { S, type ObjectSchema, type Schema } from "../schema";
+import { S, type ObjectSchema } from "../schema";
+import { DID, HEX64, ISO, PLACE_REF, RULE_REF, SLUG, TEXT } from "./refs";
 
-/* ── shared pieces ─────────────────────────────────────────────────── */
+/* ── shared pieces (the ids and the common strings are `./refs`, shared with the place and list records) ── */
 
-const DID = S.string({ format: "did-ks" });
-const ISO = S.string({ format: "iso8601" });
-const HEX64 = S.string({ pattern: /^[0-9a-f]{64}$/ });
-const SLUG = S.string({ pattern: /^[a-z0-9][a-z0-9-]{0,62}$/ });
 /** DCQL ids: alphanumerics, `_` and `-` (OpenID4VP 1.0 §6.1). */
 const DCQL_ID = S.string({ pattern: /^[A-Za-z0-9_-]{1,64}$/ });
-const TEXT = (max: number): Schema => S.string({ minLength: 1, maxLength: max });
 
 /** The DMN types a rule may give a value it reads — DMN's itemDefinition, in the FEEL subset. */
 export const DOOR_INPUT_TYPES = [
@@ -301,7 +297,7 @@ export const CRITERION_SCHEMA: ObjectSchema = S.object(
 
 export const KASH_RULE_BODY_SCHEMA: ObjectSchema = S.object(
   {
-    id: S.string({ pattern: /^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\/rule\/[a-z0-9][a-z0-9-]{0,62}$/ }),
+    id: RULE_REF,
     version: S.number({ integer: true, min: 1 }),
     author: DID,
     title: TEXT(160),
@@ -404,7 +400,6 @@ export interface RuleBody1_1 extends Omit<RuleBody, "parameters" | "criteria"> {
 }
 
 const VALUE = S.union(S.string({ maxLength: 256 }), S.number(), S.boolean());
-const PLACE_REF = S.string({ pattern: /^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\/place\/[a-z0-9][a-z0-9-]{0,62}$/ });
 const DURATION = S.string({ pattern: /^P(?=\d|T\d)(\d+Y)?(\d+M)?(\d+D)?(T(\d+H)?(\d+M)?(\d+(\.\d+)?S)?)?$/ });
 const RULE_ID = KASH_RULE_BODY_SCHEMA.properties.id!;
 const GIVEN_TEXT = TEXT(600);

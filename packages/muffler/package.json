@@ -1,7 +1,7 @@
 {
   "name": "@kashscript/muffler",
-  "version": "0.1.0",
-  "description": "The Data Protocol — a transport-agnostic, did:kash-bound atproto-style PDS client + firehose indexer with CID content-addressing, an injectable Refiner (lexicon validation via @kashscript/lexicons), and pluggable record sinks (in-memory + Supabase adapter). Apache-2.0 — portable hosting is free.",
+  "version": "0.2.0-alpha.0",
+  "description": "The Data Protocol — a transport-agnostic, did:kash-bound atproto-style PDS client + firehose indexer with CID content-addressing, an injectable Refiner (lexicon validation via @kashscript/lexicons), the guard that admits only public, organisation-authored records (ECOSYSTEM d59), and pluggable record sinks (in-memory + Supabase adapter). Apache-2.0 — portable hosting is free.",
   "type": "module",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -12,6 +12,7 @@
     "./client":        "./src/client.ts",
     "./indexer":       "./src/indexer.ts",
     "./refine":        "./src/refine.ts",
+    "./guard":         "./src/guard.ts",
     "./sink-supabase": "./src/sinks/supabase.ts"
   },
   "dependencies": {
@@ -40,6 +41,7 @@
     "clean":          "rm -rf dist .turbo"
   },
   "devDependencies": {
+    "@kashscript/attest": "workspace:*",
     "@supabase/supabase-js": "^2.74.0",
     "typescript": "^5.6.3",
     "@types/bun": "^1.2.5"

@@ -93,6 +93,7 @@ A DSSE envelope, `payloadType` **`application/vnd.kash.trust-list+json`**, signe
 - **Grants are exact tags.** Each issuer is listed for the registered DSTs it names, never a family — a `dsse-type` grant would let one member vouch for another's payloadType. An unregistered tag makes the list invalid.
 - **An unlisted issuer never renders as trusted.** Only a list whose publisher the verifier **pinned out of band** makes a record listed. attest ships no pin (no ecosystem publisher key exists until PL-7); the wallet ships with its publisher's DID. An unpinned list is reported as that publisher's word, and every record shows as unlisted.
 - **Honest limit:** offline, a verifier cannot know that a newer version exists. It uses the highest version presented, and a list outside its window lists nobody.
+- **2026-11-16 (KS-N1):** the same payload is a public record, `kash.trust-list@1.0.0` ([`public-records.md`](public-records.md) §2.5), with d91's three assertions written on it — identity (`class`, `grade`), standing (`listed · suspended · removed`), scope (`dsts`, `references`) — and the floor version. The format literal is unchanged, so this verifier reads such a list as it reads any other; it does not yet read the standing, so a suspended or removed entry ends its window (`STANDING_WINDOW`). Reading standing, class and scope here is KS-Q4's.
 
 ## 4. Status and revocation — the one check that may touch the network
 
@@ -124,6 +125,8 @@ The list time is the issuer's own claim. **`fetchStatusLists` is the only functi
 - **Finding, not changed here:** Indusland answers mark status per mark id (`/api/tehzeeb/marks/[id]`) — a per-record status URL, which this contract forbids for new work.
 
 Records already signed carry no entry. They cannot gain one without re-signing, which is forbidden, so their verdict says `no-status-entry`.
+
+**2026-11-16 (KS-N1):** the same payload is a public record, `kash.status-list@1.0.0` ([`public-records.md`](public-records.md) §2.6), as it is here; the record's CID is the hash of the bytes the envelope signs. d91's three terminal states — expired · superseded · withdrawn — are KS-Q4's, because this verifier must learn them too.
 
 ## 5. The DSTs
 

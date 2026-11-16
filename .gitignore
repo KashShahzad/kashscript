@@ -15,3 +15,6 @@ release/
 # committing them showed every verification run as modified files (KS-R8).
 .gradle/
 **/android/build/
+# Playwright's output from the site's axe run (FL-4).
+apps/kashscript/test-results/
+apps/kashscript/playwright-report/

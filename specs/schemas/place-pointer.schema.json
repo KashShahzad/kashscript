@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kashscript.com/lexicons/kash.place.pointer@1.0.0",
+  "title": "A place has a new publisher",
+  "description": "The old publisher's signed pointer from a place's old id to its new one under another publisher (d60(a)). The old record is never rewritten.",
+  "type": "object",
+  "properties": {
+    "from": {
+      "type": "string",
+      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
+    },
+    "publisher": {
+      "type": "string",
+      "format": "did-ks",
+      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}$"
+    },
+    "to": {
+      "type": "string",
+      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
+    },
+    "movedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "note": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 400
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "from",
+    "publisher",
+    "to",
+    "movedAt"
+  ]
+}

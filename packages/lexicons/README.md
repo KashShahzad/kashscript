@@ -10,7 +10,8 @@ A *lexicon* is the Kash equivalent of an AT-Protocol record schema: a
 versioned, NSID-addressed JSON shape that describes what valid `kash.*`
 records look like. This package gives you the primitives to **define**,
 **register**, and **validate** lexicons — but ships zero domain content
-out of the box. The domain extensions (`social`, `trade`, `zkp`,
+out of the box. The open protocol's public records (`door`, `place`, `lists`,
+listed together in `public`) and the apps' vocabularies (`social`, `zkp`,
 `education`, `civic`, `community`) are explicit subpath imports.
 
 ---
@@ -27,10 +28,12 @@ out of the box. The domain extensions (`social`, `trade`, `zkp`,
 | `@kashscript/lexicons/json-schema`     | Export lexicons as JSON Schema (draft 2020-12)       |
 | `@kashscript/lexicons/semver`          | Strict semver for lexicon evolution                  |
 | `@kashscript/lexicons/extensions/social` | The `kash.social.*` vocabulary                     |
-| `@kashscript/lexicons/extensions/trade`  | The `kash.trade.*` vocabulary                      |
 | `@kashscript/lexicons/extensions/zkp`    | The `kash.zkp.*` vocabulary                        |
 | `@kashscript/lexicons/extensions/{education,civic,community}` | Further opt-in vocabularies |
 | `@kashscript/lexicons/extensions/door` | `kash.rule@1.0.0` and `kash.rule@1.1.0` (a door's published rule; 1.1.0 adds its address, drafts, parameter bounds and each criterion's subject) and `kash.adoption@1.0.0` (an anchor adopts a rule with local values within its bounds). All three are public, organisation-authored records (d59). The decision receipt is the person's record, so its shape lives in `@kashscript/predicate` since `0.3.0-alpha.0`. Meaning is checked by `@kashscript/predicate`; see `specs/rule.md`, `specs/adoption.md` and `specs/decision.md` |
+| `@kashscript/lexicons/extensions/place` | `kash.place@1.0.0` (a place by its publisher's DID and a slug — no coordinate, d60), `kash.place.pointer@1.0.0` (a place's new publisher), `kash.listing@1.0.0` (an offering with its published price — no rating) and `kash.guide@1.0.0` (a text about places). Public, organisation-authored records (d59), with the cross-field checks the shape cannot write (`placeFaults`, …). See `specs/public-records.md` |
+| `@kashscript/lexicons/extensions/lists` | `kash.trust-list@1.0.0` — attest's `kashscript-trust-list/1` payload in clear, with d91's three assertions (identity · standing · scope) and issuer classes — and `kash.status-list@1.0.0`, attest's `kashscript-status-list/1`. The record's CID is the hash of the bytes attest signs |
+| `@kashscript/lexicons/extensions/public` | `PUBLIC_RECORD_LEXICONS` — every public record kind in one list (the door's, the places', the lists'), `publicRecordFaults`, and `findPersonIdentity`, the scan muffler's guard runs: an email, a phone number or a DID in words is refused |
 
 ---
 
@@ -71,4 +74,4 @@ if (eventResult.ok) console.log("valid:", eventResult.value.header.lexicon);
 
 ## License
 
-Apache-2.0. Also covered by SSLA v1.0 Schedule A (Permissive). See [LICENSE](./LICENSE).
+Apache-2.0. See [LICENSE](./LICENSE).

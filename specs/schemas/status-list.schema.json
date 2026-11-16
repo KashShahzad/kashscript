@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kashscript.com/lexicons/kash.status-list@1.0.0",
+  "title": "A status list",
+  "description": "An issuer's revocation or suspension bitstring — attest's kashscript-status-list/1 payload in clear, aligned to W3C Bitstring Status List v1.0: the list's URL, its issuer, purpose, the encoded bitstring, and the time the issuer says it was true. Signed by its issuer as DSSE; any host may mirror it.",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "kashscript-status-list/1"
+    },
+    "type": {
+      "const": "BitstringStatusList"
+    },
+    "id": {
+      "type": "string",
+      "maxLength": 2048,
+      "pattern": "^https:\\/\\/[^\\s]+$"
+    },
+    "issuer": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "statusPurpose": {
+      "enum": [
+        "revocation",
+        "suspension"
+      ]
+    },
+    "encodedList": {
+      "type": "string",
+      "pattern": "^u[A-Za-z0-9_-]+$"
+    },
+    "issuedAtUnix": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "validUntilUnix": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "const": null
+        }
+      ]
+    },
+    "ttl": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "practice": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "type",
+    "id",
+    "issuer",
+    "statusPurpose",
+    "encodedList",
+    "issuedAtUnix",
+    "validUntilUnix"
+  ]
+}

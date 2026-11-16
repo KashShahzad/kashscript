@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kashscript.com/lexicons/kash.trust-list@1.0.0",
+  "title": "A trust list",
+  "description": "A publisher's versioned list of issuers — attest's kashscript-trust-list/1 payload in clear — with d91's three assertions: identity (the key, its class and grade), standing (listed, suspended, removed) and scope (the exact tags and the references it may attest against), each entry bound to a floor version. Signed by its publisher as DSSE; any host may mirror it.",
+  "type": "object",
+  "properties": {
+    "format": {
+      "const": "kashscript-trust-list/1"
+    },
+    "listId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "publisher": {
+      "type": "string",
+      "format": "did-ks",
+      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}$"
+    },
+    "issuedAtUnix": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "validFromUnix": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "validUntilUnix": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "floor": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "version"
+      ]
+    },
+    "issuers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "issuerId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "keys": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "keyid": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "alg": {
+                  "enum": [
+                    "Ed25519",
+                    "ES256"
+                  ]
+                },
+                "publicKeyHex": {
+                  "type": "string",
+                  "pattern": "^(?:[0-9a-f]{64}|0[23][0-9a-f]{64})$"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "keyid",
+                "alg",
+                "publicKeyHex"
+              ]
+            },
+            "maxItems": 16
+          },
+          "dsts": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "minItems": 1,
+            "maxItems": 64
+          },
+          "validFromUnix": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "validUntilUnix": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "class": {
+            "enum": [
+              "self-issuer",
+              "counterparty",
+              "assessor",
+              "accredited-body",
+              "insurer"
+            ]
+          },
+          "standing": {
+            "enum": [
+              "listed",
+              "suspended",
+              "removed"
+            ]
+          },
+          "grade": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 3
+          },
+          "references": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "hash": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "id"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 64
+          },
+          "floor": {
+            "type": "object",
+            "properties": {
+              "version": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "hash": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "version"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "issuerId",
+          "label",
+          "keys",
+          "dsts",
+          "validFromUnix",
+          "validUntilUnix",
+          "class",
+          "standing"
+        ]
+      },
+      "maxItems": 4096
+    },
+    "practice": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "format",
+    "listId",
+    "version",
+    "publisher",
+    "issuedAtUnix",
+    "validFromUnix",
+    "validUntilUnix",
+    "floor",
+    "issuers"
+  ]
+}

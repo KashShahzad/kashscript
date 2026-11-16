@@ -14,6 +14,7 @@
 
 export * from "./cid";
 export * from "./refine";
+export * from "./guard";
 export * from "./identity";
 export * from "./client";
 export * from "./indexer";

@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kashscript.com/lexicons/kash.guide@1.0.0",
+  "title": "A guide",
+  "description": "A publisher's text about places, in sections, with the places and public records it cites and chosen bylines for its makers. Public, organisation-authored; never a person's identifier.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/guide\\/[a-z0-9][a-z0-9-]{0,62}$"
+    },
+    "publisher": {
+      "type": "string",
+      "format": "did-ks",
+      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1200
+    },
+    "languages": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "bcp47-language-tag",
+        "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"
+      },
+      "minItems": 1,
+      "maxItems": 16
+    },
+    "places": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
+      },
+      "minItems": 1,
+      "maxItems": 64
+    },
+    "cites": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/(?:place|listing|guide|rule|adoption)\\/[a-z0-9][a-z0-9-]{0,62}$"
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "id"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 64
+    },
+    "sections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "heading": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 20000
+          },
+          "media": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "cid": {
+                  "type": "string",
+                  "format": "cid",
+                  "pattern": "^bafy[a-z2-7]{52,}$"
+                },
+                "mimeType": {
+                  "type": "string",
+                  "pattern": "^(?:image|audio|video)\\/[a-z0-9.+-]+$"
+                },
+                "alt": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 420
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "cid",
+                "mimeType"
+              ]
+            },
+            "maxItems": 12
+          },
+          "places": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
+            },
+            "minItems": 1,
+            "maxItems": 16
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "heading",
+          "text"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 64
+    },
+    "credits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "role": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 40,
+            "pattern": "^(?:(?!did:|@)[\\s\\S])*$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "pattern": "^(?:(?!did:|@)[\\s\\S])*$"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "role",
+          "name"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 16
+    },
+    "version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "dates": {
+      "type": "object",
+      "properties": {
+        "published": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "published"
+      ]
+    },
+    "practice": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "publisher",
+    "title",
+    "languages",
+    "places",
+    "sections",
+    "version",
+    "dates"
+  ]
+}
