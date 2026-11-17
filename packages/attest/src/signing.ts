@@ -83,6 +83,86 @@ export function joseAlgOf(type: KashKeyType): "EdDSA" | "ES256" {
   return type === "P-256" ? "ES256" : "EdDSA";
 }
 
+/* ── the signature profiles: the one allow-list (KS-Q4; d84 P6's crypto agility) ── */
+
+export type SignatureProfileId = "Ed25519" | "ES256" | "ML-DSA-65";
+
+/**
+ * One way of signing, named in full in every family that carries it. **The
+ * live rows are the whole allow-list**: a JWS header, a Kash-Event `alg` or a
+ * key type that no live row names is refused before any key is touched —
+ * `none`, an HMAC, RSA, secp256k1, anything. A post-quantum signature joins as
+ * a row: designed here, not built (ADR-0030).
+ */
+export interface SignatureProfile {
+  readonly id: SignatureProfileId;
+  /** `live` verifies today; `reserved` is named so nobody reuses the name, and verifies nothing. */
+  readonly status: "live" | "reserved";
+  /** The key type a `did:kash` declares (identity-core), or null while none is assigned. */
+  readonly keyType: KashKeyType | null;
+  readonly standard: string;
+  /** The JOSE `alg` — RFC 8037 and RFC 7518; for a reserved row, the name in the IETF's draft. */
+  readonly jose: string;
+  /** The Kash-Event `signature.alg` (identity-protocol-v1 §5.5). */
+  readonly kashEvent: string;
+  /** How the signature is written in each family. */
+  readonly encoding: { readonly jws: string; readonly dsse: string; readonly kashEvent: string };
+  readonly hash: string;
+  readonly note: string;
+}
+
+export const SIGNATURE_PROFILES: readonly SignatureProfile[] = [
+  {
+    id: "Ed25519",
+    status: "live",
+    keyType: "Ed25519",
+    standard: "RFC 8032 (PureEdDSA), with the acceptance rule identity-core pins against Wycheproof (AU-3)",
+    jose: "EdDSA",
+    kashEvent: "ed25519",
+    encoding: { jws: "raw, 64 bytes", dsse: "raw, 64 bytes", kashEvent: "raw, 64 bytes, multibase by default" },
+    hash: "SHA-512, inside the algorithm",
+    note: "the default for organisations, relationship keys and the log's checkpoints",
+  },
+  {
+    id: "ES256",
+    status: "live",
+    keyType: "P-256",
+    standard: "ECDSA over P-256 with SHA-256 (FIPS 186-5; RFC 7518 §3.4), low-S only",
+    jose: "ES256",
+    kashEvent: "es256",
+    encoding: { jws: "raw r ‖ s, 64 bytes, low-S", dsse: "strict DER, low-S", kashEvent: "raw r ‖ s, low-S" },
+    hash: "SHA-256",
+    note: "a phone's secure chip signs it (PL-2, ADR-0020); the key decides, never the header",
+  },
+  {
+    id: "ML-DSA-65",
+    status: "reserved",
+    keyType: null,
+    standard: "FIPS 204 (ML-DSA), security category 3",
+    jose: "ML-DSA-65",
+    kashEvent: "ml-dsa-65",
+    encoding: { jws: "not assigned", dsse: "not assigned", kashEvent: "not assigned" },
+    hash: "SHAKE256, inside the algorithm",
+    note: "designed, not built: it becomes a live row — a key type in identity-core, a did:kash prefix, the IETF's registered JOSE name — when a wallet and the platforms' Web Crypto can verify it; a hybrid is a profile over two live rows, both required (d84 P6's long horizon; ADR-0030)",
+  },
+];
+
+/** The JOSE `alg` values any verifier here accepts: the live rows, and nothing else. */
+export const ALLOWED_JOSE_ALGS: readonly ("EdDSA" | "ES256")[] = SIGNATURE_PROFILES.filter((p) => p.status === "live").map((p) => p.jose as "EdDSA" | "ES256");
+
+/** The Kash-Event `alg` values any verifier here accepts. */
+export const ALLOWED_EVENT_ALGS: readonly ("ed25519" | "es256")[] = SIGNATURE_PROFILES.filter((p) => p.status === "live").map((p) => p.kashEvent as "ed25519" | "es256");
+
+/** True only for an `alg` a live profile names. `none`, `HS256`, `RS256`, `ES256K`, a reserved name and every non-string are false. */
+export function isAllowedJoseAlg(alg: unknown): alg is "EdDSA" | "ES256" {
+  return typeof alg === "string" && (ALLOWED_JOSE_ALGS as readonly string[]).includes(alg);
+}
+
+/** The live profile for a key type, or null. */
+export function profileOfKey(type: KashKeyType): SignatureProfile | null {
+  return SIGNATURE_PROFILES.find((p) => p.status === "live" && p.keyType === type) ?? null;
+}
+
 /**
  * An Ed25519 signature from a key held elsewhere, checked before it is used: a
  * key service that answers with another key — a rotation, a wrong reference —

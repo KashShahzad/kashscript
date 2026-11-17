@@ -12,7 +12,7 @@
 
 import { deriveDidForKey, p256Jwk, p256PublicKeyOfJwk, type EcJwk } from "@kashscript/identity-core";
 import { base64UrlToBytes, bytesToBase64Url } from "../ed25519";
-import { joseAlgOf, signBytes, signerKey, typedKey, verifyBytes, type KashPublicKey, type RawSigner, type VerifyKey } from "../signing";
+import { isAllowedJoseAlg, joseAlgOf, signBytes, signerKey, typedKey, verifyBytes, type KashPublicKey, type RawSigner, type VerifyKey } from "../signing";
 
 /** An Ed25519 public key as a JWK (RFC 8037). */
 export interface OkpJwk {
@@ -99,11 +99,15 @@ export function decodeJws(compact: string): DecodedJws | null {
 }
 
 /**
- * True only when the header's `alg` is the one `key` implies and the signature
- * verifies over the received segments. A bare `Uint8Array` key is Ed25519, as
- * before PL-2.
+ * True only when the header's `alg` is on the allow-list (`ALLOWED_JOSE_ALGS`,
+ * the live signature profiles), is the one `key` implies, and the signature
+ * verifies over the received segments. Two gates, in that order: an `alg` no
+ * live profile names — `none`, an HMAC, RSA — is refused before the key is
+ * looked at, so a public key can never be read as a shared secret. A bare
+ * `Uint8Array` key is Ed25519, as before PL-2.
  */
 export async function verifyJws(jws: DecodedJws, key: VerifyKey): Promise<boolean> {
+  if (!isAllowedJoseAlg(jws.header.alg)) return false;
   const k = typedKey(key);
   if (jws.header.alg !== joseAlgOf(k.type)) return false;
   let sig: Uint8Array;

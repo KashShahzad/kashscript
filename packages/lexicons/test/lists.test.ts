@@ -7,11 +7,16 @@
 import { describe, expect, test } from "bun:test";
 import { validateBody } from "../src/engine";
 import { LexiconRegistry } from "../src/registry";
+import { validate } from "../src/schema";
 import {
+  KASH_STATUS_LIST_1_1_BODY_SCHEMA,
+  KASH_STATUS_LIST_1_1_ID,
+  KASH_STATUS_LIST_BODY_SCHEMA,
   KASH_STATUS_LIST_ID,
   KASH_TRUST_LIST_ID,
   LIST_LEXICONS,
   STATUS_LIST_FORMAT,
+  STATUS_PURPOSES,
   TRUST_LIST_FORMAT,
   statusListFaults,
   trustListFaults,
@@ -131,10 +136,21 @@ describe("kash.status-list@1.0.0 — attest's payload, in clear", () => {
     expect(statusListFaults(status)).toEqual([]);
     expect(STATUS_LIST_FORMAT).toBe("kashscript-status-list/1");
   });
-  test("its purposes are the two attest reads today; d91's three terminal states wait for KS-Q4", () => {
+  test("1.0.0 admits revocation and suspension, as published; KS-Q4's 1.1.0 adds supersession and withdrawal, and nothing else", () => {
     expect(ok(KASH_STATUS_LIST_ID, { ...status, statusPurpose: "suspension" })).toEqual([]);
-    for (const purpose of ["withdrawn", "superseded", "expired", "refresh"]) {
-      expect(refused(KASH_STATUS_LIST_ID, { ...status, statusPurpose: purpose })).toBe(true);
+    // The registry resolves forward-compatibly (a 1.0.0 record is checked under the newest 1.x), so 1.0.0's own shape is read directly —
+    // as a reader still on lexicons 0.5.0 reads it: it refuses the two new purposes, never mis-reads them.
+    for (const purpose of ["supersession", "withdrawal", "withdrawn", "superseded", "expired", "refresh"]) {
+      expect(validate(KASH_STATUS_LIST_BODY_SCHEMA, { ...status, statusPurpose: purpose }).ok).toBe(false);
+    }
+    expect(validate(KASH_STATUS_LIST_BODY_SCHEMA, { ...status, statusPurpose: "revocation" }).ok).toBe(true);
+    // Every 1.0.0 body is a 1.1.0 body.
+    expect(validate(KASH_STATUS_LIST_1_1_BODY_SCHEMA, status).ok).toBe(true);
+    expect(STATUS_PURPOSES).toEqual(["revocation", "suspension", "supersession", "withdrawal"]);
+    for (const purpose of STATUS_PURPOSES) expect(ok(KASH_STATUS_LIST_1_1_ID, { ...status, statusPurpose: purpose })).toEqual([]);
+    // Expiry is the clock's; W3C's refresh does not invalidate, so neither is a purpose here.
+    for (const purpose of ["withdrawn", "superseded", "expired", "refresh", "message"]) {
+      expect(refused(KASH_STATUS_LIST_1_1_ID, { ...status, statusPurpose: purpose })).toBe(true);
     }
   });
   test("the list is served over https, the bitstring is multibase base64url, and validUntil is a time or null", () => {

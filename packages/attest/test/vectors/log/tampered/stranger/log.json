@@ -1,0 +1,11 @@
+{
+  "format": "kashscript-log/1",
+  "logId": "did:kash:8kCvT4dL7i2iX33ub1YCAJSCdyvHD1WrKPpvoBH3Wbd5/log/sample",
+  "key": "did:kash:8kCvT4dL7i2iX33ub1YCAJSCdyvHD1WrKPpvoBH3Wbd5",
+  "leaf": "kash-log-entry-v1\n",
+  "checkpointType": "application/vnd.kash.log-checkpoint+json",
+  "maxBatchDelaySec": 86400,
+  "startedAtUnix": 1794945059,
+  "origin": null,
+  "note": "An append-only log of issuers and lists, and of attestations by salted hash. It never holds a person, a presentation or a record's content. Its checkpoints' times are the log's own claims; a public witness over each checkpoint's payload hash is what makes a time stand. Anyone may mirror these files and rebuild the tree from entries/ alone. Without gossip between mirrors, a checker shown one view cannot see a split view it was not shown."
+}

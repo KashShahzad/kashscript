@@ -64,10 +64,13 @@ import {
   canonicalizeBytes,
   deriveDid,
   generateKeyPair,
-  signEvent,
+  signEventWith,
+  type EventSigner,
   type KashKeyPair,
 } from "@kashscript/identity-core";
 import {
+  COUNTERSIGN_MAX_TTL_SECONDS as ATTEST_COUNTERSIGN_MAX_TTL_SECONDS,
+  signBytes,
   DST_COUNTERSIGN_ACCEPTANCE,
   DST_COUNTERSIGN_REQUEST,
   DST_COUNTERSIGN_WITHDRAWAL,
@@ -103,8 +106,9 @@ export const COUNTERSIGN_DEFAULT_TTL_SECONDS = 14 * 24 * 60 * 60;
 
 /** Hard ceiling on a request window: 90 days. A request that cannot be answered
  *  in a quarter is a standing claim on somebody, which is what an expiry is for
- *  preventing. */
-export const COUNTERSIGN_MAX_TTL_SECONDS = 90 * 24 * 60 * 60;
+ *  preventing. The number is attest's (KS-Q4): its verifier refuses a longer
+ *  window from any implementation, so the ceiling is enforced where it is checked. */
+export const COUNTERSIGN_MAX_TTL_SECONDS: number = ATTEST_COUNTERSIGN_MAX_TTL_SECONDS;
 
 /** Capability-secret size. 16 bytes = 128 bits, and 26 base32 characters — the
  *  longest string a person can reasonably read down a phone line. */
@@ -327,6 +331,53 @@ export function adoptDelegatedSigningKey(input: {
   };
 }
 
+/* ── Keys held in a key service (KS-Q4; Indorania ADR-0003's first finding) ── */
+
+/**
+ * A relationship signing key that lives in a key service: the service signs
+ * bytes on request and never hands over the seed. Every signature made through
+ * it is checked under `publicKey` before it is used, so a service that answers
+ * with another key fails here, not in a stranger's verifier.
+ */
+export interface ExternalRelationshipSigningKey {
+  readonly did: Did;
+  readonly publicKey: Uint8Array;
+  readonly custody: KeyCustody;
+  /** Ed25519 over exactly these bytes; 64 bytes back. */
+  readonly sign: (bytes: Uint8Array) => Promise<Uint8Array>;
+}
+
+/** Either form a countersigner's key may take: a seed the caller holds, or a key service. */
+export type CountersignSigningKey = RelationshipSigningKey | ExternalRelationshipSigningKey;
+
+function isSeedKey(k: CountersignSigningKey): k is RelationshipSigningKey {
+  return (k as RelationshipSigningKey).privateKey instanceof Uint8Array;
+}
+
+function isUsableKey(k: unknown): k is CountersignSigningKey {
+  if (typeof k !== "object" || k === null) return false;
+  const c = k as { privateKey?: unknown; sign?: unknown; publicKey?: unknown; did?: unknown };
+  return typeof c.did === "string" && c.publicKey instanceof Uint8Array && (c.privateKey instanceof Uint8Array || typeof c.sign === "function");
+}
+
+/** The Kash-Event signer a key gives: its seed, or its service. */
+function eventSignerOf(k: CountersignSigningKey): EventSigner {
+  return isSeedKey(k) ? { alg: "ed25519", privateKey: k.privateKey } : { alg: "ed25519", publicKey: k.publicKey, sign: k.sign };
+}
+
+/** A raw Ed25519 signature over `message` (the DSSE countersignature): by seed, or by service, checked either way. */
+function rawSignatureBy(k: CountersignSigningKey, message: Uint8Array): Promise<Uint8Array> {
+  return isSeedKey(k) ? signRaw(message, k.privateKey, k.publicKey) : signBytes({ alg: "Ed25519", publicKey: k.publicKey, sign: k.sign }, message, "raw");
+}
+
+/** The requester's signer: exactly one of a seed or an `EventSigner` (a key service, or hardware). */
+function requesterSignerOf(input: { readonly requesterPrivateKey?: Uint8Array; readonly requesterSigner?: EventSigner }): EventSigner {
+  const hasSeed = input.requesterPrivateKey instanceof Uint8Array;
+  const hasSigner = typeof input.requesterSigner === "object" && input.requesterSigner !== null;
+  if (hasSeed === hasSigner) throw new KashscriptIdentityMalformedPayloadError("requesterPrivateKey");
+  return hasSeed ? { alg: "ed25519", privateKey: input.requesterPrivateKey! } : input.requesterSigner!;
+}
+
 /* ── Creating a request ────────────────────────────────────────────────── */
 
 export interface CreateCountersignRequestInput {
@@ -334,8 +385,10 @@ export interface CreateCountersignRequestInput {
   readonly subject: DsseEnvelope;
   /** The holder's DID. Its key must be the one signing this request. */
   readonly requesterDid: Did;
-  /** SECRET. The holder's 32-byte Ed25519 seed. */
-  readonly requesterPrivateKey: Uint8Array;
+  /** SECRET. The holder's 32-byte Ed25519 seed — or give `requesterSigner` instead, never both. */
+  readonly requesterPrivateKey?: Uint8Array;
+  /** The holder's key held elsewhere: a key service's `sign(bytes)` (KS-Q4), or a hardware key. */
+  readonly requesterSigner?: EventSigner;
   /** One plain sentence. This is the whole of what the counterparty is told
    *  they are signing, so it carries the meaning, not a reference to it. */
   readonly statement: string;
@@ -393,9 +446,7 @@ export async function createCountersignRequest(
   if (typeof input.requesterDid !== "string" || input.requesterDid.length === 0) {
     throw new KashscriptIdentityMalformedPayloadError("requesterDid");
   }
-  if (!(input.requesterPrivateKey instanceof Uint8Array)) {
-    throw new KashscriptIdentityMalformedPayloadError("requesterPrivateKey");
-  }
+  const requester = requesterSignerOf(input);
   const subject = input.subject;
   if (
     typeof subject?.payloadType !== "string" ||
@@ -430,9 +481,7 @@ export async function createCountersignRequest(
     withdrawalFeed: input.withdrawalFeed ?? null,
   };
   const header = { typ: "countersign-request", v: 1 } as const;
-  const signature = await signEvent(header, body, input.requesterPrivateKey, {
-    dst: DST_COUNTERSIGN_REQUEST,
-  });
+  const signature = await signEventWith(header, body, requester, { dst: DST_COUNTERSIGN_REQUEST });
   const request: SignedCountersignRequest = { header, body, signature };
 
   const capabilitySecretB32 = encodeCrockford32(capabilitySecret);
@@ -480,9 +529,10 @@ export interface AcceptCountersignRequestInput {
   readonly request: SignedCountersignRequest;
   /** The envelope the request describes, as the holder signed it. */
   readonly subject: DsseEnvelope;
-  /** The counterparty's own key. This function never mints one — decision 27
-   *  rule 1 is a property of where the key came from, not of what we promise. */
-  readonly signingKey: RelationshipSigningKey;
+  /** The counterparty's own key — a seed, or a key service that signs bytes
+   *  (KS-Q4). This function never mints one — decision 27 rule 1 is a property
+   *  of where the key came from, not of what we promise. */
+  readonly signingKey: CountersignSigningKey;
   readonly nowSec?: UnixSeconds;
 }
 
@@ -525,7 +575,7 @@ export async function acceptCountersignRequest(
   if (typeof subject?.payload !== "string" || typeof subject.payloadType !== "string") {
     throw new KashscriptIdentityMalformedPayloadError("subject");
   }
-  if (!(signingKey?.privateKey instanceof Uint8Array)) {
+  if (!isUsableKey(signingKey)) {
     throw new KashscriptIdentityMalformedPayloadError("signingKey");
   }
 
@@ -546,12 +596,8 @@ export async function acceptCountersignRequest(
     return { ok: false, reason: "ALREADY_COUNTERSIGNED" };
   }
 
-  // 1. The countersignature — the same bytes, a different key.
-  const countersignature = await signRaw(
-    pae(subject.payloadType, payloadBytes),
-    signingKey.privateKey,
-    signingKey.publicKey,
-  );
+  // 1. The countersignature — the same bytes, a different key (by seed, or by a key service, checked either way).
+  const countersignature = await rawSignatureBy(signingKey, pae(subject.payloadType, payloadBytes));
   const envelope: DsseEnvelope = {
     payloadType: subject.payloadType,
     payload: subject.payload,
@@ -573,9 +619,7 @@ export async function acceptCountersignRequest(
     signedAtUnix: nowSec,
   };
   const header = { typ: "countersign", v: 1 } as const;
-  const signature = await signEvent(header, acceptanceBody, signingKey.privateKey, {
-    dst: DST_COUNTERSIGN_ACCEPTANCE,
-  });
+  const signature = await signEventWith(header, acceptanceBody, eventSignerOf(signingKey), { dst: DST_COUNTERSIGN_ACCEPTANCE });
 
   return {
     ok: true,
@@ -643,15 +687,15 @@ export function declineCountersignRequest(
  */
 export async function withdrawCountersignRequest(input: {
   readonly request: SignedCountersignRequest;
-  readonly requesterPrivateKey: Uint8Array;
+  /** The requester's seed — or `requesterSigner`, never both. */
+  readonly requesterPrivateKey?: Uint8Array;
+  readonly requesterSigner?: EventSigner;
   readonly nowSec?: UnixSeconds;
 }): Promise<SignedCountersignWithdrawal> {
   if (typeof input?.request?.body !== "object" || input.request.body === null) {
     throw new KashscriptIdentityMalformedPayloadError("request");
   }
-  if (!(input.requesterPrivateKey instanceof Uint8Array)) {
-    throw new KashscriptIdentityMalformedPayloadError("requesterPrivateKey");
-  }
+  const requester = requesterSignerOf(input);
   const body = {
     act: "withdraw",
     requestId: input.request.body.requestId,
@@ -659,9 +703,7 @@ export async function withdrawCountersignRequest(input: {
     withdrawnAtUnix: input.nowSec ?? nowUnix(),
   } as const;
   const header = { typ: "countersign-withdrawal", v: 1 } as const;
-  const signature = await signEvent(header, body, input.requesterPrivateKey, {
-    dst: DST_COUNTERSIGN_WITHDRAWAL,
-  });
+  const signature = await signEventWith(header, body, requester, { dst: DST_COUNTERSIGN_WITHDRAWAL });
   return { header, body, signature };
 }
 
@@ -683,14 +725,19 @@ export async function withdrawCountersignRequest(input: {
  */
 export async function claimCountersignKey(input: {
   readonly priorDid: Did;
-  readonly priorPrivateKey: Uint8Array;
-  readonly successor: RelationshipSigningKey;
+  /** The prior key's seed — or `priorSigner`, never both. */
+  readonly priorPrivateKey?: Uint8Array;
+  readonly priorSigner?: EventSigner;
+  readonly successor: CountersignSigningKey;
   readonly nowSec?: UnixSeconds;
 }): Promise<CountersignKeyClaim> {
-  if (!(input?.priorPrivateKey instanceof Uint8Array)) {
+  const hasSeed = input?.priorPrivateKey instanceof Uint8Array;
+  const hasSigner = typeof input?.priorSigner === "object" && input.priorSigner !== null;
+  if (hasSeed === hasSigner) {
     throw new KashscriptIdentityMalformedPayloadError("priorPrivateKey");
   }
-  if (!(input.successor?.privateKey instanceof Uint8Array)) {
+  const prior: EventSigner = hasSeed ? { alg: "ed25519", privateKey: input.priorPrivateKey! } : input.priorSigner!;
+  if (!isUsableKey(input.successor)) {
     throw new KashscriptIdentityMalformedPayloadError("successor");
   }
   const body = {
@@ -702,11 +749,11 @@ export async function claimCountersignKey(input: {
   } as const;
   // The header carries no DID: both signatures must be over identical bytes.
   const header = { typ: "key-claim", v: 1 } as const;
-  const [prior, successor] = await Promise.all([
-    signEvent(header, body, input.priorPrivateKey, { dst: DST_KEY_CLAIM }),
-    signEvent(header, body, input.successor.privateKey, { dst: DST_KEY_CLAIM }),
+  const [priorSig, successorSig] = await Promise.all([
+    signEventWith(header, body, prior, { dst: DST_KEY_CLAIM }),
+    signEventWith(header, body, eventSignerOf(input.successor), { dst: DST_KEY_CLAIM }),
   ]);
-  return { header, body, signatures: { prior, successor } };
+  return { header, body, signatures: { prior: priorSig, successor: successorSig } };
 }
 
 /* ── Assembling what a stranger checks ─────────────────────────────────── */

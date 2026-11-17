@@ -179,12 +179,11 @@ describe("the AU-3 vectors — each forgery and re-wrapping is refused by name",
         const { verifySdJwt } = await import("../src/sd-jwt");
         const { hexToBytes } = await import("../src/chain");
         const resolveKey = makeKeyResolver(new Map([[ctx.listedKeyid, { publicKey: hexToBytes(ctx.listedPublicKeyHex), pinned: true }]]), new Map());
-        const r = await verifySdJwt(readFileSync(join(dir, file), "utf8").trim(), {
-          resolveKey,
-          requireKeyBinding: want.audience !== undefined,
-          nowSec: want.nowSec,
-          ...(want.audience !== undefined ? { audience: want.audience, nonce: want.nonce } : {}),
-        });
+        const text = readFileSync(join(dir, file), "utf8").trim();
+        const r =
+          want.audience !== undefined
+            ? await verifySdJwt(text, { resolveKey, requireKeyBinding: true, nowSec: want.nowSec, audience: want.audience, nonce: want.nonce ?? "" })
+            : await verifySdJwt(text, { resolveKey, requireKeyBinding: false, nowSec: want.nowSec });
         expect(r.reason).toBe(want.reason as never);
         expect(r.ok).toBe(want.reason === null);
       } else {

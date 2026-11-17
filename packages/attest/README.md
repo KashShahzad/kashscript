@@ -21,8 +21,9 @@ code that seeds it (Oreoasis, Duedale, Indusland), never invented.
 - **`dsse`** — DSSE envelopes + PAE (`signEnvelope` / `verifyEnvelope`).
 - **`dst`** — the canonical Domain-Separation-Tag registry (new DSTs are registered here first).
 - **`chain`** — RFC-8785 canonicalization + `chainBlockHash` + `sha256Hex` hash-chain helpers.
-- **`witness`** — Rekor (primary) → OpenTimestamps (fallback) → offline `none`; anchor Merkle root (a flat digest: checking one tip needs them all); RFC 6962 trees, where each member proves its place with its own audit path (`rfc6962Tree`, `rfc6962VerifyInclusion`); receipt store. Never throws.
-- **`signing`** — the one seam every DSSE and JWS signature goes through: Ed25519 or ES256, from a key's own bytes or through a callback for a key held elsewhere — a phone's chip, a key service — whose signature is checked before it is used.
+- **`witness`** — the public witnesses, read offline: OpenTimestamps proofs byte for byte, every operation recomputed (RIPEMD-160 included), and a supplied Bitcoin header's proof of work checked; RFC 3161 tokens read from their DER. The two networked clients, `stampOpenTimestamps` / `upgradeOpenTimestamps` and `rfc3161Stamp`, each take `fetch` explicitly. RFC 6962 trees, with inclusion and consistency proofs (`rfc6962Tree`, `rfc6962VerifyInclusion`, `rfc6962ConsistencyProof`, `rfc6962VerifyConsistency`). The older anchor client (Rekor → OpenTimestamps → offline `none`, a flat anchor root, a receipt store) stays for Oreoasis's audit anchor and verifies nothing.
+- **`log`** — the trust log ([`specs/trust-log.md`](../../specs/trust-log.md)): four closed entries behind a guard, the salted record hash, checkpoints signed by the log's key, inclusion and consistency proofs, the time verdict that catches a backdated claim (`CLAIMED_BEFORE_WITNESS`), and `auditLog`, which rebuilds a log from its entries alone and compares a mirror. Pure: no file, no socket. **`log-files`** reads and writes a log's folder, and **`openssl`** checks an RFC 3161 token's signature against a root you name; both are Node only.
+- **`signing`** — the one seam every DSSE and JWS signature goes through: Ed25519 or ES256, from a key's own bytes or through a callback for a key held elsewhere — a phone's chip, a key service — whose signature is checked before it is used. `SIGNATURE_PROFILES` names what may sign, and every JOSE header is checked against it before a key is touched; ML-DSA-65 is reserved, not built.
 - **`ledger`** — verify a signed action-ledger row + the forensic chain scan (`forensicConsistencyScan`).
 - **`bundle`** — verify a DSSE audit bundle end to end (signature + chain + anchor).
 - **`countersign`** — the two-signature bundle and its offline verifier. A record signed only by the
@@ -82,7 +83,10 @@ ULID-shaped id from a content hash and is a different primitive, not a duplicate
 ```bash
 attest verify <file> [--key <hex|host-key.txt|jwks.json>] [--signer-did <did>] [--offline]
                      [--trust-publisher <did>]... [--check-status]
-                     [--audience <id>] [--nonce <n>] [--status-list <file>]...
+                     [--audience <id>] [--nonce <n>] [--at <unix>] [--max-age <s>]
+                     [--status-list <file>]...
+                     [--header <file>]... [--tsa-root <pem>] [--max-batch-delay <s>]
+attest log verify <dir> [--mirror <dir>] [--header <file>]... [--tsa-root <pem>]
 ```
 
 Auto-detects and verifies **offline** a countersign bundle (a cohort record is one, checked against its
@@ -102,6 +106,16 @@ the key a keyid resolves to, the requester's own acceptance is never a countersi
 (`contentIdOf`); every verifier that says *never throws* never throws; unstated custody is `unknown`;
 and the Ed25519 acceptance rule is pinned (identity-core `ed25519-strict`, vectors under
 `test/vectors/ed25519`). See [`docs/adr/0027`](../../docs/adr/0027-the-verifier-binds-the-issuer-to-the-key.md).
+
+Since KS-Q4 (2026-11-18) a presented SD-JWT is checked only with `--audience` and `--nonce`, the
+identifier you are and the nonce you sent, and its binding must be within `--max-age` seconds
+(default 600) of now, or of `--at` for a file you check later. A header naming an algorithm outside
+the profile registry is refused before any key is touched. A trust list's standing, class, grade and
+scope are read, and a status verdict names its cache time. The trust log's checkpoint, inclusion proof
+and consistency proof are detected and checked with the time verdict. `attest log verify <dir>`
+audits a whole log from its files and compares a mirror; `--tsa-root` hands openssl the root an RFC 3161
+witness must chain to, and `--header` hands in a Bitcoin block header for an OpenTimestamps witness.
+See [`docs/adr/0030`](../../docs/adr/0030-the-trust-log-and-hardened-checking.md).
 
 A countersign bundle needs **no `--key` at all** — `did:kash` is self-certifying, so every public key
 is already inside the artifact:

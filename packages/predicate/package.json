@@ -1,6 +1,6 @@
 {
   "name": "@kashscript/predicate",
-  "version": "0.3.0-alpha.2",
+  "version": "0.3.0-alpha.3",
   "description": "The rule engine for doors (ECOSYSTEM d59, d84): a published rule's criteria as OpenID4VP DCQL queries plus FEEL conditions (a DMN subset, tested against the TCK cases it claims); validation that refuses an ask for a refusal, a sensitive category or an ascribed identity; a checklist on the person's side, never a score; the packet, a copy per viewer; the desk's routing, which never refuses; and the decision receipt; the rule's address (ISIC Rev 5 and the seven givens), parameter bounds and an anchor's signed adoption. Pure, deterministic, no third-party dependency. Apache-2.0.",
   "type": "module",
   "main": "./src/index.ts",

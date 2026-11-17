@@ -88,12 +88,14 @@ describe("ES256 vectors — committed once, verified offline", () => {
   });
 
   it("the ES256 predicate presentation verifies, holder-bound by an ES256 KB-JWT to a P-256 key", async () => {
+    // The frozen vector's binding was made an hour before its context's now; the default window is ten minutes (KS-Q4).
     const r = await verifyPredicatePresentation(txt("predicate-presentation-es256.v1.txt"), {
       resolveKey: noKeys,
       audience: ctx.audience,
       nonce: ctx.nonce,
       nowSec: ctx.nowSec,
-    } as never);
+      maxKbAgeSec: 3_600,
+    });
     expect(r.ok).toBe(true);
     expect(r.holder).toBe(ctx.holder);
     const parts = txt("predicate-presentation-es256.v1.txt").split("~");
@@ -338,14 +340,15 @@ describe("a runtime with no Ed25519 says 'not checked', never 'invalid' — and 
     const countersignFixture = JSON.parse(readFileSync(join(import.meta.dir, "fixtures", "countersign-bundle.json"), "utf8"));
     const pl1Export = JSON.parse(readFileSync(join(import.meta.dir, "vectors", "holder", "holder-export.v1.json"), "utf8"));
     const pl3Presentation = readFileSync(join(import.meta.dir, "vectors", "exchange", "predicate-presentation-a.v1.txt"), "utf8");
+    const pl3 = JSON.parse(readFileSync(join(import.meta.dir, "vectors", "exchange", "context.v1.json"), "utf8")) as { verifiers: { a: { did: string; nonce: string } } };
     await withoutEd25519(async () => {
       // ES256 still works
       expect((await verifyTrustList(json("trust-list-es256.v1.json"), { pinnedPublishers: [ctx.trustPublisher], nowSec: ctx.nowSec })).ok).toBe(true);
-      expect((await verifySdJwt(txt("predicate-presentation-es256.v1.txt"), { resolveKey: noKeys, requireKeyBinding: true, audience: ctx.audience, nonce: ctx.nonce, nowSec: ctx.nowSec })).ok).toBe(true);
+      expect((await verifySdJwt(txt("predicate-presentation-es256.v1.txt"), { resolveKey: noKeys, requireKeyBinding: true, audience: ctx.audience, nonce: ctx.nonce, nowSec: ctx.nowSec, maxKbAgeSec: 3_600 })).ok).toBe(true);
       // Ed25519: nothing judged
       expect((await verifyCountersignBundle(countersignFixture)).reason).toBe("RUNTIME_CANNOT_CHECK");
       expect((await verifyHolderExport(pl1Export, { nowSec: 1_790_208_000 })).reasons).toEqual(["RUNTIME_CANNOT_CHECK"]);
-      expect((await verifySdJwt(pl3Presentation, { resolveKey: noKeys, requireKeyBinding: true, nowSec: 1_790_208_000 })).reason).toBe("RUNTIME_CANNOT_CHECK");
+      expect((await verifySdJwt(pl3Presentation, { resolveKey: noKeys, requireKeyBinding: true, audience: pl3.verifiers.a.did, nonce: pl3.verifiers.a.nonce, nowSec: 1_790_208_000 })).reason).toBe("RUNTIME_CANNOT_CHECK");
       const claim = json<CountersignBundle>("countersign-es256.v1.json").keyClaims![0]!;
       expect((await verifyKeyClaim(claim)).reason).toBe("RUNTIME_CANNOT_CHECK");
       // the mixed bundle needs Ed25519 for its requester — so it too is not judged

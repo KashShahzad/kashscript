@@ -129,3 +129,107 @@ export async function rfc6962VerifyInclusion(
   }
   return sn === 0 && sameBytes(r, root);
 }
+
+/* ── consistency between two tree heads (KS-Q4, the trust log) ─────────── */
+
+/** The largest power of two strictly below `n` (RFC 9162 §2.1: `k`). */
+function split(n: number): number {
+  let k = 1;
+  while (k * 2 < n) k *= 2;
+  return k;
+}
+
+function isPowerOfTwo(n: number): boolean {
+  if (!Number.isSafeInteger(n) || n < 1) return false;
+  let k = 1;
+  while (k < n) k *= 2;
+  return k === n;
+}
+
+/**
+ * RFC 9162 §2.1.4.1: the consistency proof between the tree over the first
+ * `first` leaf hashes and the tree over the first `second` of them,
+ * `PROOF(m, D_n) = SUBPROOF(m, D_n, true)`. Empty when the two heads are one.
+ * The leaves are leaf HASHES (`rfc6962LeafHash`), in the log's order.
+ */
+export async function rfc6962ConsistencyProof(
+  leafHashes: readonly Uint8Array[],
+  first: number,
+  second: number,
+): Promise<Uint8Array[]> {
+  if (!Number.isSafeInteger(first) || !Number.isSafeInteger(second) || first < 1 || first > second || second > leafHashes.length) {
+    throw new AttestError("INVALID_INPUT", `a consistency proof needs 1 <= first (${String(first)}) <= second (${String(second)}) <= leaves (${leafHashes.length})`);
+  }
+  for (const h of leafHashes) {
+    if (!(h instanceof Uint8Array) || h.length !== 32) throw new AttestError("INVALID_INPUT", "a leaf hash is 32 bytes");
+  }
+  // MTH over the half-open range [lo, hi), from the RFC's recursive definition; memoised by range.
+  const memo = new Map<string, Uint8Array>();
+  const mth = async (lo: number, hi: number): Promise<Uint8Array> => {
+    if (hi - lo === 1) return leafHashes[lo]!;
+    const key = `${lo}:${hi}`;
+    const seen = memo.get(key);
+    if (seen !== undefined) return seen;
+    const k = split(hi - lo);
+    const h = await nodeHash(await mth(lo, lo + k), await mth(lo + k, hi));
+    memo.set(key, h);
+    return h;
+  };
+  // SUBPROOF(m, D[lo:hi], b), with m counted from lo.
+  const subproof = async (m: number, lo: number, hi: number, b: boolean): Promise<Uint8Array[]> => {
+    const n = hi - lo;
+    if (m === n) return b ? [] : [await mth(lo, hi)];
+    const k = split(n);
+    if (m <= k) return [...(await subproof(m, lo, lo + k, b)), await mth(lo + k, hi)];
+    return [...(await subproof(m - k, lo + k, hi, false)), await mth(lo, lo + k)];
+  };
+  return subproof(first, 0, second, true);
+}
+
+/**
+ * RFC 9162 §2.1.4.2: are these two tree heads consistent — is the tree of
+ * `second` leaves an append-only extension of the tree of `first` — by this
+ * proof? False for anything that does not prove it, malformed input included.
+ * Two equal heads are consistent by an empty proof. Never throws.
+ */
+export async function rfc6962VerifyConsistency(
+  first: number,
+  second: number,
+  path: readonly Uint8Array[],
+  firstHash: Uint8Array,
+  secondHash: Uint8Array,
+): Promise<boolean> {
+  if (!Number.isSafeInteger(first) || !Number.isSafeInteger(second) || first < 1 || first > second) return false;
+  if (!(firstHash instanceof Uint8Array) || firstHash.length !== 32) return false;
+  if (!(secondHash instanceof Uint8Array) || secondHash.length !== 32) return false;
+  if (!Array.isArray(path) || path.length > MAX_PATH) return false;
+  for (const p of path) if (!(p instanceof Uint8Array) || p.length !== 32) return false;
+  if (first === second) return path.length === 0 && sameBytes(firstHash, secondHash);
+  if (path.length === 0) return false;
+  const steps = isPowerOfTwo(first) ? [firstHash, ...path] : [...path];
+  let fn = first - 1;
+  let sn = second - 1;
+  while (fn % 2 === 1) {
+    fn = Math.floor(fn / 2);
+    sn = Math.floor(sn / 2);
+  }
+  let fr = steps[0]!;
+  let sr = steps[0]!;
+  for (let i = 1; i < steps.length; i++) {
+    const c = steps[i]!;
+    if (sn === 0) return false;
+    if (fn % 2 === 1 || fn === sn) {
+      fr = await nodeHash(c, fr);
+      sr = await nodeHash(c, sr);
+      while (fn % 2 === 0 && fn !== 0) {
+        fn = Math.floor(fn / 2);
+        sn = Math.floor(sn / 2);
+      }
+    } else {
+      sr = await nodeHash(sr, c);
+    }
+    fn = Math.floor(fn / 2);
+    sn = Math.floor(sn / 2);
+  }
+  return sn === 0 && sameBytes(fr, firstHash) && sameBytes(sr, secondHash);
+}

@@ -1,12 +1,12 @@
 # @kashscript/kash
 
-> **`kash` — the station kit.** It makes a station's own keys, writes a cohort record as a file, countersigns it as the station, checks any record offline, and signs a trust list with the publisher key. Local files only: **no server, no upload, and no delivery into a wallet.**
+> **`kash` — the station kit.** It makes a station's own keys, writes a cohort record as a file, countersigns it as the station, checks any record offline, signs a trust list with the publisher key, and keeps the trust log. Local files only: **no server, no upload, and no delivery into a wallet.** Two commands go online, to public witnesses only, and say so first: `kash log witness` and `kash log upgrade`.
 
 ```bash
 npx @kashscript/kash --help      # Node 20+, or Bun 1+
 ```
 
-`kash verify` runs the verifier from `@kashscript/attest`, which is installed alongside it (pinned to `0.2.0-alpha.3`, the first version that knows the cohort profile).
+`kash verify` runs the verifier from `@kashscript/attest`, and `kash log` its trust log; attest is installed alongside it, at the version published with this one.
 
 ## What it does
 
@@ -16,6 +16,8 @@ kash issue cohort …                   The teacher's organisation writes a pend
 kash countersign <link>               The station countersigns it, with its own key → the finished record.
 kash verify <file>                    Check a record, bundle, trust list or status list. Offline.
 kash trust sign <file>                Sign a trust list or status list with the publisher key.
+kash log init|add|checkpoint|proof    Keep the trust log: a folder any host serves and mirrors. Offline.
+kash log witness|upgrade              Send a head's hash to OpenTimestamps or an RFC 3161 authority. Online.
 kash status                           The keystore, and whether each key file is still private to you.
 kash doctor | add | rollback          The project-integration commands (unchanged, apart from losing their login).
 ```
@@ -67,6 +69,21 @@ kash verify trust-list.signed.json --trust-publisher did:kash:<publisher>
 
 Takes an unsigned `kashscript-trust-list/1` or `kashscript-status-list/1` payload and signs it in the wallet's own format. It fills in the publisher from the key, refuses a list that names someone else, checks its own result and prints nothing if it would not verify. The default key is `publisher` — **never the station's key**. A wallet trusts a list only if its app pins that publisher's DID out of band. Publishing the file is yours to do.
 
+### `kash log`
+
+```bash
+kash log init ./log --name scheme                      # log.json names the publisher key; the id is <did>/log/scheme
+kash log add ./log trust-list.signed.json              # its version, and a key event for every key it names
+kash log add ./log trust-list-v2.signed.json --previous trust-list.signed.json
+kash log add ./log attestation.json                    # {v:1, kind:"attestation", issuer, salted, claimedAtUnix}
+kash log checkpoint ./log                              # the head, signed with the publisher key
+kash log witness ./log --tsa --tsa-root digicert.pem   # online: OpenTimestamps, and DigiCert's RFC 3161 authority beside it
+kash log upgrade ./log                                 # online, hours later: the Bitcoin attestation
+kash log proof ./log 3 > proof-3.json                  # one entry's proof; anyone checks it with attest verify
+```
+
+The log holds issuers and lists, and attestations by salted hash. It never holds a person, a presentation or a record's content, and `add` refuses all of them, checking the whole batch before it writes any of it. A signed trust list goes in as its version plus its key events (added, rotated, revoked); a second version needs `--previous`, the version the log already holds. A claim from before the log began must be marked `backfilled`: its time will be the witness's, never the claim. A checkpoint's time is the log's own word until a witness stamps it. `--tsa-root <pem>` keeps an RFC 3161 token only if openssl verifies it against that root. The folder is the log: serve it from any static host. Anyone checks it, and compares a mirror, with `attest log verify <dir> --mirror <copy>`. The specification is [`specs/trust-log.md`](../../specs/trust-log.md).
+
 ## What a record does not prove
 
 A cohort record says three things: a cohort was finished, under a syllabus at a named version, and the teacher's organisation and the station each countersigned it with their own keys. It does **not** prove:
@@ -89,8 +106,8 @@ A cohort record says three things: a cohort was finished, under a syllabus at a 
 
 ## Where things are
 
-- **Keystore:** `--keystore <dir>`, else `$KASH_KEYSTORE`, else `~/.kash/keys`. One `<name>.key.json` per key. `--key <name|path>` picks one; `issue` defaults to `teacher`, `countersign` to `station`, `trust sign` to `publisher`.
-- **Nothing leaves the machine.** No command here opens a socket, and the tests run the bundled binary with every route to the network switched off.
+- **Keystore:** `--keystore <dir>`, else `$KASH_KEYSTORE`, else `~/.kash/keys`. One `<name>.key.json` per key. `--key <name|path>` picks one; `issue` defaults to `teacher`, `countersign` to `station`, `trust sign` and `log` to `publisher`.
+- **Nothing leaves the machine but a hash, and only when you ask.** `kash log witness` sends a checkpoint's 32-byte hash to public witnesses, and `kash log upgrade` asks a calendar for its own commitment; each says so before it goes online. No other command opens a socket, and the tests run the bundled binary with every route to the network switched off.
 
 ## Older commands
 

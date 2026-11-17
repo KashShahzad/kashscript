@@ -1,0 +1,32 @@
+{
+  "format": "kashscript-log-consistency/1",
+  "logId": "did:kash:8kCvT4dL7i2iX33ub1YCAJSCdyvHD1WrKPpvoBH3Wbd5/log/sample",
+  "first": 4,
+  "second": 9,
+  "path": [
+    "583fb03b4675a722cd74960952baf6454eb9b09074846ee36394384508b7be47",
+    "64d30f114af6c8b84885e84c73f4b2cd3ac787709134078dc97115098570585e"
+  ],
+  "checkpoints": {
+    "first": {
+      "payloadType": "application/vnd.kash.log-checkpoint+json",
+      "payload": "eyJmb3JtYXQiOiJrYXNoc2NyaXB0LWxvZy1jaGVja3BvaW50LzEiLCJsb2dJZCI6ImRpZDprYXNoOjhrQ3ZUNGRMN2kyaVgzM3ViMVlDQUpTQ2R5dkhEMVdyS1Bwdm9CSDNXYmQ1L2xvZy9zYW1wbGUiLCJwcmV2aW91cyI6bnVsbCwicm9vdEhhc2giOiI1MDhlYjQ2MTBiMjdkMThjODY0NTdmYTZhMGRhNjAzNzU1MjkzZjEwNzVmYjZhYzhiMGE1Yzg0NTRkODE3YzgwIiwidGltZXN0YW1wVW5peCI6MTc5NDk0NTI1OSwidHJlZVNpemUiOjR9",
+      "signatures": [
+        {
+          "keyid": "did:kash:8kCvT4dL7i2iX33ub1YCAJSCdyvHD1WrKPpvoBH3Wbd5",
+          "sig": "pbYOxfdVOaXecJt5KAYQ6DDO59NYxMZMMTiyxyfQjCP05+NJT2IjsE+kZjx51DjzrDyWS3U5IQqfZZHX7XDjDw=="
+        }
+      ]
+    },
+    "second": {
+      "payloadType": "application/vnd.kash.log-checkpoint+json",
+      "payload": "eyJmb3JtYXQiOiJrYXNoc2NyaXB0LWxvZy1jaGVja3BvaW50LzEiLCJsb2dJZCI6ImRpZDprYXNoOjhrQ3ZUNGRMN2kyaVgzM3ViMVlDQUpTQ2R5dkhEMVdyS1Bwdm9CSDNXYmQ1L2xvZy9zYW1wbGUiLCJwcmV2aW91cyI6eyJyb290SGFzaCI6ImI2ODA0YjU4ZmQxZGYxZDhhNzU0ZmQwMWYwM2U0M2I3ZThkNzM0NDJmMzdjN2MwMjRkMzlmMTAyMWNkMDIyMWQiLCJ0cmVlU2l6ZSI6N30sInJvb3RIYXNoIjoiMzQ2NTAwZmVhMGNjYjg1M2RiZDdhMjFiMmJmNWQxNDliZjg5N2JjYzU0N2QxYTVkYmM2Y2Y5YjUyZjM5ZTgzZSIsInRpbWVzdGFtcFVuaXgiOjE3OTQ5NDU1NTksInRyZWVTaXplIjo5fQ==",
+      "signatures": [
+        {
+          "keyid": "did:kash:8kCvT4dL7i2iX33ub1YCAJSCdyvHD1WrKPpvoBH3Wbd5",
+          "sig": "ESDVdSwi0PYXOCpQOtQZDjnsVfW7G5eGrpUXX3teDvVUW3eOPzpxBVdJq/8HPx6Rr6BoftVLMMdIZKN9yzqwCg=="
+        }
+      ]
+    }
+  }
+}

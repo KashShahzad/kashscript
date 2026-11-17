@@ -361,10 +361,15 @@ export interface ExternalSignature {
 /**
  * Who signs. Ed25519 and P-256 software keys carry their private bytes; a
  * hardware key carries only a `sign` callback over the exact payload bytes
- * (the chip hashes them with SHA-256 itself, as ES256 requires).
+ * (the chip hashes them with SHA-256 itself, as ES256 requires). So does an
+ * Ed25519 key held elsewhere — a key service, a KMS, a non-extractable
+ * CryptoKey (KS-Q4; Indorania ADR-0003's first finding): it returns the 64-byte
+ * signature over the payload, and the signature is checked under `publicKey`
+ * before it leaves, so a service answering with another key fails here.
  */
 export type EventSigner =
   | { readonly alg: "ed25519"; readonly privateKey: Uint8Array }
+  | { readonly alg: "ed25519"; readonly publicKey: Uint8Array; readonly sign: (payload: Uint8Array) => Promise<Uint8Array> }
   | { readonly alg: "es256"; readonly privateKey: Uint8Array; readonly publicKey: Uint8Array }
   | { readonly alg: "es256"; readonly sign: (payload: Uint8Array) => Promise<ExternalSignature> };
 
@@ -377,14 +382,17 @@ export function es256RawSignature(sig: ExternalSignature): Uint8Array {
   return normaliseLowS(raw);
 }
 
-/** Sign a Kash-Event with any signer — software Ed25519, software P-256 or hardware. */
+/** Sign a Kash-Event with any signer — software Ed25519, software P-256, hardware, or a key held in a key service. */
 export async function signEventWith(
   header: Readonly<Record<string, unknown>>,
   body: unknown,
   signer: EventSigner,
   opts?: SignEventOptions,
 ): Promise<KashEventSignature> {
-  if (signer.alg === "ed25519") return signEvent(header, body, signer.privateKey, opts);
+  if (signer.alg === "ed25519") {
+    if (!("sign" in signer)) return signEvent(header, body, signer.privateKey, opts);
+    return signEd25519Through(header, body, signer, opts);
+  }
   if (signer.alg !== "es256") {
     throw new KashCryptoError(`Unknown signer alg ${JSON.stringify((signer as { alg?: unknown }).alg)}.`, "UNSUPPORTED_ALG");
   }
@@ -409,6 +417,44 @@ export async function signEventWith(
     ...(encoding === "multibase" ? {} : { encoding }),
     ...(opts?.kid !== undefined ? { kid: opts.kid } : {}),
   };
+}
+
+/**
+ * An Ed25519 Kash-Event signed by a key that never leaves where it lives. The
+ * bytes signed are exactly `signEvent`'s (`DST ‖ JCS({header, body})`), and
+ * Ed25519 is deterministic, so the same key gives the same signature by either
+ * path. The answer is checked under the public key before it is returned.
+ */
+async function signEd25519Through(
+  header: Readonly<Record<string, unknown>>,
+  body: unknown,
+  signer: { readonly publicKey: Uint8Array; readonly sign: (payload: Uint8Array) => Promise<Uint8Array> },
+  opts?: SignEventOptions,
+): Promise<KashEventSignature> {
+  assertPublicKey(signer.publicKey);
+  const dst = opts?.dst ?? DEFAULT_KASH_RECORD_DST;
+  const encoding: SignatureEncoding = opts?.encoding ?? "multibase";
+  const payloadBytes = buildSignablePayload(header, body, dst);
+  let sig: unknown;
+  try {
+    sig = await signer.sign(payloadBytes);
+  } catch (err) {
+    throw new KashCryptoError("The external Ed25519 signer failed.", "SIGN_FAILED", err);
+  }
+  if (!(sig instanceof Uint8Array) || sig.length !== ED25519_SIGNATURE_BYTES) {
+    throw new KashCryptoError(`An Ed25519 signature is ${ED25519_SIGNATURE_BYTES} bytes.`, "SIGN_FAILED");
+  }
+  const signature: KashEventSignature = {
+    alg: "ed25519",
+    sig: encodeSignatureBytes(new Uint8Array(sig), encoding),
+    dst,
+    ...(encoding === "multibase" ? {} : { encoding }),
+    ...(opts?.kid !== undefined ? { kid: opts.kid } : {}),
+  };
+  if (!(await verifyEvent({ header, body, signature }, signer.publicKey))) {
+    throw new KashCryptoError("The external Ed25519 signer returned a signature that does not verify under its public key.", "SIGN_FAILED");
+  }
+  return signature;
 }
 
 /** Sign a Kash-Event with a software P-256 key. */

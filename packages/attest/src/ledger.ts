@@ -18,7 +18,7 @@
  * was stale — the M5 ledger reconciled actor DIDs to base58 `did:kash`.
  */
 
-import { signEvent, verifyEvent } from "@kashscript/identity-core";
+import { signEvent, signEventWith, verifyEvent } from "@kashscript/identity-core";
 import { AttestError, TamperError } from "./errors";
 import { GENESIS_PREV_HASH, chainBlockHash } from "./chain";
 
@@ -183,22 +183,25 @@ export async function verifyLedgerSignature(input: {
 }
 
 /** Sign a ledger-row payload → `ed25519:<128-hex>`. Co-located with verify so
- *  the canonicalization can never drift (the seed's #1 silent-VERIFY_FALSE risk). */
+ *  the canonicalization can never drift (the seed's #1 silent-VERIFY_FALSE risk).
+ *  The key is a 32-byte seed, or an Ed25519 key held in a key service that signs
+ *  bytes on request (KS-Q4; Indorania ADR-0003's first finding) — the same bytes
+ *  either way, and a service's answer is checked under its public key. */
 export async function signLedgerBlock(
   payload: LedgerSignaturePayload,
-  privateKey: Uint8Array,
+  key: Uint8Array | { readonly publicKey: Uint8Array; readonly sign: (bytes: Uint8Array) => Promise<Uint8Array> },
 ): Promise<string> {
-  const signed = await signEvent(
-    {
-      sessionId: payload.sessionId,
-      stepIndex: payload.stepIndex,
-      actorDid: payload.actorDid,
-      previousBlockHash: payload.previousBlockHash,
-    },
-    payload.payloadMutation,
-    privateKey,
-    { dst: OREOASIS_LEDGER_DST, encoding: "hex", kid: payload.actorDid },
-  );
+  const header = {
+    sessionId: payload.sessionId,
+    stepIndex: payload.stepIndex,
+    actorDid: payload.actorDid,
+    previousBlockHash: payload.previousBlockHash,
+  };
+  const opts = { dst: OREOASIS_LEDGER_DST, encoding: "hex" as const, kid: payload.actorDid };
+  const signed =
+    key instanceof Uint8Array
+      ? await signEvent(header, payload.payloadMutation, key, opts)
+      : await signEventWith(header, payload.payloadMutation, { alg: "ed25519", publicKey: key.publicKey, sign: key.sign }, opts);
   return `ed25519:${signed.sig}`;
 }
 

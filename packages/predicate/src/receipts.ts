@@ -39,6 +39,8 @@ export interface ReadContext {
   readonly statusLists?: readonly StatusListReport[];
   /** The evaluation time, unix seconds. Nothing here reads a clock. */
   readonly nowSec: number;
+  /** The desk's own bound on a status list's age (KS-Q4): an older list decides nothing. Unset, a list past its cache time still decides, marked stale. */
+  readonly maxStatusAgeSec?: number;
 }
 
 /** A receipt as the holder keeps it, or as a packet carries it. `ref` is the caller's own handle — never sent. */
@@ -142,7 +144,8 @@ function judge(status: StatusState, expiresAtUnix: number | null, nowSec: number
     problems.push("expired — an expired record never counts");
     counts = false;
   }
-  if (status === "revoked" || status === "suspended") {
+  // d91's terminal states count for nothing at a door: superseded (a later attestation replaces it) and withdrawn, beside revoked and suspended.
+  if (status === "revoked" || status === "suspended" || status === "superseded" || status === "withdrawn") {
     problems.push(`${status} on its issuer's status list`);
     counts = false;
   }
@@ -182,17 +185,25 @@ async function readReceiptInner(h: HeldReceipt, ctx: ReadContext, opts: ReadOpti
     const parsed = parseSdJwt(h.value);
     if (parsed === null) return null;
     const pres = opts.presentedTo;
-    const sd = await verifySdJwt(h.value, {
-      resolveKey,
-      requireKeyBinding: pres !== undefined,
-      nowSec: ctx.nowSec,
-      ...(pres !== undefined ? { audience: pres.audience, nonce: pres.nonce } : {}),
-      ...(pres !== undefined && opts.maxKbAgeSec !== undefined ? { maxKbAgeSec: opts.maxKbAgeSec } : {}),
-    });
+    // A presentation is checked against this verifier's audience and nonce, fresh (attest 0.3.0, KS-Q4); a held receipt as held.
+    const sd =
+      pres !== undefined
+        ? await verifySdJwt(h.value, {
+            resolveKey,
+            requireKeyBinding: true,
+            nowSec: ctx.nowSec,
+            audience: pres.audience,
+            nonce: pres.nonce,
+            ...(opts.maxKbAgeSec !== undefined ? { maxKbAgeSec: opts.maxKbAgeSec } : {}),
+          })
+        : await verifySdJwt(h.value, { resolveKey, requireKeyBinding: false, nowSec: ctx.nowSec });
     const claims = sd.claims;
     const problems: string[] = [];
     if (!sd.ok && sd.reason !== "CREDENTIAL_EXPIRED") problems.push(`does not check (${sd.reason})`);
-    const status = checkStatus(statusEntryOf(claims), statusLists).state;
+    const status = checkStatus(statusEntryOf(claims), statusLists, {
+      nowSec: ctx.nowSec,
+      ...(ctx.maxStatusAgeSec !== undefined ? { maxAgeSec: ctx.maxStatusAgeSec } : {}),
+    }).state;
     const expiresAtUnix = expiryOf(claims);
     const counts = judge(status, expiresAtUnix, ctx.nowSec, claims, problems);
     const id = await sha256Hex(enc.encode(parsed.issuerJwt));

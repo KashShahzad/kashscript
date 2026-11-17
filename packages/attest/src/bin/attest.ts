@@ -9,15 +9,21 @@
  * the same bytes — needs no --key at all) and a cohort record, which is one
  * checked against its profile as well, a holder export, a trust list, a
  * status list, a DSSE audit bundle (Oreoasis), an Every-Rupee report (Duedale),
- * or an Indus token (IPOE1/IVFC1/IBPS1/IGEO1). `--check-status` is the one flag
- * that touches the network: it fetches the status lists a holder export points
- * at and did not carry. Exit codes: 0 = PASS · 1 = verification FAILED
- * (tamper) · 2 = usage/IO error · 3 = INTEGRITY ONLY (the file is consistent
- * with itself, but its only key came from inside it — pass --key; AU-3, A7-06).
- * Public-log inclusion (rekor-cli / ots) is delegated — printed as next-steps.
+ * an Indus token (IPOE1/IVFC1/IBPS1/IGEO1), and the trust log's checkpoint,
+ * inclusion proof and consistency proof (KS-Q4). `attest log verify <dir>`
+ * audits a whole log from its files. `--check-status` is the one flag that
+ * touches the network: it fetches the status lists a holder export points at
+ * and did not carry. Exit codes: 0 = PASS · 1 = verification FAILED (tamper) ·
+ * 2 = usage/IO error · 3 = INTEGRITY ONLY (the file is consistent with itself,
+ * but its only key came from inside it — pass --key; AU-3, A7-06). An RFC 3161
+ * token's signature is openssl's, against the root `--tsa-root` names.
  */
 
 import { readFileSync } from "node:fs";
+import { isLogConsistencyProof, isLogInclusionProof, verifyCheckpoint, verifyLogConsistency, verifyLogInclusion, auditLog, DEFAULT_MAX_BATCH_DELAY_SEC, DST_LOG_CHECKPOINT, type CheckpointReport, type LogAuditReport, type LogConsistencyReport, type LogInclusionReport } from "../log";
+import { readLogDirectory } from "../log/files";
+import type { BitcoinHeader, WitnessVerdict } from "../witness/verdict";
+import { opensslAvailable, opensslRfc3161Check, type OpensslCheck } from "./openssl";
 import { hexToBytes } from "../chain";
 import { TamperError } from "../errors";
 import { verifyAuditBundle, type AuditBundleVerifyReport } from "../bundle";
@@ -73,11 +79,15 @@ import { statusEntryOf } from "../holder/status-list";
 import {
   plainAsk,
   plainBundle,
+  plainCheckpoint,
   plainCohort,
   plainCountersign,
   plainHolderExport,
   plainIndus,
   plainLines,
+  plainLogAudit,
+  plainLogConsistency,
+  plainLogInclusion,
   plainPredicate,
   plainReport,
   plainSdJwt,
@@ -94,7 +104,23 @@ const USAGE = `attest — the KashScript evidence-commons verifier
 Usage:
   attest verify <file> [--key <hex|host-key.txt|jwks.json>] [--signer-did <did>] [--offline]
                        [--trust-publisher <did>]... [--check-status]
-                       [--audience <id>] [--nonce <n>] [--status-list <file>]...
+                       [--audience <id>] [--nonce <n>] [--at <unix>] [--max-age <s>]
+                       [--status-list <file>]...
+                       [--header <file>]... [--tsa-root <pem>] [--max-batch-delay <s>]
+  attest log verify <dir> [--mirror <dir>] [--header <file>]... [--tsa-root <pem>]
+
+A presentation is made to one verifier: check it with --audience and --nonce,
+the identifier you are and the nonce you sent. Its binding must be no further
+than --max-age seconds (default 600) from now, or from --at, the time you
+received it, for a file you check later.
+
+The trust log (KS-Q4): a checkpoint, an inclusion proof and a consistency
+proof are auto-detected. --header hands in a Bitcoin block header for an
+OpenTimestamps witness ({height, header}, as A-List's anchors/headers/ keep
+them). --tsa-root names the root an RFC 3161 witness must chain to; openssl
+checks the signature, and its fingerprint is printed. --max-batch-delay is the
+log's allowance between a claimed time and its first witness (default 86400;
+the log's log.json states its own).
 
 Auto-detected, verified offline:
   - Countersign bundle  (two signatures over the same bytes; needs NO --key,
@@ -109,6 +135,9 @@ Auto-detected, verified offline:
                          presentation against the --audience and --nonce you sent)
   - Session receipt     (both parties' signatures on every line; pending or complete)
   - Ask                 (the eight rules and the forbidden needs)
+  - Log checkpoint      (the trust log's signed head)
+  - Inclusion proof     (one entry in a signed head, its witnesses, its time)
+  - Consistency proof   (a later head keeps every entry of an earlier one)
   - DSSE audit bundle   (Oreoasis: { payloadType, payload, signatures })
   - Every-Rupee report  (Duedale:  { report, signature, operatorPublicKeyHex })
   - Indus token         (IPOE1/IVFC1/IBPS1/IGEO1 - requires --key)
@@ -156,6 +185,8 @@ function readKeyBytes(key: string): Uint8Array {
 }
 
 interface Args {
+  /** `verify <file>`, or `log verify <dir>`. */
+  readonly command: "verify" | "log-verify";
   readonly file: string;
   readonly key?: string;
   readonly signerDid?: string;
@@ -164,19 +195,49 @@ interface Args {
   readonly audience?: string;
   readonly nonce?: string;
   readonly statusListFiles: readonly string[];
+  /** Check as of this unix time — for a presentation checked after it was received. */
+  readonly at?: number;
+  /** A presentation's binding window, seconds. */
+  readonly maxAge?: number;
+  readonly headerFiles: readonly string[];
+  readonly tsaRoot?: string;
+  readonly maxBatchDelay?: number;
+  readonly mirror?: string;
 }
 function parseArgs(argv: readonly string[]): Args {
-  if (argv[0] !== "verify" || argv[1] === undefined) die(2, USAGE);
-  const file = argv[1];
+  let command: Args["command"];
+  let file: string;
+  let start: number;
+  if (argv[0] === "verify" && argv[1] !== undefined) {
+    command = "verify";
+    file = argv[1];
+    start = 2;
+  } else if (argv[0] === "log" && argv[1] === "verify" && argv[2] !== undefined) {
+    command = "log-verify";
+    file = argv[2];
+    start = 3;
+  } else {
+    die(2, USAGE);
+  }
   let key: string | undefined;
   let signerDid: string | undefined;
   let audience: string | undefined;
   let nonce: string | undefined;
+  let at: number | undefined;
+  let maxAge: number | undefined;
+  let tsaRoot: string | undefined;
+  let maxBatchDelay: number | undefined;
+  let mirror: string | undefined;
   const trustPublishers: string[] = [];
   const statusListFiles: string[] = [];
+  const headerFiles: string[] = [];
   let checkStatus = false;
   const need = (flag: string, v: string | undefined): string => (v === undefined ? die(2, `${flag} needs a value\n\n${USAGE}`) : v);
-  for (let i = 2; i < argv.length; i++) {
+  const seconds = (flag: string, v: string | undefined): number => {
+    const n = Number(need(flag, v));
+    return Number.isSafeInteger(n) && n >= 0 ? n : die(2, `${flag} takes a whole number of seconds\n\n${USAGE}`);
+  };
+  for (let i = start; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--key") key = argv[++i];
     else if (a === "--signer-did") signerDid = argv[++i];
@@ -185,19 +246,132 @@ function parseArgs(argv: readonly string[]): Args {
     else if (a === "--nonce") nonce = need(a, argv[++i]);
     else if (a === "--status-list") statusListFiles.push(need(a, argv[++i]));
     else if (a === "--check-status") checkStatus = true;
+    else if (a === "--at") at = seconds(a, argv[++i]);
+    else if (a === "--max-age") maxAge = seconds(a, argv[++i]);
+    else if (a === "--header") headerFiles.push(need(a, argv[++i]));
+    else if (a === "--tsa-root") tsaRoot = need(a, argv[++i]);
+    else if (a === "--max-batch-delay") maxBatchDelay = seconds(a, argv[++i]);
+    else if (a === "--mirror") mirror = need(a, argv[++i]);
     else if (a === "--offline") continue; // verify never touches the network unless --check-status asks
     else die(2, `unknown argument: ${a}\n\n${USAGE}`);
   }
   return {
+    command,
     file,
     ...(key !== undefined ? { key } : {}),
     ...(signerDid !== undefined ? { signerDid } : {}),
     ...(audience !== undefined ? { audience } : {}),
     ...(nonce !== undefined ? { nonce } : {}),
+    ...(at !== undefined ? { at } : {}),
+    ...(maxAge !== undefined ? { maxAge } : {}),
+    ...(tsaRoot !== undefined ? { tsaRoot } : {}),
+    ...(maxBatchDelay !== undefined ? { maxBatchDelay } : {}),
+    ...(mirror !== undefined ? { mirror } : {}),
     trustPublishers,
     checkStatus,
     statusListFiles,
+    headerFiles,
   };
+}
+
+/** Bitcoin block headers from files shaped as A-List's anchors/headers/<height>.json: {height, header}, or a list of them. */
+function loadHeaders(files: readonly string[]): BitcoinHeader[] {
+  const out: BitcoinHeader[] = [];
+  for (const f of files) {
+    let j: unknown;
+    try {
+      j = JSON.parse(readFileSync(f, "utf8"));
+    } catch (e) {
+      die(2, `cannot read ${f}: ${(e as Error).message}`);
+    }
+    for (const h of Array.isArray(j) ? j : [j]) {
+      const r = h as { height?: unknown; header?: unknown };
+      if (typeof r.height !== "number" || typeof r.header !== "string") die(2, `${f}: a header file is {height, header}, or a list of them`);
+      out.push({ height: r.height, headerHex: r.header.toLowerCase() });
+    }
+  }
+  return out;
+}
+
+/** The RFC 3161 signature check `--tsa-root` asks for, or null; says plainly when openssl is missing. */
+function rfc3161CheckFor(args: Args): OpensslCheck | null {
+  if (args.tsaRoot === undefined) return null;
+  if (!opensslAvailable()) {
+    out("note               : --tsa-root was given but openssl is not on this machine — RFC 3161 signatures stay unchecked");
+    return null;
+  }
+  try {
+    return opensslRfc3161Check(args.tsaRoot);
+  } catch (e) {
+    die(2, `--tsa-root: ${(e as Error).message}`);
+  }
+}
+
+function printWitness(w: WitnessVerdict): void {
+  out(`  witness            : ${w.kind} — ${w.state}${w.timeUnix !== null ? `, ${iso(w.timeUnix)}` : ""} — ${w.by}`);
+  out(`    detail           : ${w.detail}`);
+}
+
+function printCheckpoint(r: CheckpointReport): void {
+  out(`Trust log checkpoint`);
+  out(`  log                : ${r.logId ?? "unknown"}`);
+  out(`  signature          : ${r.ok ? "ok" : `FAIL (${r.reason})`} — by ${r.key ?? "unknown"}, the key inside the log id`);
+  out(`  tree size          : ${r.treeSize ?? "?"}`);
+  out(`  root               : ${r.rootHash ?? "?"}`);
+  out(`  log's own time     : ${iso(r.timestampUnix)} — a claim until a public witness stamps it`);
+  out(`  previous head      : ${r.previous === null ? "none — the first" : `${r.previous.treeSize} entries, ${r.previous.rootHash}`}`);
+  out(`  witness digest     : ${r.payloadSha256 ?? "?"} — what a public witness stamps`);
+  for (const n of r.notes) out(`  note               : ${n}`);
+  printPlain(plainCheckpoint(r), r.ok);
+  out(`RESULT: ${r.ok ? "PASS" : "FAIL"}`);
+}
+
+function printLogInclusion(r: LogInclusionReport, rfc: OpensslCheck | null, allowance: number): void {
+  out(`Trust log inclusion proof`);
+  out(`  log                : ${r.logId ?? "unknown"}`);
+  out(`  entry              : ${r.entry?.kind ?? "?"} — leaf ${r.leafIndex ?? "?"} of ${r.treeSize ?? "?"}`);
+  out(`  in the log         : ${r.included ? "yes — its own path reaches the root the log's key signed" : "NO"}`);
+  out(`  checkpoint         : ${r.checkpoint === null ? "not read" : r.checkpoint.ok ? "signed by the log's own key" : `FAIL (${r.checkpoint.reason})`}`);
+  for (const w of r.witnesses) printWitness(w);
+  if (rfc !== null) out(`  tsa root           : sha256 ${rfc.rootSha256} — compare it with the authority's published fingerprint`);
+  if (r.time !== null) {
+    out(`  claimed            : ${iso(r.time.claimedAtUnix)}${r.time.backfilled ? " (backfilled — logged after the log began, about something before it)" : r.time.backfillRefused ? " (marked backfilled, but the log had begun by then — judged as any other entry)" : ""}`);
+    out(`  attested           : ${r.time.attestedAtUnix === null ? `none — ${r.time.state}` : `existed by ${iso(r.time.attestedAtUnix)}, ${r.time.by}`}`);
+    out(`  first head         : ${r.time.firstHead ? "yes — its witness is the entry's first" : "no — a later head; the claimed time is not judged"}`);
+    out(`  allowance          : ${allowance} s between a claimed time and its first witness`);
+    if (r.time.fault !== null) out(`  time               : ${r.time.fault} — the claimed time is not supported; the attested time stands`);
+  }
+  if (r.reason !== null) out(`  reason             : ${r.reason}`);
+  for (const n of r.notes) out(`  note               : ${n}`);
+  printPlain(plainLogInclusion(r), r.ok);
+  out(`RESULT: ${r.ok ? "PASS" : "FAIL"}`);
+}
+
+function printLogConsistency(r: LogConsistencyReport): void {
+  out(`Trust log consistency proof`);
+  out(`  log                : ${r.logId ?? "unknown"}`);
+  out(`  heads              : ${r.first?.treeSize ?? "?"} → ${r.second?.treeSize ?? "?"}`);
+  out(`  consistent         : ${r.consistent ? "yes — the later head keeps every entry of the earlier one, in order" : "NO"}`);
+  if (r.reason !== null) out(`  reason             : ${r.reason}`);
+  for (const n of r.notes) out(`  note               : ${n}`);
+  printPlain(plainLogConsistency(r), r.ok);
+  out(`RESULT: ${r.ok ? "PASS" : "FAIL"}`);
+}
+
+function printLogAudit(r: LogAuditReport, rfc: OpensslCheck | null): void {
+  out(`Trust log (${r.entries} entries)`);
+  out(`  log                : ${r.logId ?? "unknown"}`);
+  out(`  key                : ${r.key ?? "unknown"}`);
+  for (const c of r.checkpoints) {
+    out(`  head ${String(c.treeSize).padEnd(14)}: root ${c.rootMatches ? "rebuilt from the entries" : "DOES NOT MATCH the entries"}; ${c.consistentWithPrevious === null ? "the first held" : c.consistentWithPrevious ? "extends the head before it" : "DOES NOT extend the head before it"}; log's time ${iso(c.timestampUnix)}; attested ${c.attestedAtUnix === null ? "—" : iso(c.attestedAtUnix)}`);
+    for (const w of c.witnesses) printWitness(w);
+  }
+  if (rfc !== null) out(`  tsa root           : sha256 ${rfc.rootSha256} — compare it with the authority's published fingerprint`);
+  for (const f of r.faults) out(`  fault              : ${f.code}${f.at !== null ? ` at ${f.at}` : ""} — ${f.detail}`);
+  for (const t of r.timeFindings) out(`  time               : entry ${t.index} (${t.kind}) — ${t.fault}: ${t.text}`);
+  for (const n of r.notes) out(`  note               : ${n}`);
+  printPlain(plainLogAudit(r), r.ok);
+  out(`RESULT: ${r.ok ? (r.timeFindings.length === 0 ? "PASS" : `PASS — the log is whole; ${r.timeFindings.length} entr${r.timeFindings.length === 1 ? "y's" : "ies'"} claimed time not supported`) : "FAIL"}`);
 }
 
 const iso = (unix: number | null): string => (unix === null ? "never" : new Date(unix * 1000).toISOString().replace(".000Z", "Z"));
@@ -458,6 +632,28 @@ function printIndus(r: IndusVerifyResult): void {
 
 async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
+
+  // `attest log verify <dir>`: the whole log, from its files alone (KS-Q4).
+  if (args.command === "log-verify") {
+    const headers = loadHeaders(args.headerFiles);
+    const rfc = rfc3161CheckFor(args);
+    let files: ReturnType<typeof readLogDirectory>;
+    let mirror: ReturnType<typeof readLogDirectory> | undefined;
+    try {
+      files = readLogDirectory(args.file);
+      mirror = args.mirror === undefined ? undefined : readLogDirectory(args.mirror);
+    } catch (e) {
+      die(2, `cannot read the log: ${(e as Error).message}`);
+    }
+    const report = await auditLog(files, {
+      headers,
+      ...(mirror !== undefined ? { mirror } : {}),
+      ...(rfc !== null ? { verifyRfc3161Signature: rfc.check } : {}),
+    });
+    printLogAudit(report, rfc);
+    process.exit(report.ok ? 0 : 1);
+  }
+
   let raw: string;
   try {
     raw = readFileSync(args.file, "utf8");
@@ -482,35 +678,45 @@ async function main(): Promise<void> {
   // from the one networked path, --check-status.
   if (isSdJwt(trimmed)) {
     const resolveKey = makeKeyResolver(new Map(), new Map());
+    // --at: the time a file is checked as of — for a presentation received earlier. Otherwise the clock.
+    const asOf = args.at !== undefined ? { nowSec: args.at } : {};
     const statusLists: StatusListReport[] = [];
     for (const f of args.statusListFiles) {
-      statusLists.push(await verifyStatusList(JSON.parse(readFileSync(f, "utf8")) as DsseEnvelope, { resolveKey }));
+      statusLists.push(await verifyStatusList(JSON.parse(readFileSync(f, "utf8")) as DsseEnvelope, { resolveKey, ...asOf }));
     }
-    const first = await verifySdJwt(trimmed, { resolveKey, requireKeyBinding: false });
+    const first = await verifySdJwt(trimmed, { resolveKey, requireKeyBinding: false, ...asOf });
     const entry = statusEntryOf(first.claims);
     if (args.checkStatus && entry !== null && !statusLists.some((l) => l.ok && l.id === entry.statusListCredential)) {
       for (const f of await fetchStatusLists([entry.statusListCredential], globalThis.fetch as unknown as FetchLike)) {
         if (f.envelope === null) out(`status fetch ${f.url}: ${f.error}`);
-        else statusLists.push(await verifyStatusList(f.envelope, { resolveKey, source: "fetched" }));
+        else statusLists.push(await verifyStatusList(f.envelope, { resolveKey, source: "fetched", ...asOf }));
       }
     }
     const presented = first.keyBinding.present;
-    const bind = {
-      ...(args.audience !== undefined ? { audience: args.audience } : {}),
-      ...(args.nonce !== undefined ? { nonce: args.nonce } : {}),
-    };
+    // A presentation is made to one verifier: without its audience and nonce there is nothing to check it against (KS-Q4).
+    if (presented && (args.audience === undefined || args.nonce === undefined)) {
+      die(
+        2,
+        "this is a presentation, made to one verifier: pass --audience and --nonce — the identifier you are and the nonce you sent.\n" +
+          "For a file you check after you received it, add --at <unix seconds>, the time you received it.",
+      );
+    }
+    const when = { ...asOf, ...(args.maxAge !== undefined ? { maxKbAgeSec: args.maxAge } : {}) };
     if (first.vct === PREDICATE_VCT && presented) {
-      const report = await verifyPredicatePresentation(trimmed, { resolveKey, statusLists, ...bind });
+      const report = await verifyPredicatePresentation(trimmed, { resolveKey, statusLists, audience: args.audience!, nonce: args.nonce!, ...when });
       printPredicate(report);
       process.exit(report.ok ? 0 : 1);
     }
     if (first.vct === THANK_YOU_VCT) {
-      const opts = { resolveKey, statusLists, ...(args.nonce !== undefined ? { nonce: args.nonce } : {}) };
-      const report = presented ? await verifyRedemption(trimmed, opts) : await verifyThankYou(trimmed, opts);
+      const report = presented
+        ? await verifyRedemption(trimmed, { resolveKey, statusLists, audience: args.audience!, nonce: args.nonce!, ...when })
+        : await verifyThankYou(trimmed, { resolveKey, statusLists, ...asOf });
       printThankYou(report, presented);
       process.exit(report.ok ? 0 : 1);
     }
-    const report = await verifySdJwt(trimmed, { resolveKey, requireKeyBinding: false, ...bind });
+    const report = presented
+      ? await verifySdJwt(trimmed, { resolveKey, requireKeyBinding: true, audience: args.audience!, nonce: args.nonce!, ...when })
+      : await verifySdJwt(trimmed, { resolveKey, requireKeyBinding: false, ...asOf });
     printSdJwt(report);
     process.exit(report.ok ? 0 : 1);
   }
@@ -544,7 +750,7 @@ async function main(): Promise<void> {
   // 2a'. Holder export — no top-level payloadType either, so no collision with 2b.
   // Every key comes from inside the file; nothing is fetched unless --check-status.
   if (isHolderExport(obj)) {
-    const base = { pinnedPublishers: args.trustPublishers, rawText: raw };
+    const base = { pinnedPublishers: args.trustPublishers, rawText: raw, ...(args.at !== undefined ? { nowSec: args.at } : {}) };
     let report = await verifyHolderExport(obj, base);
     if (args.checkStatus) {
       const wanted = report.records
@@ -571,6 +777,29 @@ async function main(): Promise<void> {
     const { violations } = validateAsk(obj);
     printAsk(o.key, violations);
     process.exit(violations.length === 0 ? 0 : 1);
+  }
+
+  // 2a''''. The trust log's three artifacts (KS-Q4). The checkpoint is a DSSE envelope, so before 2b.
+  if (isLogInclusionProof(obj)) {
+    const rfc = rfc3161CheckFor(args);
+    const allowance = args.maxBatchDelay ?? DEFAULT_MAX_BATCH_DELAY_SEC;
+    const report = await verifyLogInclusion(obj, {
+      maxBatchDelaySec: allowance,
+      headers: loadHeaders(args.headerFiles),
+      ...(rfc !== null ? { verifyRfc3161Signature: rfc.check } : {}),
+    });
+    printLogInclusion(report, rfc, allowance);
+    process.exit(report.ok ? 0 : 1);
+  }
+  if (isLogConsistencyProof(obj)) {
+    const report = await verifyLogConsistency(obj);
+    printLogConsistency(report);
+    process.exit(report.ok ? 0 : 1);
+  }
+  if (o.payloadType === DST_LOG_CHECKPOINT) {
+    const report = await verifyCheckpoint(obj);
+    printCheckpoint(report);
+    process.exit(report.ok ? 0 : 1);
   }
 
   // 2a''. The holder contract's two signed documents. Checked before 2b, which
@@ -631,7 +860,7 @@ async function main(): Promise<void> {
     process.exit(exitFor(report.ok, args.key === undefined));
   }
 
-  die(2, "unrecognized artifact: not a countersign bundle, holder export, trust or status list, DSSE bundle, Every-Rupee report, or Indus token");
+  die(2, "unrecognized artifact: not a countersign bundle, holder export, trust or status list, log checkpoint or proof, DSSE bundle, Every-Rupee report, or Indus token");
 }
 
 main().catch((e: unknown) => die(2, `error: ${e instanceof Error ? e.message : String(e)}`));

@@ -55,7 +55,7 @@ describe("sd-jwt — issue, hold, present, verify", () => {
 
   it("a presentation must carry key binding", async () => {
     const [iss, h] = [await generateKeyPair(), await generateKeyPair()];
-    const r = await verifySdJwt(await credential(iss, h), { resolveKey, requireKeyBinding: true, nowSec: T });
+    const r = await verifySdJwt(await credential(iss, h), { resolveKey, requireKeyBinding: true, audience: "v", nonce: "n", nowSec: T });
     expect(r.reason).toBe("KEY_BINDING_MISSING");
   });
 });
@@ -93,23 +93,26 @@ describe("sd-jwt — tamper, replay and theft", () => {
     const p = parseSdJwt(held)!;
     const kb = shown.slice(shown.lastIndexOf("~") + 1);
     const spliced = `${p.issuerJwt}~${p.disclosures[0]}~${kb}`;
-    const r = await verifySdJwt(spliced, { resolveKey, requireKeyBinding: true, nowSec: T });
+    const r = await verifySdJwt(spliced, { resolveKey, requireKeyBinding: true, audience: "v", nonce: "n", nowSec: T });
     expect(r.reason).toBe("SD_HASH_MISMATCH");
   });
 
   it("rejects a presentation re-signed by anyone but the holder — a stolen credential cannot be shown", async () => {
     const [iss, h, thief] = [await generateKeyPair(), await generateKeyPair(), await generateKeyPair()];
     const p = await presentSdJwt(await credential(iss, h), () => false, kjs(thief), { aud: "v", nonce: "n", iatUnix: T });
-    const r = await verifySdJwt(p, { resolveKey, requireKeyBinding: true, nowSec: T });
+    const r = await verifySdJwt(p, { resolveKey, requireKeyBinding: true, audience: "v", nonce: "n", nowSec: T });
     expect(r.reason).toBe("KEY_BINDING_INVALID");
   });
 
-  it("rejects the wrong audience, the wrong nonce, and a stale binding when asked", async () => {
+  it("rejects the wrong audience, the wrong nonce, and a stale binding", async () => {
     const [iss, h] = [await generateKeyPair(), await generateKeyPair()];
     const p = await presentSdJwt(await credential(iss, h), () => false, kjs(h), { aud: "v1", nonce: "n1", iatUnix: T });
-    expect((await verifySdJwt(p, { resolveKey, requireKeyBinding: true, audience: "v2", nowSec: T })).reason).toBe("AUDIENCE_MISMATCH");
+    expect((await verifySdJwt(p, { resolveKey, requireKeyBinding: true, audience: "v2", nonce: "n1", nowSec: T })).reason).toBe("AUDIENCE_MISMATCH");
     expect((await verifySdJwt(p, { resolveKey, requireKeyBinding: true, audience: "v1", nonce: "n2", nowSec: T })).reason).toBe("NONCE_MISMATCH");
-    expect((await verifySdJwt(p, { resolveKey, requireKeyBinding: true, nowSec: T + 3600, maxKbAgeSec: 300 })).reason).toBe("KEY_BINDING_STALE");
+    expect((await verifySdJwt(p, { resolveKey, requireKeyBinding: true, audience: "v1", nonce: "n1", nowSec: T + 3600, maxKbAgeSec: 300 })).reason).toBe("KEY_BINDING_STALE");
+    // KS-Q4: a presentation check bounds the binding even when the verifier names no window — ten minutes by default.
+    expect((await verifySdJwt(p, { resolveKey, requireKeyBinding: true, audience: "v1", nonce: "n1", nowSec: T + 601 })).reason).toBe("KEY_BINDING_STALE");
+    expect((await verifySdJwt(p, { resolveKey, requireKeyBinding: true, audience: "v1", nonce: "n1", nowSec: T + 600 })).reason).toBeNull();
   });
 
   it("rejects an expired credential, an unsupported alg, a wrong typ, and an issuer it cannot resolve", async () => {

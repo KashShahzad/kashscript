@@ -12,3 +12,4 @@ export * from "./predicate";
 export * from "./presentation-log";
 export * from "./session";
 export * from "./thank-you";
+export * from "./nonce";

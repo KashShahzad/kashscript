@@ -1,6 +1,6 @@
 {
   "name": "@kashscript/identity-server",
-  "version": "0.2.0",
+  "version": "0.3.0-alpha.0",
   "description": "Server-side did:kash identity — server-issued guest DIDs, handshake challenge/response, self-certifying DID resolution, JWKS publishing, and the MCP-conformant agent-identity profile: OAuth 2.1 + PKCE (S256), RFC 8707 audience-bound, RFC 8693 agent→owner delegated access tokens (RFC 9068 JWT). Apache-2.0 — identity is free.",
   "type": "module",
   "main": "./src/index.ts",

@@ -19,8 +19,12 @@
 import { bytesToBase64, ed25519PublicKeyToSpkiPem, signRawEd25519, type RawEd25519Signer } from "../ed25519";
 import { bytesToHex, hexToBytes } from "../chain";
 
-/** RFC 6962's tree: a batch where each member proves its place with its own path (GP-6). */
+/** RFC 6962's tree: a batch where each member proves its place with its own path (GP-6), and the consistency proof between two heads (KS-Q4). */
 export * from "./rfc6962";
+/** The two public witnesses the trust log uses, read offline: OpenTimestamps and RFC 3161 (KS-Q4). */
+export * from "./verdict";
+export * from "./ots";
+export * from "./rfc3161";
 
 /* ── Anchor shapes ─────────────────────────────────────────────────────── */
 

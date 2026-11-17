@@ -9,7 +9,7 @@ import { join } from "node:path";
 import { getSchemaDefinition } from "../src/engine";
 import { LexiconRegistry } from "../src/registry";
 import { KASH_GUIDE_ID, KASH_LISTING_ID, KASH_PLACE_ID, KASH_PLACE_POINTER_ID } from "../src/extensions/place";
-import { KASH_STATUS_LIST_ID, KASH_TRUST_LIST_ID } from "../src/extensions/lists";
+import { KASH_STATUS_LIST_1_1_ID, KASH_TRUST_LIST_ID } from "../src/extensions/lists";
 import { PUBLIC_RECORD_LEXICONS, PUBLIC_RECORD_NSIDS, findPersonIdentity, isPublicRecordNsid, publicRecordFaults } from "../src/extensions/public";
 import { STANDARD_LIBRARY } from "../src/lexicons";
 import { SOCIAL_EXTENSION } from "../src/extensions/social";
@@ -66,7 +66,8 @@ describe("the published JSON Schemas stay in step with the lexicons", () => {
     [KASH_LISTING_ID, "listing.schema.json"],
     [KASH_GUIDE_ID, "guide.schema.json"],
     [KASH_TRUST_LIST_ID, "trust-list.schema.json"],
-    [KASH_STATUS_LIST_ID, "status-list.schema.json"],
+    // The published schema is the newest version's, as rule.schema.json is (KS-Q4: 1.1.0 adds supersession and withdrawal).
+    [KASH_STATUS_LIST_1_1_ID, "status-list.schema.json"],
   ] as const) {
     test(file, () => {
       const generated = getSchemaDefinition(id, registry);

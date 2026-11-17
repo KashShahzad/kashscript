@@ -1,6 +1,6 @@
 {
   "name": "@kashscript/wallet",
-  "version": "0.1.0-alpha.6",
+  "version": "0.1.0-alpha.7",
   "description": "The wallet component — keys first, no account. Receives, holds, presents and exports signed records on the holder's own device: a hardware root that never signs, relationship keys that never leave in the clear, a proof switch that never leaves the device, and deletion at expiry that is real. Headless core, web and Expo adapters, and a headless mode for the simulation. Apache-2.0.",
   "type": "module",
   "main": "./src/index.ts",

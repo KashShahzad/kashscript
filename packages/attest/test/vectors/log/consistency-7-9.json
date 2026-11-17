@@ -1,0 +1,35 @@
+{
+  "format": "kashscript-log-consistency/1",
+  "logId": "did:kash:8kCvT4dL7i2iX33ub1YCAJSCdyvHD1WrKPpvoBH3Wbd5/log/sample",
+  "first": 7,
+  "second": 9,
+  "path": [
+    "a593d1cf0deadfd4c82164b2204da213c9abf8fe2cf2fb651ad6de36d385de10",
+    "18356c5230f42a1fdd3998f5f5d7d256641c587d494954f9327346ccfc864f0e",
+    "f08e11eb92af9b9ad208d41a908ff1f1114ce8f6b2f7fbee155ce690498b9621",
+    "508eb4610b27d18c86457fa6a0da603755293f1075fb6ac8b0a5c8454d817c80",
+    "64d30f114af6c8b84885e84c73f4b2cd3ac787709134078dc97115098570585e"
+  ],
+  "checkpoints": {
+    "first": {
+      "payloadType": "application/vnd.kash.log-checkpoint+json",
+      "payload": "eyJmb3JtYXQiOiJrYXNoc2NyaXB0LWxvZy1jaGVja3BvaW50LzEiLCJsb2dJZCI6ImRpZDprYXNoOjhrQ3ZUNGRMN2kyaVgzM3ViMVlDQUpTQ2R5dkhEMVdyS1Bwdm9CSDNXYmQ1L2xvZy9zYW1wbGUiLCJwcmV2aW91cyI6eyJyb290SGFzaCI6IjUwOGViNDYxMGIyN2QxOGM4NjQ1N2ZhNmEwZGE2MDM3NTUyOTNmMTA3NWZiNmFjOGIwYTVjODQ1NGQ4MTdjODAiLCJ0cmVlU2l6ZSI6NH0sInJvb3RIYXNoIjoiYjY4MDRiNThmZDFkZjFkOGE3NTRmZDAxZjAzZTQzYjdlOGQ3MzQ0MmYzN2M3YzAyNGQzOWYxMDIxY2QwMjIxZCIsInRpbWVzdGFtcFVuaXgiOjE3OTQ5NDU1MDksInRyZWVTaXplIjo3fQ==",
+      "signatures": [
+        {
+          "keyid": "did:kash:8kCvT4dL7i2iX33ub1YCAJSCdyvHD1WrKPpvoBH3Wbd5",
+          "sig": "2lOWZJQZxKPMZxbTRstwx0l6SIPZz4CECP4I0kU11Uh57t7HByRQyCVM45eEEQjKupfCrIc5qZA7LxhZMcveAw=="
+        }
+      ]
+    },
+    "second": {
+      "payloadType": "application/vnd.kash.log-checkpoint+json",
+      "payload": "eyJmb3JtYXQiOiJrYXNoc2NyaXB0LWxvZy1jaGVja3BvaW50LzEiLCJsb2dJZCI6ImRpZDprYXNoOjhrQ3ZUNGRMN2kyaVgzM3ViMVlDQUpTQ2R5dkhEMVdyS1Bwdm9CSDNXYmQ1L2xvZy9zYW1wbGUiLCJwcmV2aW91cyI6eyJyb290SGFzaCI6ImI2ODA0YjU4ZmQxZGYxZDhhNzU0ZmQwMWYwM2U0M2I3ZThkNzM0NDJmMzdjN2MwMjRkMzlmMTAyMWNkMDIyMWQiLCJ0cmVlU2l6ZSI6N30sInJvb3RIYXNoIjoiMzQ2NTAwZmVhMGNjYjg1M2RiZDdhMjFiMmJmNWQxNDliZjg5N2JjYzU0N2QxYTVkYmM2Y2Y5YjUyZjM5ZTgzZSIsInRpbWVzdGFtcFVuaXgiOjE3OTQ5NDU1NTksInRyZWVTaXplIjo5fQ==",
+      "signatures": [
+        {
+          "keyid": "did:kash:8kCvT4dL7i2iX33ub1YCAJSCdyvHD1WrKPpvoBH3Wbd5",
+          "sig": "ESDVdSwi0PYXOCpQOtQZDjnsVfW7G5eGrpUXX3teDvVUW3eOPzpxBVdJq/8HPx6Rr6BoftVLMMdIZKN9yzqwCg=="
+        }
+      ]
+    }
+  }
+}

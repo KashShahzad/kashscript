@@ -1,6 +1,6 @@
 {
   "name": "@kashscript/lexicons",
-  "version": "0.5.0-alpha.0",
+  "version": "0.6.0-alpha.0",
   "description": "Zero-dependency lexicon framework — envelope, schema DSL, registry, validator — and the public, organisation-authored records of the open protocol (a door's rule and adoption; places, listings and guides; trust and status lists), as opt-in extensions.",
   "type": "module",
   "main": "./src/index.ts",

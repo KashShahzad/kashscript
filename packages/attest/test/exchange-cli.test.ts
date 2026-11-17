@@ -16,6 +16,9 @@ const BIN = "dist/bin/attest.js";
 const GUARD = "./test/offline-guard.cjs";
 const V = "test/vectors/exchange";
 const ctx = JSON.parse(readFileSync(join(PKG, V, "context.v1.json"), "utf8"));
+/** The frozen presentations, checked as of a minute after their bindings were made (KS-Q4: a binding is fresh for ten minutes). */
+const AT_A = ["--at", "1790298060"];
+const AT_REDEEM = ["--at", "1790899260"];
 
 function run(args: readonly string[]): { status: number | null; stdout: string; stderr: string } {
   const r = spawnSync("node", ["--require", GUARD, BIN, "verify", ...args], { cwd: PKG, encoding: "utf8", shell: WIN });
@@ -29,7 +32,7 @@ beforeAll(() => {
 
 describe("attest bin — presentations, sessions and thank-yous, with the network disabled", () => {
   it("a predicate presentation passes against the audience and nonce its verifier sent", () => {
-    const r = run([`${V}/predicate-presentation-a.v1.txt`, "--audience", ctx.verifiers.a.did, "--nonce", ctx.verifiers.a.nonce, "--status-list", `${V}/predicate-status-list.v1.json`]);
+    const r = run([`${V}/predicate-presentation-a.v1.txt`, "--audience", ctx.verifiers.a.did, "--nonce", ctx.verifiers.a.nonce, ...AT_A, "--status-list", `${V}/predicate-status-list.v1.json`]);
     expect(r.stderr).not.toContain("offline-guard");
     expect(r.status).toBe(0);
     expect(r.stdout).toContain("judged against     : rule rule-demo-1 version 3");
@@ -38,8 +41,21 @@ describe("attest bin — presentations, sessions and thank-yous, with the networ
     expect(r.stdout).toContain("RESULT: PASS");
   });
 
+  it("KS-Q4: a presentation is checked against the verifier's audience and nonce, fresh — never without them", () => {
+    const bare = run([`${V}/predicate-presentation-a.v1.txt`]);
+    expect(bare.status).toBe(2);
+    expect(bare.stderr).toContain("pass --audience and --nonce");
+    // Checked today, weeks after it was made, the binding is stale.
+    const late = run([`${V}/predicate-presentation-a.v1.txt`, "--audience", ctx.verifiers.a.did, "--nonce", ctx.verifiers.a.nonce]);
+    expect(late.status).toBe(1);
+    expect(late.stdout).toContain("KEY_BINDING_STALE");
+    // A verifier may widen the window, and says so with --max-age.
+    const wide = run([`${V}/predicate-presentation-a.v1.txt`, "--audience", ctx.verifiers.a.did, "--nonce", ctx.verifiers.a.nonce, "--at", "1790301600", "--max-age", "3600"]);
+    expect(wide.status).toBe(0);
+  }, 60_000);
+
   it("the same presentation fails for another verifier (exit 1)", () => {
-    const r = run([`${V}/predicate-presentation-a.v1.txt`, "--audience", ctx.verifiers.b.did, "--nonce", ctx.verifiers.a.nonce]);
+    const r = run([`${V}/predicate-presentation-a.v1.txt`, "--audience", ctx.verifiers.b.did, "--nonce", ctx.verifiers.a.nonce, ...AT_A]);
     expect(r.status).toBe(1);
     expect(r.stdout).toContain("DOES NOT MATCH");
   });
@@ -89,11 +105,12 @@ describe("attest bin — presentations, sessions and thank-yous, with the networ
   });
 
   it("a thank-you redeems with its own issuer, and is refused once the issuer marks it used", () => {
-    const ok = run([`${V}/thank-you-redemption.v1.txt`, "--nonce", ctx.redemptionNonce, "--status-list", `${V}/thank-you-status-before.v1.json`]);
+    const ok = run([`${V}/thank-you-redemption.v1.txt`, "--audience", ctx.cafe, "--nonce", ctx.redemptionNonce, ...AT_REDEEM, "--status-list", `${V}/thank-you-status-before.v1.json`]);
+    expect(ok.status).toBe(0);
     expect(ok.stdout).toContain("presented to       :");
     expect(ok.stdout).toContain("its own issuer");
     expect(ok.stdout).toContain("never the answer");
-    const used = run([`${V}/thank-you-redemption.v1.txt`, "--nonce", ctx.redemptionNonce, "--status-list", `${V}/thank-you-status-after.v1.json`]);
+    const used = run([`${V}/thank-you-redemption.v1.txt`, "--audience", ctx.cafe, "--nonce", ctx.redemptionNonce, ...AT_REDEEM, "--status-list", `${V}/thank-you-status-after.v1.json`]);
     expect(used.status).toBe(1);
     expect(used.stdout).toContain("USED_OR_WITHDRAWN");
   });
@@ -106,11 +123,11 @@ describe("attest bin — presentations, sessions and thank-yous, with the networ
   });
 
   it("--check-status is the only path that reaches for the network", () => {
-    const quiet = run([`${V}/predicate-presentation-a.v1.txt`, "--audience", ctx.verifiers.a.did, "--nonce", ctx.verifiers.a.nonce]);
+    const quiet = run([`${V}/predicate-presentation-a.v1.txt`, "--audience", ctx.verifiers.a.did, "--nonce", ctx.verifiers.a.nonce, ...AT_A]);
     expect(quiet.status).toBe(0);
     expect(quiet.stdout).not.toContain("offline-guard");
     expect(quiet.stdout).toContain("status not checked");
-    const asked = run([`${V}/predicate-presentation-a.v1.txt`, "--audience", ctx.verifiers.a.did, "--nonce", ctx.verifiers.a.nonce, "--check-status"]);
+    const asked = run([`${V}/predicate-presentation-a.v1.txt`, "--audience", ctx.verifiers.a.did, "--nonce", ctx.verifiers.a.nonce, ...AT_A, "--check-status"]);
     expect(asked.stdout).toContain("offline-guard: fetch is disabled");
   });
 });

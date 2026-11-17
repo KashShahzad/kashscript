@@ -204,11 +204,15 @@ describe("thank-yous", () => {
     const presentation = await w.wallet.thankYous.redeem(note!.id, { client_id: w.cafe.issuer.did, nonce: "counter-nonce" });
     const resolveKey = makeKeyResolver(new Map(), new Map());
     const before = [await verifyStatusList(await w.cafe.issuer.statusList(), { resolveKey, nowSec: w.now() })];
-    expect((await verifyRedemption(presentation, { resolveKey, nonce: "counter-nonce", statusLists: before, nowSec: w.now() })).ok).toBe(true);
+    // The café checks the redemption as itself — its own identifier and the nonce it sent (attest 0.3.0, KS-Q4).
+    const asCafe = { resolveKey, audience: w.cafe.issuer.did, nonce: "counter-nonce", nowSec: w.now() };
+    expect((await verifyRedemption(presentation, { ...asCafe, statusLists: before })).ok).toBe(true);
+    // Another party holding the same presentation cannot redeem it as the café.
+    expect((await verifyRedemption(presentation, { ...asCafe, audience: w.verifier.did, statusLists: before })).reason).toBe("REDEEMED_ELSEWHERE");
     const held = (await w.wallet.records.get(note!.id))!;
     w.cafe.issuer.revoke(held.manifest.status!);
     const after = [await verifyStatusList(await w.cafe.issuer.statusList(), { resolveKey, nowSec: w.now() })];
-    expect((await verifyRedemption(presentation, { resolveKey, nonce: "counter-nonce", statusLists: after, nowSec: w.now() })).reason).toBe("USED_OR_WITHDRAWN");
+    expect((await verifyRedemption(presentation, { ...asCafe, statusLists: after })).reason).toBe("USED_OR_WITHDRAWN");
   });
 });
 

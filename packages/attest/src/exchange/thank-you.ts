@@ -122,16 +122,18 @@ function voucherStatus(v: StatusVerdict): StatusVerdict {
   return v;
 }
 
-async function check(input: string, opts: VerifyThankYouOptions, requireKeyBinding: boolean): Promise<ThankYouReport> {
-  const sd = await verifySdJwt(input, {
+async function check(input: string, opts: VerifyThankYouOptions, presented: { readonly audience: string; readonly nonce: string } | null): Promise<ThankYouReport> {
+  const common = {
     resolveKey: opts.resolveKey,
-    requireKeyBinding,
     ...(opts.nowSec !== undefined ? { nowSec: opts.nowSec } : {}),
-    ...(opts.nonce !== undefined ? { nonce: opts.nonce } : {}),
     ...(opts.maxKbAgeSec !== undefined ? { maxKbAgeSec: opts.maxKbAgeSec } : {}),
-  });
+  };
+  const sd =
+    presented === null
+      ? await verifySdJwt(input, { ...common, requireKeyBinding: false, ...(opts.nonce !== undefined ? { nonce: opts.nonce } : {}) })
+      : await verifySdJwt(input, { ...common, requireKeyBinding: true, audience: presented.audience, nonce: presented.nonce });
   const c = sd.claims;
-  const status = voucherStatus(checkStatus(statusEntryOf(c), opts.statusLists ?? []));
+  const status = voucherStatus(checkStatus(statusEntryOf(c), opts.statusLists ?? [], opts.nowSec !== undefined ? { nowSec: opts.nowSec } : {}));
   const f = c !== null && isPlainObject(c.for) ? (c.for as unknown as ThankYouFor) : null;
   let reason: ThankYouFailureReason | null = null;
   if (!sd.ok) reason = "SD_JWT_INVALID";
@@ -165,24 +167,36 @@ export interface VerifyThankYouOptions {
   readonly resolveKey: KeyResolver;
   readonly nowSec?: number;
   readonly statusLists?: readonly StatusListReport[];
+  /** For a held voucher that carries a binding: checked against it when given. */
   readonly nonce?: string;
   readonly maxKbAgeSec?: number;
 }
 
+/** A redemption is a presentation to the voucher's own issuer: it checks against its own identifier and the nonce it sent (KS-Q4). */
+export interface VerifyRedemptionOptions extends VerifyThankYouOptions {
+  /** The redeeming issuer's own identifier. A voucher bound to anyone else, or given by anyone else, is redeemed elsewhere. */
+  readonly audience: string;
+  readonly nonce: string;
+}
+
 /** Verify a held thank-you: its issuer, its shape, and that nothing in it can be summed. */
 export function verifyThankYou(voucher: string, opts: VerifyThankYouOptions): Promise<ThankYouReport> {
-  return check(voucher, opts, false);
+  return check(voucher, opts, null);
 }
 
 /**
- * Verify a redemption: the voucher presented by its holder, to its own issuer.
- * Fails if it is bound to another audience, if anyone but the holder's key
- * signed it, or if the issuer's status list says it is used or withdrawn.
+ * Verify a redemption: the voucher presented by its holder, to its own issuer,
+ * for the nonce that issuer sent. Fails if it is bound to another audience or
+ * given by someone other than the redeeming issuer, if anyone but the holder's
+ * key signed it, if the binding is stale, or if the issuer's status list says
+ * it is used or withdrawn.
  */
-export async function verifyRedemption(presentation: string, opts: VerifyThankYouOptions): Promise<ThankYouReport> {
-  const r = await check(presentation, opts, true);
+export async function verifyRedemption(presentation: string, opts: VerifyRedemptionOptions): Promise<ThankYouReport> {
+  const r = await check(presentation, opts, { audience: opts.audience, nonce: opts.nonce });
+  const elsewhere =
+    r.sdJwt.reason === "AUDIENCE_MISMATCH" || (r.sdJwt.ok && (r.issuer === null || opts.audience !== r.issuer || r.sdJwt.keyBinding.audience !== r.issuer));
+  if (elsewhere) return { ...r, ok: false, reason: "REDEEMED_ELSEWHERE" };
   if (!r.ok) return r;
-  if (r.sdJwt.keyBinding.audience !== r.issuer) return { ...r, ok: false, reason: "REDEEMED_ELSEWHERE" };
-  if (r.status.state === "revoked") return { ...r, ok: false, reason: "USED_OR_WITHDRAWN" };
+  if (r.status.state === "revoked" || r.status.state === "withdrawn") return { ...r, ok: false, reason: "USED_OR_WITHDRAWN" };
   return r;
 }

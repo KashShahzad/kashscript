@@ -26,6 +26,26 @@ import { selfCertifyingTypedKey, stripFragment, typedKeyOf, type ListedKey, type
 export const DST_TRUST_LIST = "application/vnd.kash.trust-list+json" as const;
 export const TRUST_LIST_FORMAT = "kashscript-trust-list/1" as const;
 
+/** d91(f)'s issuer classes. An assurance carries the assessor's liability; Indorania carries none for a fact. Equal to lexicons' (a muffler test keeps them so). */
+export const ISSUER_CLASSES = ["self-issuer", "counterparty", "assessor", "accredited-body", "insurer"] as const;
+export type IssuerClass = (typeof ISSUER_CLASSES)[number];
+
+/** d91(f)'s standing. Only `listed` lists; the other two say why an entry is still written down. */
+export const STANDINGS = ["listed", "suspended", "removed"] as const;
+export type Standing = (typeof STANDINGS)[number];
+
+/** The floor an entry conforms to (d91(f): every trust entry cites the version of the floor it conforms to). */
+export interface FloorRef {
+  readonly version: string;
+  readonly hash?: string;
+}
+
+/** A reference an issuer may attest against — a rule, a standard's clause — by id, and by hash when one version is meant. */
+export interface TrustListReference {
+  readonly id: string;
+  readonly hash?: string;
+}
+
 export interface TrustListIssuer {
   /** The issuer's identifier — a `did:kash`, or a stable id when its keys are listed below. */
   readonly issuerId: string;
@@ -33,10 +53,20 @@ export interface TrustListIssuer {
   readonly label: string;
   /** Keys for signers whose identifiers are not self-certifying (JWKS kids, structured DIDs). */
   readonly keys: readonly PublicKeyEntry[];
-  /** The exact registered DSTs this issuer may issue. */
+  /** Scope, part one: the exact registered DSTs this issuer may issue. */
   readonly dsts: readonly string[];
   readonly validFromUnix: number;
   readonly validUntilUnix: number;
+  /** Identity: which class of issuer (d91(f)). Absent in a list written before d91. */
+  readonly class?: IssuerClass;
+  /** Standing: only `listed` lists. Absent reads as listed — a list written before d91 lists by its windows alone. */
+  readonly standing?: Standing;
+  /** Identity: the grade at which this key was shown to be this organisation's (d91(d)); 3 is the organisation signing as itself. */
+  readonly grade?: 0 | 1 | 2 | 3;
+  /** Scope, part two: the references it may attest against. Absent: any. */
+  readonly references?: readonly TrustListReference[];
+  /** This entry's floor, where it differs from the list's. */
+  readonly floor?: FloorRef;
 }
 
 export interface TrustListPayload {
@@ -50,6 +80,9 @@ export interface TrustListPayload {
   readonly validFromUnix: number;
   readonly validUntilUnix: number;
   readonly issuers: readonly TrustListIssuer[];
+  /** The floor every entry is bound to, unless its own says otherwise (d91(f)). */
+  readonly floor?: FloorRef;
+  readonly practice?: boolean;
 }
 
 export type TrustListFailureReason =
@@ -58,7 +91,9 @@ export type TrustListFailureReason =
   | "TRUST_LIST_PUBLISHER_NOT_SELF_CERTIFYING"
   | "TRUST_LIST_SIGNATURE_INVALID"
   | "TRUST_LIST_UNREGISTERED_DST"
-  | "TRUST_LIST_BAD_KEY";
+  | "TRUST_LIST_BAD_KEY"
+  /** A class, standing, grade, reference or floor that is not one of the values d91 defines (KS-Q4). */
+  | "TRUST_LIST_BAD_ASSERTION";
 
 export interface TrustListReport {
   /** The signature and the structure hold. Says nothing about pinning or time. */
@@ -73,6 +108,9 @@ export interface TrustListReport {
   readonly issuedAtUnix: number | null;
   readonly validUntilUnix: number | null;
   readonly issuers: readonly TrustListIssuer[];
+  /** The floor the list binds its entries to, or null for a list written before d91. */
+  readonly floor: FloorRef | null;
+  readonly practice: boolean;
   readonly reason: TrustListFailureReason | null;
   readonly notes: readonly string[];
 }
@@ -98,6 +136,18 @@ export function decodeEnvelopePayload(envelope: unknown): unknown {
   }
 }
 
+const HEX64 = /^[0-9a-f]{64}$/;
+const shortText = (v: unknown, max: number): v is string => typeof v === "string" && v.length > 0 && v.length <= max;
+
+/** A floor reference: a version's name and, once the floor is a record, its hash. */
+function isFloorRef(v: unknown): v is FloorRef {
+  return isPlainObject(v) && shortText(v.version, 64) && (v.hash === undefined || (typeof v.hash === "string" && HEX64.test(v.hash))) && Object.keys(v).every((k) => k === "version" || k === "hash");
+}
+
+function isReference(v: unknown): v is TrustListReference {
+  return isPlainObject(v) && shortText(v.id, 256) && (v.hash === undefined || (typeof v.hash === "string" && HEX64.test(v.hash))) && Object.keys(v).every((k) => k === "id" || k === "hash");
+}
+
 /** Structural check of one issuer entry; the reason, or null. */
 function issuerFault(e: unknown): TrustListFailureReason | null {
   if (!isPlainObject(e)) return "MALFORMED_TRUST_LIST";
@@ -112,6 +162,12 @@ function issuerFault(e: unknown): TrustListFailureReason | null {
   for (const d of e.dsts) {
     if (typeof d !== "string" || !isRegisteredDst(d)) return "TRUST_LIST_UNREGISTERED_DST";
   }
+  // d91's three assertions, when written: each only one of the values d91 defines (KS-Q4).
+  if (e.class !== undefined && !(ISSUER_CLASSES as readonly unknown[]).includes(e.class)) return "TRUST_LIST_BAD_ASSERTION";
+  if (e.standing !== undefined && !(STANDINGS as readonly unknown[]).includes(e.standing)) return "TRUST_LIST_BAD_ASSERTION";
+  if (e.grade !== undefined && !(isInt(e.grade) && e.grade >= 0 && e.grade <= 3)) return "TRUST_LIST_BAD_ASSERTION";
+  if (e.references !== undefined && !(Array.isArray(e.references) && e.references.length <= 64 && e.references.every(isReference))) return "TRUST_LIST_BAD_ASSERTION";
+  if (e.floor !== undefined && !isFloorRef(e.floor)) return "TRUST_LIST_BAD_ASSERTION";
   return null;
 }
 
@@ -126,6 +182,8 @@ function failed(reason: TrustListFailureReason, note: string, partial: Partial<T
     issuedAtUnix: null,
     validUntilUnix: null,
     issuers: [],
+    floor: null,
+    practice: false,
     ...partial,
     reason,
     notes: [note],
@@ -186,6 +244,8 @@ export async function verifyTrustList(
     const fault = issuerFault(e);
     if (fault !== null) return failed(fault, "an issuer entry is invalid", partial);
   }
+  if (p.floor !== undefined && !isFloorRef(p.floor)) return failed("TRUST_LIST_BAD_ASSERTION", "the list's floor is not a version and an optional hash", partial);
+  if (p.practice !== undefined && typeof p.practice !== "boolean") return failed("MALFORMED_TRUST_LIST", "practice is true or false", partial);
 
   const now = opts.nowSec ?? Math.floor(Date.now() / 1000);
   const pinned = (opts.pinnedPublishers ?? []).includes(p.publisher);
@@ -193,13 +253,19 @@ export async function verifyTrustList(
   const notes: string[] = [];
   if (!pinned) notes.push(`publisher ${p.publisher} is not pinned — this list is its word only and lists nobody`);
   if (!current) notes.push("outside its validity window — it lists nobody until a current version is presented");
+  const issuers = p.issuers as unknown as readonly TrustListIssuer[];
+  const held = issuers.filter((e) => e.standing === "suspended" || e.standing === "removed").length;
+  if (held > 0) notes.push(`${held} entr${held === 1 ? "y is" : "ies are"} suspended or removed — written down, listing nothing`);
+  if (p.practice === true) notes.push("a practice list — not a real-world fact");
   notes.push("offline: a newer version may exist; this check can only use the versions presented");
   return {
     ok: true,
     ...partial,
     pinned,
     current,
-    issuers: p.issuers as unknown as readonly TrustListIssuer[],
+    issuers,
+    floor: p.floor === undefined ? null : (p.floor as FloorRef),
+    practice: p.practice === true,
     reason: null,
     notes,
   };
@@ -226,6 +292,13 @@ export function currentTrustLists(reports: readonly TrustListReport[]): readonly
   return [...best.values()];
 }
 
+/**
+ * Scope, part two, for one entry: `unscoped` when the entry names no references
+ * (it may attest against any); `not-checked` when it names some but the caller
+ * did not say what the record is against; `in-scope` or `out-of-scope` otherwise.
+ */
+export type ListingScope = "in-scope" | "out-of-scope" | "unscoped" | "not-checked";
+
 export interface ListingMatch {
   readonly listId: string;
   readonly version: number;
@@ -234,26 +307,68 @@ export interface ListingMatch {
   readonly label: string;
   /** Only a pinned match makes a record "listed". */
   readonly pinned: boolean;
+  /** Identity: the issuer's class, or null for a list written before d91. */
+  readonly class: IssuerClass | null;
+  /** Identity: the grade the key was shown at, or null. */
+  readonly grade: 0 | 1 | 2 | 3 | null;
+  /** Standing, as the entry writes it (absent reads as listed). */
+  readonly standing: Standing;
+  readonly scope: ListingScope;
+  /** The entry's floor, else the list's, else null. */
+  readonly floor: FloorRef | null;
+}
+
+/** A pinned, current list names the signer for this tag and does not list it. */
+export interface ListingRefusal extends ListingMatch {
+  readonly why: "suspended" | "removed" | "out-of-scope";
+}
+
+export interface ListingLookup {
+  /** The listing that lists it now: standing listed, inside its window, in scope; a pinned list's first. */
+  readonly listing: ListingMatch | null;
+  /** Why a pinned list that names it does not list it, when none does. A suspension or removal in any pinned list stands over a listing elsewhere. */
+  readonly refused: ListingRefusal | null;
+}
+
+export interface FindListingOptions {
+  /** What the record is against — a rule's id and hash — so the entry's scope can be read. */
+  readonly reference?: TrustListReference;
+}
+
+function scopeOf(e: TrustListIssuer, reference: TrustListReference | undefined): ListingScope {
+  if (e.references === undefined || e.references.length === 0) return "unscoped";
+  if (reference === undefined) return "not-checked";
+  const hit = e.references.some((r) => r.id === reference.id && (r.hash === undefined || reference.hash === undefined || r.hash === reference.hash));
+  return hit ? "in-scope" : "out-of-scope";
 }
 
 /**
- * Is `signer` listed to issue `tag` right now? Prefers a pinned list. Checks the
- * entry's own window as well as the list's.
+ * Is `signer` listed to issue `tag` right now — and if a pinned list names it
+ * without listing it, why not? Reads d91's three assertions: identity (class,
+ * grade), standing (only `listed` lists; a suspended or removed entry is a
+ * refusal whatever its window) and scope (the exact tag, and the reference when
+ * the caller names one). Prefers a pinned list. Checks the entry's own window as
+ * well as the list's.
  */
-export function findListing(
+export function lookupListing(
   signer: string,
   tag: string,
   lists: readonly TrustListReport[],
   nowSec: number,
-): ListingMatch | null {
+  opts: FindListingOptions = {},
+): ListingLookup {
+  let pinnedMatch: ListingMatch | null = null;
   let unpinned: ListingMatch | null = null;
+  let sanction: ListingRefusal | null = null;
+  let outOfScope: ListingRefusal | null = null;
   for (const list of currentTrustLists(lists)) {
     for (const e of list.issuers) {
       if (!e.dsts.includes(tag)) continue;
-      if (nowSec < e.validFromUnix || nowSec > e.validUntilUnix) continue;
       const bySelf = stripFragment(signer) === e.issuerId && selfCertifyingTypedKey(signer) !== null;
       const byKey = e.keys.some((k) => k.keyid === signer);
       if (!bySelf && !byKey) continue;
+      const standing: Standing = e.standing ?? "listed";
+      const scope = scopeOf(e, opts.reference);
       const match: ListingMatch = {
         listId: list.listId as string,
         version: list.version as number,
@@ -261,12 +376,44 @@ export function findListing(
         issuerId: e.issuerId,
         label: e.label,
         pinned: list.pinned,
+        class: e.class ?? null,
+        grade: e.grade ?? null,
+        standing,
+        scope,
+        floor: e.floor ?? list.floor ?? null,
       };
-      if (list.pinned) return match;
-      unpinned ??= match;
+      if (standing !== "listed") {
+        // A sanction is read whatever the entry's window says (its window ends when it is written: lexicons' STANDING_WINDOW).
+        if (list.pinned) sanction ??= { ...match, why: standing };
+        continue;
+      }
+      if (nowSec < e.validFromUnix || nowSec > e.validUntilUnix) continue;
+      if (scope === "out-of-scope") {
+        if (list.pinned) outOfScope ??= { ...match, why: "out-of-scope" };
+        continue;
+      }
+      if (list.pinned) pinnedMatch ??= match;
+      else unpinned ??= match;
     }
   }
-  return unpinned;
+  if (sanction !== null) return { listing: null, refused: sanction };
+  const listing = pinnedMatch ?? unpinned;
+  return { listing, refused: listing?.pinned === true ? null : outOfScope };
+}
+
+/**
+ * Is `signer` listed to issue `tag` right now? Prefers a pinned list. Checks the
+ * entry's own window as well as the list's, its standing, and its scope when a
+ * reference is given. {@link lookupListing} also says why not.
+ */
+export function findListing(
+  signer: string,
+  tag: string,
+  lists: readonly TrustListReport[],
+  nowSec: number,
+  opts: FindListingOptions = {},
+): ListingMatch | null {
+  return lookupListing(signer, tag, lists, nowSec, opts).listing;
 }
 
 /** Every key the current lists name, marked with whether its list is pinned. */

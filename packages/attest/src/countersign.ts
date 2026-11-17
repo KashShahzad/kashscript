@@ -99,6 +99,13 @@ export type { CountersignKeyClaim, CountersignKeyClaimBody, CountersignKeyClaimR
 /** Format id of the container. Also the CLI's auto-detect discriminant. */
 export const COUNTERSIGN_BUNDLE_FORMAT = "kashscript-countersign/1" as const;
 
+/**
+ * The longest window a request may give (KS-Q4; d84 P6: short-lived approval
+ * links): 90 days. identity-server never mints a longer one; a checker refuses
+ * one, whoever made it, so the ceiling holds for every implementation.
+ */
+export const COUNTERSIGN_MAX_TTL_SECONDS = 90 * 24 * 60 * 60;
+
 /** DST of the holder's request. Registered in `./dst`. */
 export const DST_COUNTERSIGN_REQUEST = "kash-countersign-request-v1\n" as const;
 /** DST of the counterparty's acceptance. */
@@ -236,6 +243,8 @@ export type CountersignFailureReason =
   | "ACCEPTANCE_SIGNATURE_INVALID"
   | "ACCEPTANCE_BINDING_MISMATCH"
   | "SIGNED_OUTSIDE_WINDOW"
+  /** The request's own window is longer than any approval link may be open (KS-Q4: 90 days). */
+  | "REQUEST_WINDOW_TOO_LONG"
   | "COUNTERSIGNER_NOT_IN_ENVELOPE"
   /** Every acceptance that verifies is the requester's own key — a signature over its own claim, never a countersignature (d26; AU-3, A7-02). */
   | "COUNTERSIGNER_IS_REQUESTER"
@@ -446,6 +455,11 @@ async function verifyCountersignBundleInner(
 
   if (body.subjectPayloadType !== subject.payloadType) fail("SUBJECT_TYPE_MISMATCH");
   if (body.subjectDigestSha256 !== subjectDigest) fail("SUBJECT_DIGEST_MISMATCH");
+  // A link open longer than the ceiling is a standing claim on somebody, whoever minted it (KS-Q4).
+  if (typeof body.issuedAtUnix === "number" && typeof body.expiresAtUnix === "number" && body.expiresAtUnix - body.issuedAtUnix > COUNTERSIGN_MAX_TTL_SECONDS) {
+    fail("REQUEST_WINDOW_TOO_LONG");
+    notes.push(`the request was open for ${Math.round((body.expiresAtUnix - body.issuedAtUnix) / 86_400)} days — longer than any approval link may be (${COUNTERSIGN_MAX_TTL_SECONDS / 86_400} days)`);
+  }
 
   const requestDigest = await countersignRequestDigest(request);
 

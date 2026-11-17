@@ -26,7 +26,9 @@ export type KashCliErrorCode =
   /** The record names a different station than the key offered to countersign it. */
   | "WRONG_STATION"
   /** `verify` could not find attest's verifier to run. */
-  | "VERIFIER_NOT_FOUND";
+  | "VERIFIER_NOT_FOUND"
+  /** A public witness (`kash log witness` / `upgrade`) could not be reached, or did not take the hash. */
+  | "WITNESS_FAILED";
 
 export class KashCliError extends Error {
   override readonly name = "KashCliError";

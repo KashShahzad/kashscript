@@ -261,12 +261,12 @@ export interface ReadDecision {
 
 /** Read a decision receipt — held or presented — offline. */
 export async function readDecision(sdJwt: string, opts: { readonly nowSec: number; readonly resolveKey?: KeyResolver; readonly presentedTo?: { readonly audience: string; readonly nonce: string } }): Promise<ReadDecision | null> {
-  const sd = await verifySdJwt(sdJwt, {
-    resolveKey: opts.resolveKey ?? makeKeyResolver(new Map(), new Map()),
-    requireKeyBinding: opts.presentedTo !== undefined,
-    nowSec: opts.nowSec,
-    ...(opts.presentedTo !== undefined ? { audience: opts.presentedTo.audience, nonce: opts.presentedTo.nonce } : {}),
-  });
+  const resolveKey = opts.resolveKey ?? makeKeyResolver(new Map(), new Map());
+  // Presented: bound to this verifier's audience and nonce, fresh (attest 0.3.0, KS-Q4). Held: as held.
+  const sd =
+    opts.presentedTo !== undefined
+      ? await verifySdJwt(sdJwt, { resolveKey, requireKeyBinding: true, nowSec: opts.nowSec, audience: opts.presentedTo.audience, nonce: opts.presentedTo.nonce })
+      : await verifySdJwt(sdJwt, { resolveKey, requireKeyBinding: false, nowSec: opts.nowSec });
   const c = sd.claims;
   const head = c?.decision as Pick<DecisionBody, "rule" | "outcome" | "automatic"> | undefined;
   if (sd.vct !== DECISION_VCT || c === null || head === undefined) return null;

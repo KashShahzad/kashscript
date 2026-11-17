@@ -26,6 +26,7 @@
 import { base64UrlToBytes, bytesToBase64Url } from "../ed25519";
 import { decodeJws, didOfJwk, keyOfJwk, signJws, verifyJws, type DecodedJws, type JwsSigner } from "./jws";
 import { keyOfResolved, stripFragment, type KeyResolver, type KeySource } from "../holder/keys";
+import { isAllowedJoseAlg } from "../signing";
 import { isAlgorithmUnsupported } from "@kashscript/identity-core";
 
 export const SD_JWT_TYP = "dc+sd-jwt" as const;
@@ -203,6 +204,12 @@ export type SdJwtFailureReason =
   | "AUDIENCE_MISMATCH"
   | "NONCE_MISMATCH"
   | "KEY_BINDING_STALE"
+  /** A presentation check was asked for without the audience the verifier is (KS-Q4: every presentation is bound to one). */
+  | "AUDIENCE_NOT_SUPPLIED"
+  /** A presentation check was asked for without the nonce the verifier sent (KS-Q4). */
+  | "NONCE_NOT_SUPPLIED"
+  /** A header names critical extensions this verifier does not implement (RFC 7515 §4.1.11). */
+  | "CRIT_UNSUPPORTED"
   /** This runtime cannot run the algorithm a key needs (older browsers lack Ed25519). Nothing was judged. */
   | "RUNTIME_CANNOT_CHECK";
 
@@ -237,16 +244,44 @@ export interface SdJwtReport {
   readonly notes: readonly string[];
 }
 
-export interface VerifySdJwtOptions {
+/** How long a presentation's key binding stays fresh when the verifier names no other window: ten minutes, either way of `nowSec` (AU-3's packet default; KS-Q4). */
+export const DEFAULT_PRESENTATION_MAX_AGE_SEC = 600;
+
+interface VerifySdJwtCommon {
   readonly resolveKey: KeyResolver;
-  /** Presentations must carry a KB-JWT; a held credential need not. */
-  readonly requireKeyBinding: boolean;
+  readonly nowSec?: number;
+}
+
+/**
+ * Checking a credential as it is held: the issuer, the disclosures, the expiry.
+ * A key binding, if one is there, is checked for integrity; against an audience
+ * and a nonce only when they are given, and the report says when they were not.
+ */
+export interface VerifyHeldSdJwtOptions extends VerifySdJwtCommon {
+  readonly requireKeyBinding: false;
   readonly audience?: string;
   readonly nonce?: string;
-  readonly nowSec?: number;
-  /** When set, a KB-JWT older than this fails. Only meaningful at the moment of receipt. */
   readonly maxKbAgeSec?: number;
 }
+
+/**
+ * Checking a presentation made to this verifier (KS-Q4; d84 P6: nonce and
+ * audience bound into every presentation): the KB-JWT must name exactly this
+ * audience and this nonce, and be no further than `maxKbAgeSec` from `nowSec`.
+ * The replay defence beyond that window is the verifier's: issue each nonce
+ * once and accept it once (`createNonceRegistry`, `acceptPresentationOnce`).
+ */
+export interface VerifyPresentedSdJwtOptions extends VerifySdJwtCommon {
+  readonly requireKeyBinding: true;
+  /** The verifier's own identifier — the `aud` the holder had to bind. */
+  readonly audience: string;
+  /** The nonce the verifier sent for this presentation. */
+  readonly nonce: string;
+  /** Default {@link DEFAULT_PRESENTATION_MAX_AGE_SEC}. */
+  readonly maxKbAgeSec?: number;
+}
+
+export type VerifySdJwtOptions = VerifyHeldSdJwtOptions | VerifyPresentedSdJwtOptions;
 
 function report(partial: Partial<SdJwtReport> & { reason: SdJwtFailureReason | null }, notes: string[] = []): SdJwtReport {
   return {
@@ -279,13 +314,27 @@ export async function verifySdJwt(input: string, opts: VerifySdJwtOptions): Prom
   }
 }
 
+/** A header that names critical extensions: none is implemented here, so any `crit` is refused (RFC 7515 §4.1.11). */
+const hasCrit = (header: Record<string, unknown>): boolean => header.crit !== undefined;
+
 async function verifySdJwtInner(input: string, opts: VerifySdJwtOptions): Promise<SdJwtReport> {
+  // A presentation check without the verifier's audience and nonce checks nothing a stranger could not replay (KS-Q4).
+  if (opts.requireKeyBinding) {
+    const o = opts as { audience?: unknown; nonce?: unknown };
+    if (typeof o.audience !== "string" || o.audience.length === 0) {
+      return report({ reason: "AUDIENCE_NOT_SUPPLIED" }, ["a presentation is checked against the audience the verifier is — none was given"]);
+    }
+    if (typeof o.nonce !== "string" || o.nonce.length === 0) {
+      return report({ reason: "NONCE_NOT_SUPPLIED" }, ["a presentation is checked against the nonce the verifier sent — none was given"]);
+    }
+  }
   const parsed = parseSdJwt(input);
   if (parsed === null) return report({ reason: "MALFORMED_SD_JWT" }, ["not an SD-JWT"]);
   const jwt = decodeJws(parsed.issuerJwt) as DecodedJws;
-  // EdDSA or ES256 — and below, only the one the issuer's KEY implies.
-  if (jwt.header.alg !== "EdDSA" && jwt.header.alg !== "ES256") return report({ reason: "ALG_UNSUPPORTED" }, [`alg ${String(jwt.header.alg)} — this version verifies EdDSA and ES256`]);
+  // The allow-list first (the live signature profiles: EdDSA, ES256); below, only the one the issuer's KEY implies.
+  if (!isAllowedJoseAlg(jwt.header.alg)) return report({ reason: "ALG_UNSUPPORTED" }, [`alg ${String(jwt.header.alg)} — this version verifies EdDSA and ES256 only`]);
   if (jwt.header.typ !== SD_JWT_TYP) return report({ reason: "TYP_MISMATCH" }, [`typ must be ${SD_JWT_TYP}`]);
+  if (hasCrit(jwt.header)) return report({ reason: "CRIT_UNSUPPORTED" }, ["the issuer's header names critical extensions this verifier does not implement"]);
   const payload = jwt.payload;
   const iss = typeof payload.iss === "string" ? payload.iss : null;
   const vct = typeof payload.vct === "string" ? payload.vct : null;
@@ -403,6 +452,8 @@ async function verifySdJwtInner(input: string, opts: VerifySdJwtOptions): Promis
   if (holderKey === null) return report({ ...withClaims, reason: "HOLDER_KEY_MISSING" });
   const kb = decodeJws(parsed.kbJwt);
   if (kb === null || kb.header.typ !== KB_JWT_TYP) return report({ ...withClaims, reason: "KEY_BINDING_INVALID" });
+  if (!isAllowedJoseAlg(kb.header.alg)) return report({ ...withClaims, reason: "KEY_BINDING_INVALID" }, [`the key binding's alg ${String(kb.header.alg)} is not on the allow-list`]);
+  if (hasCrit(kb.header)) return report({ ...withClaims, reason: "CRIT_UNSUPPORTED" }, ["the key binding's header names critical extensions this verifier does not implement"]);
   const kbSigOk = await verifyJws(kb, holderKey);
   const baseString = input.trim().slice(0, input.trim().length - parsed.kbJwt.length);
   const sdHashOk = kb.payload.sd_hash === (await digestOf(baseString));
@@ -413,13 +464,18 @@ async function verifySdJwtInner(input: string, opts: VerifySdJwtOptions): Promis
   const nonceOk = opts.nonce === undefined ? null : nonce === opts.nonce;
   const keyBinding = { present: true, signatureOk: kbSigOk, sdHashOk, audience: aud, nonce, iat, audienceOk, nonceOk };
   const notes: string[] = [];
+  // A presentation check always bounds the binding's age; a held check only when it is asked to.
+  const maxAge = opts.requireKeyBinding ? (opts.maxKbAgeSec ?? DEFAULT_PRESENTATION_MAX_AGE_SEC) : opts.maxKbAgeSec;
   let reason: SdJwtFailureReason | null = null;
   if (!kbSigOk) reason = "KEY_BINDING_INVALID";
   else if (!sdHashOk) reason = "SD_HASH_MISMATCH";
   else if (audienceOk === false) reason = "AUDIENCE_MISMATCH";
   else if (nonceOk === false) reason = "NONCE_MISMATCH";
-  else if (opts.maxKbAgeSec !== undefined && (iat === null || Math.abs(now - iat) > opts.maxKbAgeSec)) reason = "KEY_BINDING_STALE";
-  if (audienceOk === null || nonceOk === null) notes.push("audience or nonce not checked — supply the ones the verifier sent");
+  else if (maxAge !== undefined && (iat === null || Math.abs(now - iat) > maxAge)) reason = "KEY_BINDING_STALE";
+  if (audienceOk === null || nonceOk === null) {
+    notes.push("a holder binding is present but was not checked against a verifier's audience and nonce — this checked the credential, not a presentation");
+  }
+  if (maxAge !== undefined && reason === null) notes.push(`its binding was made within ${maxAge} s of the time checked`);
   return report({ ...withClaims, keyBinding, reason }, notes);
 }
 

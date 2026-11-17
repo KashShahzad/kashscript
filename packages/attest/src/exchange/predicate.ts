@@ -16,7 +16,7 @@ import { issueSdJwt, verifySdJwt, type SdJwtReport } from "../sd-jwt/sd-jwt";
 import { jwkOf, type JwsSigner } from "../sd-jwt/jws";
 import type { VerifyKey } from "../signing";
 import type { KeyResolver } from "../holder/keys";
-import { findListing, type ListingMatch, type TrustListReport } from "../holder/trust-list";
+import { lookupListing, type ListingMatch, type TrustListReport } from "../holder/trust-list";
 import { checkStatus, statusEntryOf, type StatusListEntry, type StatusListReport, type StatusVerdict } from "../holder/status-list";
 import { recordIdOf, type HeldArtifactValue } from "../holder/record-id";
 import { PREDICATE_VCT } from "./constants";
@@ -97,12 +97,16 @@ export interface PredicatePresentationReport {
 
 export interface VerifyPredicateOptions {
   readonly resolveKey: KeyResolver;
-  /** The verifier's own identifier and the nonce it sent. */
-  readonly audience?: string;
-  readonly nonce?: string;
+  /** The verifier's own identifier — the audience the holder bound. Required: a presentation is made to one verifier (KS-Q4). */
+  readonly audience: string;
+  /** The nonce the verifier sent for this presentation. Required (KS-Q4). */
+  readonly nonce: string;
   readonly nowSec?: number;
+  /** Default ten minutes (`DEFAULT_PRESENTATION_MAX_AGE_SEC`). */
   readonly maxKbAgeSec?: number;
   readonly statusLists?: readonly StatusListReport[];
+  /** A status list older than this decides nothing. Unset, a list past its cache time still decides and says it is stale. */
+  readonly maxStatusAgeSec?: number;
   readonly trustLists?: readonly TrustListReport[];
   /** Records the holder chose to attach. Each must match a disclosed hash. */
   readonly attachedRecords?: readonly HeldArtifactValue[];
@@ -132,16 +136,31 @@ export async function verifyPredicatePresentation(
   const sd = await verifySdJwt(presentation, {
     resolveKey: opts.resolveKey,
     requireKeyBinding: true,
+    audience: opts.audience,
+    nonce: opts.nonce,
     nowSec,
-    ...(opts.audience !== undefined ? { audience: opts.audience } : {}),
-    ...(opts.nonce !== undefined ? { nonce: opts.nonce } : {}),
     ...(opts.maxKbAgeSec !== undefined ? { maxKbAgeSec: opts.maxKbAgeSec } : {}),
   });
   const notes: string[] = [...sd.notes];
   const predicate = predicateOf(sd.claims);
   const restsOn = Array.isArray(sd.claims?.restsOn) ? (sd.claims.restsOn as unknown[]).filter((x): x is string => typeof x === "string") : [];
-  const status = checkStatus(statusEntryOf(sd.claims), opts.statusLists ?? []);
-  const listing = sd.issuer === null ? null : findListing(sd.issuer, PREDICATE_VCT, opts.trustLists ?? [], nowSec);
+  const status = checkStatus(statusEntryOf(sd.claims), opts.statusLists ?? [], {
+    nowSec,
+    ...(opts.maxStatusAgeSec !== undefined ? { maxAgeSec: opts.maxStatusAgeSec } : {}),
+  });
+  // Scope, part two: the predicate names the rule it was judged against, so the issuer's listing is read for that rule (d91(f)).
+  const lookup =
+    sd.issuer === null
+      ? { listing: null, refused: null }
+      : lookupListing(sd.issuer, PREDICATE_VCT, opts.trustLists ?? [], nowSec, predicate !== null ? { reference: { id: predicate.rule.id, hash: predicate.rule.hash } } : {});
+  const listing = lookup.listing;
+  if (lookup.refused !== null) {
+    notes.push(
+      lookup.refused.why === "out-of-scope"
+        ? `the issuer's pinned listing does not cover the rule this predicate was judged against (${predicate?.rule.id ?? "?"})`
+        : `the issuer's pinned list marks it ${lookup.refused.why}`,
+    );
+  }
 
   let reason: PredicateFailureReason | null = null;
   if (!sd.ok) reason = "SD_JWT_INVALID";

@@ -8,11 +8,15 @@ import { canonicalizeBytes, deriveDid, generateKeyPair } from "@kashscript/ident
 import { base64ToBytes } from "@kashscript/attest/ed25519";
 import {
   DST_TRUST_LIST,
+  ISSUER_CLASSES as ATTEST_ISSUER_CLASSES,
+  STANDINGS as ATTEST_STANDINGS,
   STATUS_LIST_FORMAT,
+  STATUS_PURPOSES as ATTEST_STATUS_PURPOSES,
   TRUST_LIST_FORMAT,
   createStatusBitstring,
   encodeStatusList,
   findListing,
+  lookupListing,
   makeKeyResolver,
   signStatusList,
   signTrustList,
@@ -21,6 +25,7 @@ import {
   type StatusListPayload,
   type TrustListPayload,
 } from "@kashscript/attest/holder";
+import { ISSUER_CLASSES, STANDINGS, STATUS_PURPOSES } from "@kashscript/lexicons/extensions/lists";
 import { cidForBytes } from "../src/cid";
 import { composeRefiners, createPublicRecordGuard } from "../src/guard";
 import { RefineError } from "../src/refine";
@@ -101,6 +106,14 @@ describe("the guard — by content", () => {
   });
 });
 
+describe("the record and the checker name the same values (KS-Q4)", () => {
+  it("issuer classes, standings and status purposes are one list in lexicons and attest", () => {
+    expect([...ISSUER_CLASSES]).toEqual([...ATTEST_ISSUER_CLASSES]);
+    expect([...STANDINGS]).toEqual([...ATTEST_STANDINGS]);
+    expect([...STATUS_PURPOSES]).toEqual([...ATTEST_STATUS_PURPOSES]);
+  });
+});
+
 describe("the guard — with attest: the list this shape describes is the one attest signs and the wallet verifies", () => {
   it("a d91-shaped trust list signs, verifies and lists under attest unchanged; the record's CID names the signed bytes", async () => {
     const pub = await generateKeyPair();
@@ -125,6 +138,9 @@ describe("the guard — with attest: the list this shape describes is the one at
     // The listed issuer is listed; the removed assessor, whose window ended, lists nobody — a checker that reads windows only agrees with the standing.
     expect(findListing(issuerDid, "application/vnd.oreoasis.work-record+json", [report], NOW)?.issuerId).toBe(issuerDid);
     expect(findListing("assessor-7#k1", "application/vnd.oreoasis.predicate+json", [report], NOW)).toBeNull();
+    // KS-Q4: attest now reads the standing itself, and says why — removed, never a silent "unlisted".
+    expect(lookupListing("assessor-7#k1", "application/vnd.oreoasis.predicate+json", [report], NOW).refused?.why).toBe("removed");
+    expect(findListing(issuerDid, "application/vnd.oreoasis.work-record+json", [report], NOW)?.standing).toBe("listed");
 
     // One document, two forms: the signed bytes are the record's canonical bytes, so its CID names them.
     const signedBytes = base64ToBytes(envelope.payload);
@@ -143,6 +159,16 @@ describe("the guard — with attest: the list this shape describes is the one at
     expect(report.ok).toBe(true);
     expect(report.entries).toBe(131_072);
     expect(await cidForBytes(base64ToBytes(envelope.payload))).toBe(refined.cid);
+  });
+
+  it("KS-Q4: a withdrawal list (kash.status-list@1.1.0) refines, signs and verifies; a purpose d91 does not name is refused", async () => {
+    const issuer = await generateKeyPair();
+    const issuerDid = deriveDid(issuer.publicKey);
+    const payload = { ...statusList(issuerDid, await encodeStatusList(createStatusBitstring())), statusPurpose: "withdrawal" };
+    await guard.refine("kash.status-list", payload);
+    const envelope = await signStatusList(payload as unknown as StatusListPayload, { keyid: issuerDid, privateKey: issuer.privateKey, publicKey: issuer.publicKey });
+    expect((await verifyStatusList(envelope, { resolveKey: makeKeyResolver(new Map(), new Map()), nowSec: NOW })).statusPurpose).toBe("withdrawal");
+    await expect(guard.refine("kash.status-list", { ...payload, statusPurpose: "expired" })).rejects.toBeInstanceOf(RefineError);
   });
 });
 

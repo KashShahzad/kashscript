@@ -41,7 +41,17 @@ import { SESSION_EVENT_DST } from "../exchange/constants";
 import { validatePresentationLog, type PresentationLogEntry } from "../exchange/presentation-log";
 import { keyIdentityOf, keyOfResolved, makeKeyResolver, stripFragment, typedKeyOf, type KeyResolver, type KeySource, type PublicKeyEntry } from "./keys";
 import type { KashPublicKey } from "../signing";
-import { findListing, trustListKeyMap, verifyTrustList, type ListingMatch, type TrustListReport } from "./trust-list";
+import {
+  lookupListing,
+  trustListKeyMap,
+  verifyTrustList,
+  type FloorRef,
+  type IssuerClass,
+  type ListingMatch,
+  type ListingRefusal,
+  type ListingScope,
+  type TrustListReport,
+} from "./trust-list";
 import { checkStatus, statusEntryOf, verifyStatusList, type StatusListEntry, type StatusListReport, type StatusVerdict } from "./status-list";
 import type { InflateFunction } from "./gzip";
 
@@ -176,6 +186,13 @@ export interface HeldRecordReport {
     readonly listId: string | null;
     readonly version: number | null;
     readonly label: string | null;
+    /** d91's identity assertion: the issuer's class and the grade its key was shown at, when the list writes them. */
+    readonly class: IssuerClass | null;
+    readonly grade: 0 | 1 | 2 | 3 | null;
+    readonly scope: ListingScope | null;
+    readonly floor: FloorRef | null;
+    /** A pinned list names the issuer and does not list it: suspended, removed, or not for this. Null otherwise. */
+    readonly refused: ListingRefusal["why"] | null;
   };
   /** True only when a pinned trust list lists this issuer for this tag. */
   readonly trusted: boolean;
@@ -344,6 +361,8 @@ async function analyseCountersign(value: unknown): Promise<Analysis> {
           asOfUnix: null,
           source: "presented",
           listId: null,
+          cacheUntilUnix: null,
+          stale: false,
           text: "withdrawn — the requester's signed withdrawal predates the countersignature",
         }
       : null,
@@ -393,6 +412,8 @@ async function analyseKashEvent(value: unknown, ctx: HeldRecordContext): Promise
             asOfUnix: Number.isFinite(revokedUnix) ? revokedUnix : null,
             source: "presented",
             listId: null,
+            cacheUntilUnix: null,
+            stale: false,
             text: `revoked as of ${presented.revokedAt} (the issuer's signed revocation was presented)`,
           },
     notes: [],
@@ -568,14 +589,25 @@ export async function verifyHeldRecord(record: HeldRecord, ctx: HeldRecordContex
   const notes = [...a.notes];
   const signedEntry = statusEntryOf(a.signedPayload);
 
-  // Listing: which issuer does a presented, current trust list vouch for?
+  // Listing: which issuer does a presented, current trust list vouch for — and if a pinned one names it without listing it, why not?
   let match: ListingMatch | null = null;
+  let refused: ListingRefusal | null = null;
   for (const s of a.signerCandidates) {
-    const found = a.tag === null ? null : findListing(s, a.tag, ctx.trustLists, ctx.nowSec);
-    if (found !== null && (match === null || (!match.pinned && found.pinned))) match = found;
+    if (a.tag === null) break;
+    const found = lookupListing(s, a.tag, ctx.trustLists, ctx.nowSec);
+    if (found.listing !== null && (match === null || (!match.pinned && found.listing.pinned))) match = found.listing;
+    refused ??= found.refused;
   }
   const evidence = match === null ? "none" : match.pinned ? "pinned-list" : "unpinned-list";
   if (match !== null && !match.pinned) notes.push(`listed by ${match.publisher}, a publisher not pinned here — shown as unlisted`);
+  if (refused !== null && match?.pinned !== true) {
+    notes.push(
+      refused.why === "out-of-scope"
+        ? `its pinned list (${refused.listId} v${refused.version}) lists this issuer, but not for what this record is against`
+        : `its pinned list (${refused.listId} v${refused.version}) marks this issuer ${refused.why} — written down, not listed`,
+    );
+  }
+  if (match?.pinned === true && match.scope === "not-checked") notes.push("its listing names the references it may attest against; this check did not know what the record is against");
 
   let retentionSource: RetentionSource | null = null;
   let expiresAtUnix: number | null = null;
@@ -638,9 +670,14 @@ export async function verifyHeldRecord(record: HeldRecord, ctx: HeldRecordContex
       listId: match?.listId ?? null,
       version: match?.version ?? null,
       label: match?.label ?? null,
+      class: match?.class ?? null,
+      grade: match?.grade ?? null,
+      scope: match?.scope ?? null,
+      floor: match?.floor ?? null,
+      refused: match?.pinned === true ? null : (refused?.why ?? null),
     },
     trusted: evidence === "pinned-list",
-    status: a.presentedStatus ?? checkStatus(signedEntry, ctx.statusLists),
+    status: a.presentedStatus ?? checkStatus(signedEntry, ctx.statusLists, { nowSec: ctx.nowSec }),
     retention: { expiresAtUnix, source: retentionSource, pastNow },
     reasons,
     notes,

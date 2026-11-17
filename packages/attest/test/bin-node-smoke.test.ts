@@ -221,11 +221,17 @@ describe("attest bin — the plain layer: who signed, what was checked, what thi
       [REL_BIN, "verify", `${ES}/holder-export-es256.v1.json`, "--trust-publisher", ctx.trustPublisher],
       [REL_BIN, "verify", `${ES}/trust-list-es256.v1.json`, "--trust-publisher", ctx.trustPublisher],
       [REL_BIN, "verify", `${ES}/status-list-es256.v1.json`],
-      [REL_BIN, "verify", `${ES}/predicate-presentation-es256.v1.txt`, "--audience", ctx.audience, "--nonce", ctx.nonce, "--status-list", `${ES}/status-list-es256.v1.json`],
+      // The frozen presentation is checked as of a minute after its binding was made (KS-Q4: ten minutes by default).
+      [REL_BIN, "verify", `${ES}/predicate-presentation-es256.v1.txt`, "--audience", ctx.audience, "--nonce", ctx.nonce, "--at", "1790816460", "--status-list", `${ES}/status-list-es256.v1.json`],
       [REL_BIN, "verify", "test/vectors/exchange/session-receipt-complete.v1.json"],
       [REL_BIN, "verify", "test/vectors/exchange/session-receipt-pending.v1.json"],
       [REL_BIN, "verify", "test/vectors/anchor/session-anchored-2.v2.json"],
       [REL_BIN, "verify", "test/vectors/exchange/thank-you.v1.txt"],
+      // KS-Q4: the trust log's artifacts and the whole-log audit carry the layer under the same wording rules.
+      [REL_BIN, "verify", "test/vectors/log/original/checkpoints/9.json"],
+      [REL_BIN, "verify", "test/vectors/log/inclusion-attestation-ok.json"],
+      [REL_BIN, "verify", "test/vectors/log/consistency-4-9.json"],
+      [REL_BIN, "log", "verify", "test/vectors/log/original", "--mirror", "test/vectors/log/mirror"],
     ];
     for (const args of runs) {
       const r = runNode(["--require", GUARD, ...args]);
@@ -281,7 +287,7 @@ describe("attest bin — ES256 and helper recovery under Node 22, offline (PL-2)
   });
 
   it("verifies an ES256 presentation, its ES256 key binding and its ES256 status list", () => {
-    const r = runNode(["--require", GUARD, REL_BIN, "verify", `${ES}/predicate-presentation-es256.v1.txt`, "--audience", ctx.audience, "--nonce", ctx.nonce, "--status-list", `${ES}/status-list-es256.v1.json`]);
+    const r = runNode(["--require", GUARD, REL_BIN, "verify", `${ES}/predicate-presentation-es256.v1.txt`, "--audience", ctx.audience, "--nonce", ctx.nonce, "--at", "1790816460", "--status-list", `${ES}/status-list-es256.v1.json`]);
     expect(r.status).toBe(0);
     expect(r.stdout).toContain("holder binding     : ok");
     expect(r.stdout).toContain("RESULT: PASS");

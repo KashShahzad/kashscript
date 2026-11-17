@@ -23,4 +23,4 @@ export * from "./ed25519-strict";
 /** Public version constant — bumped whenever the wire-level output of any
  *  formatter changes (DID format, DID Document shape, canonical encoding,
  *  signature payload composition). */
-export const IDENTITY_CORE_VERSION = "0.4.0-alpha.2" as const;
+export const IDENTITY_CORE_VERSION = "0.4.0-alpha.3" as const;

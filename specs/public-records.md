@@ -102,6 +102,8 @@ The body **is** attest's `kashscript-trust-list/1` payload ([holder-contract.md]
 
 The body is attest's `kashscript-status-list/1` payload ([holder-contract.md](holder-contract.md) §4), aligned to W3C Bitstring Status List v1.0: `type: BitstringStatusList`, `id` (the https URL the list is served at — shared by many records, never one per record), `issuer`, `statusPurpose` (`revocation · suspension`), `encodedList` (`u` + base64url of the GZIP'd bitstring; attest enforces the 131,072-entry floor when it signs), `issuedAtUnix`, `validUntilUnix | null`, `ttl?`. Cross-field (`statusListFaults`): `VALID_UNTIL`. **d91's three terminal states** — expired · superseded by a citing attestation · withdrawn within the window — are KS-Q4's, because the verifier must learn them too.
 
+**2026-11-18 (KS-Q4):** `kash.status-list@1.1.0` sits beside `1.0.0` and adds the purposes `supersession` and `withdrawal`, so a list can carry d91's terminal states. A new enum value is a minor version, and the version is part of the id ([`docs/lexicon-versioning.md`](../docs/lexicon-versioning.md)). The checker now reads the three terminal states, a stated cache time and the withdrawal window ([holder-contract.md](holder-contract.md) §4). Each version of either list can be anchored in the trust log by the hash of its signed bytes ([trust-log.md](trust-log.md)).
+
 ### 2.7 One document, two forms
 
 The muffler record is the clear payload. attest signs **the same document** as a DSSE envelope — `signTrustList` / `signStatusList` with `{ canonical: true }`, as `kash trust sign` does. Both canonicalise with RFC 8785, so **the record's CID (sha2-256 over its JCS bytes) is the hash of the very bytes the envelope signs**: a mirror serves the envelope beside the record, and anyone can tell they are one document. The same relation holds for `kash.rule` and `kash.adoption` as KS-Q1 shaped them. Nothing in lexicons or muffler verifies a signature — lexicons has no dependency and muffler stays off attest at runtime; attest verifies, offline (d28).
@@ -141,4 +143,5 @@ JSON Schema 2020-12 (the published shape of every lexicon) · DSSE (the lists' s
 
 | Version | Date | |
 |---|---|---|
+| **v1.1** | 2026-11-18 | KS-Q4. `kash.status-list@1.1.0` with `supersession` and `withdrawal` beside `1.0.0`; the schema regenerated; muffler's guard admits the withdrawal list. lexicons `0.6.0-alpha.0`, muffler `0.2.0-alpha.1`, **not published.** |
 | **v1** | 2026-11-16 | KS-N1, folding in KS-R5. `kash.place`, `kash.place.pointer`, `kash.listing`, `kash.guide` (`extensions/place`); `kash.trust-list` with d91's three assertions and `kash.status-list` (`extensions/lists`); `PUBLIC_RECORD_LEXICONS`, `publicRecordFaults`, `findPersonIdentity` (`extensions/public`); muffler's guard and `composeRefiners`; the d28 test; the `trade` extension removed; the six JSON Schemas. lexicons `0.5.0-alpha.0`, muffler `0.2.0-alpha.0`, **not published.** |

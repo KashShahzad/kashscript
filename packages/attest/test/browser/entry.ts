@@ -37,7 +37,8 @@ async function main(): Promise<Record<string, unknown>> {
   const out: Record<string, unknown> = { userAgent: navigator.userAgent, ed25519Available: await ed25519Available() };
 
   out.es256TrustList = (await verifyTrustList(v.trustList, { pinnedPublishers: [ctx.trustPublisher], nowSec: ctx.nowSec })).ok;
-  out.es256Presentation = (await verifySdJwt(v.presentation, { resolveKey: noKeys, requireKeyBinding: true, audience: ctx.audience, nonce: ctx.nonce, nowSec: ctx.nowSec })).reason ?? "ok";
+  // The frozen vector's binding was made an hour before its context's now; the default window is ten minutes (KS-Q4).
+  out.es256Presentation = (await verifySdJwt(v.presentation, { resolveKey: noKeys, requireKeyBinding: true, audience: ctx.audience, nonce: ctx.nonce, nowSec: ctx.nowSec, maxKbAgeSec: 3_600 })).reason ?? "ok";
   out.helperClaim = (await verifyKeyClaim(v.succession.claim)).reason ?? "ok";
   out.es256Export = (await verifyHolderExport(JSON.parse(v.es256Export), { pinnedPublishers: [ctx.trustPublisher], nowSec: ctx.nowSec })).reasons;
   out.countersignEs256 = (await verifyCountersignBundle(v.countersign)).reason ?? "ok";

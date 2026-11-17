@@ -1,0 +1,52 @@
+{
+  "note": "SAMPLE. Generated once on 2026-11-18; the log's key, the stranger's key and the SAMPLE time authority's keys are gone. The witness files are real RFC 3161 tokens from that SAMPLE authority, checkable against sample-tsa-root.crt; they show the generator's clock, nothing more.",
+  "logId": "did:kash:8kCvT4dL7i2iX33ub1YCAJSCdyvHD1WrKPpvoBH3Wbd5/log/sample",
+  "publisherDid": "did:kash:8kCvT4dL7i2iX33ub1YCAJSCdyvHD1WrKPpvoBH3Wbd5",
+  "strangerDid": "did:kash:FVvfiuPSQEymNjuM6zf5PE188ENcM1nDhhUH9ZHBDYcM",
+  "issuerA": "did:web:issuer-a.sample.example",
+  "issuerB": "did:web:issuer-b.sample.example",
+  "startedAtUnix": 1794945059,
+  "claimed": [
+    1794945059,
+    1794945059,
+    1794945059,
+    1794945159,
+    1794945359,
+    1794945359,
+    1792353059,
+    1794945459,
+    1794081059
+  ],
+  "maxBatchDelaySec": 86400,
+  "heads": [
+    {
+      "size": 4,
+      "at": 1794945259,
+      "witnessedAt": 1794945660
+    },
+    {
+      "size": 7,
+      "at": 1794945509,
+      "witnessedAt": 1794945660
+    },
+    {
+      "size": 9,
+      "at": 1794945559,
+      "witnessedAt": 1794945660
+    }
+  ],
+  "salts": {
+    "entry3": {
+      "salt": "de1f6c86f037750421a79b9d06e582109c7ef3a2aa9c1154b63c1fe7f203e4c1",
+      "recordHash": "a0488086feffbc737350974083dd1b8257bd9be3503511e40a8d45f38812cc29"
+    },
+    "entry6": {
+      "salt": "dfb0ed2a08786d5abb6cc5494a092f7aa0cfc3bb4d27dc13edd578000bc5c9f3",
+      "recordHash": "89aaf2dad647e6860e4fa25c03ecb56bebbfc69c0916f3b1918d22addf6a2142"
+    },
+    "entry8": {
+      "salt": "f54621c5124c3b6c13e191fd5db10d634fe98e51b696f834d73c32b6bcc6ad9b",
+      "recordHash": "eee23063b4562844f62687e50849368d6c02f27ca927b8847012be67a2b32794"
+    }
+  }
+}

@@ -17,6 +17,8 @@ import { TRUST_LIST_FORMAT, makeKeyResolver, signTrustList, verifyTrustList } fr
 import { decodeJws, signJws, verifyJws } from "../src/sd-jwt/jws";
 import { issueSdJwt, verifySdJwt } from "../src/sd-jwt/sd-jwt";
 import { type ExternalEd25519Signer } from "../src/signing";
+import { signLedgerBlock } from "../src/ledger";
+import { InMemoryLogStore, openTrustLog, verifyCheckpoint } from "../src/log";
 import {
   SESSION_EVENT_SPEC,
   SESSION_RECEIPT_FORMAT,
@@ -141,6 +143,22 @@ describe("an Ed25519 signer that never hands over its key (GP-6)", () => {
     const sd = await issueSdJwt({ header, claims, signer: viaService });
     expect(sd).toBe(await platform.issueSdJwtVia(ks, header, claims));
     expect(sd).toBe(await issueSdJwt({ header, claims, signer: seed }));
+  });
+
+  it("KS-Q4: a ledger row and a checkpoint sign through the key service too — the seed path's bytes, the log's own key", async () => {
+    const pair = await generateKeyPair();
+    const did = deriveDid(pair.publicKey);
+    const ks = keyServiceOf(pair.privateKey);
+    const row = { sessionId: "ses_demo", stepIndex: 3, actorDid: did, previousBlockHash: "0".repeat(64), payloadMutation: { set: { k: "v" } } };
+    const bySeed = await signLedgerBlock(row, pair.privateKey);
+    const byService = await signLedgerBlock(row, { publicKey: pair.publicKey, sign: (m) => ks.sign(m) });
+    expect(byService).toBe(bySeed);
+    const other = await generateKeyPair();
+    await expect(signLedgerBlock(row, { publicKey: pair.publicKey, sign: keyServiceOf(other.privateKey).sign })).rejects.toThrow("does not verify under its public key");
+    // The log's checkpoint is a DSSE envelope: its key may live in a key service as well.
+    const log = await openTrustLog({ logId: `${did}/log/demo`, store: new InMemoryLogStore(), signer: { keyid: did, alg: "Ed25519", publicKey: pair.publicKey, sign: (m) => ks.sign(m) } });
+    await log.append({ v: 1, kind: "trust-list", listId: "l", publisher: did, version: 1, issuedAtUnix: T, sha256: "a".repeat(64) });
+    expect((await verifyCheckpoint(await log.checkpoint(T + 1))).ok).toBe(true);
   });
 
   it("a key service that answers with another key, a short signature, or an error is refused before anything is made", async () => {

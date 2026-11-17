@@ -9,14 +9,15 @@
  *     **standing** (listed · suspended · removed) and **scope** (the exact registered tags it may issue, and
  *     the references it may attest against) — with **issuer classes** (self-issuer · counterparty · assessor ·
  *     accredited body · insurer) and the floor version it binds its issuers to. The `format` literal is
- *     unchanged, so attest's verifier and the wallet read a list of this shape today; teaching them standing,
- *     class and scope is KS-Q4's. A checker that reads windows only agrees with the standing, because a
- *     suspended or removed entry must end its window (see `trustListFaults`).
+ *     unchanged, so attest's verifier and the wallet read a list of this shape. Since KS-Q4 attest reads the
+ *     standing, class, grade, scope and floor too (attest 0.3.0). A checker that reads windows only — attest
+ *     before 0.3.0 — agrees with the standing, because a suspended or removed entry must end its window
+ *     (see `trustListFaults`).
  *
- *   kash.status-list@1.0.0
- *     An issuer's revocation bitstring: attest's `kashscript-status-list/1` payload, aligned to W3C Bitstring
- *     Status List v1.0, in clear. Its three terminal states (expired · superseded · withdrawn, d91) are
- *     KS-Q4's, because the verifier must learn them too.
+ *   kash.status-list@1.0.0, and @1.1.0 (KS-Q4)
+ *     An issuer's status bitstring: attest's `kashscript-status-list/1` payload, aligned to W3C Bitstring
+ *     Status List v1.0, in clear. 1.0.0 admits revocation and suspension; 1.1.0 adds two of d91's terminal
+ *     states as purposes — supersession and withdrawal. The third, expiry, is the clock's and needs no list.
  *
  * **One document, two forms.** The muffler record is the clear payload; attest signs the same document
  * as a DSSE envelope (`signTrustList` / `signStatusList` with `{ canonical: true }`, as `kash trust sign`
@@ -180,8 +181,19 @@ export function trustListFaults(body: TrustListBody): readonly RecordFault[] {
 export const KASH_STATUS_LIST_NSID = "kash.status-list" as const;
 export const KASH_STATUS_LIST_ID = "kash.status-list@1.0.0" as const;
 
-/** W3C Bitstring Status List's purposes attest reads today. The three terminal states of d91 are KS-Q4's. */
-export const STATUS_PURPOSES = ["revocation", "suspension"] as const;
+/** The purposes `kash.status-list@1.0.0` admits: W3C Bitstring Status List's revocation and suspension. */
+export const STATUS_PURPOSES_1_0 = ["revocation", "suspension"] as const;
+
+/**
+ * The purposes `kash.status-list@1.1.0` admits (KS-Q4): W3C's two, and two of
+ * d91's terminal states as custom purposes, which the standard allows —
+ * `supersession` (a later attestation that cites this one replaces it; W3C's
+ * `refresh` does not invalidate, so it is not this) and `withdrawal` (withdrawn
+ * by its signer, inside the withdrawal window only, d84 P4.4). The third,
+ * expiry, is the clock's and needs no list. Equal to attest's `STATUS_PURPOSES`
+ * (a muffler test keeps them so).
+ */
+export const STATUS_PURPOSES = ["revocation", "suspension", "supersession", "withdrawal"] as const;
 export type StatusPurpose = (typeof STATUS_PURPOSES)[number];
 
 export interface StatusListBody {
@@ -202,21 +214,26 @@ export interface StatusListBody {
   readonly practice?: boolean;
 }
 
-export const KASH_STATUS_LIST_BODY_SCHEMA: ObjectSchema = S.object(
-  {
-    format: S.literal(STATUS_LIST_FORMAT),
-    type: S.literal("BitstringStatusList"),
-    id: S.string({ pattern: /^https:\/\/[^\s]+$/, maxLength: 2048 }),
-    issuer: TEXT(256),
-    statusPurpose: S.enum(...STATUS_PURPOSES),
-    encodedList: S.string({ pattern: /^u[A-Za-z0-9_-]+$/ }),
-    issuedAtUnix: UNIX,
-    validUntilUnix: S.union(UNIX, S.literal(null)),
-    ttl: S.optional(S.number({ integer: true, min: 0 })),
-    practice: S.optional(S.boolean()),
-  },
-  ["format", "type", "id", "issuer", "statusPurpose", "encodedList", "issuedAtUnix", "validUntilUnix"],
-);
+function statusListBodySchema(purposes: readonly string[]): ObjectSchema {
+  return S.object(
+    {
+      format: S.literal(STATUS_LIST_FORMAT),
+      type: S.literal("BitstringStatusList"),
+      id: S.string({ pattern: /^https:\/\/[^\s]+$/, maxLength: 2048 }),
+      issuer: TEXT(256),
+      statusPurpose: S.enum(...(purposes as [string, ...string[]])),
+      encodedList: S.string({ pattern: /^u[A-Za-z0-9_-]+$/ }),
+      issuedAtUnix: UNIX,
+      validUntilUnix: S.union(UNIX, S.literal(null)),
+      ttl: S.optional(S.number({ integer: true, min: 0 })),
+      practice: S.optional(S.boolean()),
+    },
+    ["format", "type", "id", "issuer", "statusPurpose", "encodedList", "issuedAtUnix", "validUntilUnix"],
+  );
+}
+
+/** 1.0.0, as published (KS-N1): revocation and suspension. */
+export const KASH_STATUS_LIST_BODY_SCHEMA: ObjectSchema = statusListBodySchema(STATUS_PURPOSES_1_0);
 
 export const KASH_STATUS_LIST_LEXICON: LexiconDef = {
   id: KASH_STATUS_LIST_ID,
@@ -226,6 +243,23 @@ export const KASH_STATUS_LIST_LEXICON: LexiconDef = {
   title: "A status list",
   description:
     "An issuer's revocation or suspension bitstring — attest's kashscript-status-list/1 payload in clear, aligned to W3C Bitstring Status List v1.0: the list's URL, its issuer, purpose, the encoded bitstring, and the time the issuer says it was true. Signed by its issuer as DSSE; any host may mirror it.",
+};
+
+/* ── kash.status-list@1.1.0 — d91's terminal states (KS-Q4) ────────── */
+
+export const KASH_STATUS_LIST_1_1_ID = "kash.status-list@1.1.0" as const;
+
+/** Strictly additive: two new enum cases, so every 1.0.0 body is a 1.1.0 body (docs/lexicon-versioning.md: a minor bump). */
+export const KASH_STATUS_LIST_1_1_BODY_SCHEMA: ObjectSchema = statusListBodySchema(STATUS_PURPOSES);
+
+export const KASH_STATUS_LIST_1_1_LEXICON: LexiconDef = {
+  id: KASH_STATUS_LIST_1_1_ID,
+  nsid: KASH_STATUS_LIST_NSID,
+  semver: { major: 1, minor: 1, patch: 0 },
+  bodySchema: KASH_STATUS_LIST_1_1_BODY_SCHEMA,
+  title: "A status list",
+  description:
+    "An issuer's status bitstring — attest's kashscript-status-list/1 payload in clear, aligned to W3C Bitstring Status List v1.0 — for revocation, suspension, or two of d91's terminal states: supersession (a later attestation that cites it replaces it) and withdrawal (withdrawn by its signer, inside the withdrawal window only). The list's URL, its issuer, purpose, the encoded bitstring, and the time the issuer says it was true. Signed by its issuer as DSSE; any host may mirror it.",
 };
 
 export function statusListFaults(body: StatusListBody): readonly RecordFault[] {
@@ -238,5 +272,5 @@ export function statusListFaults(body: StatusListBody): readonly RecordFault[] {
 
 /* ── bundle ────────────────────────────────────────────────────────── */
 
-/** The two lists. Public, organisation-authored, mirrorable (d62(d)5). */
-export const LIST_LEXICONS: readonly LexiconDef[] = [KASH_TRUST_LIST_LEXICON, KASH_STATUS_LIST_LEXICON];
+/** The two lists — the status list at both versions. Public, organisation-authored, mirrorable (d62(d)5). */
+export const LIST_LEXICONS: readonly LexiconDef[] = [KASH_TRUST_LIST_LEXICON, KASH_STATUS_LIST_LEXICON, KASH_STATUS_LIST_1_1_LEXICON];

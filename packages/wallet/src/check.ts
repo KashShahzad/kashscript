@@ -8,8 +8,8 @@
  * the check does NOT prove.
  */
 
-import { makeKeyResolver, type HeldArtifact, type HeldRecordContext, type HeldRecordReport, type StatusVerdict } from "@kashscript/attest/holder";
-import { fill } from "./copy";
+import { makeKeyResolver, type HeldArtifact, type HeldRecordContext, type HeldRecordReport, type IssuerClass, type StatusVerdict } from "@kashscript/attest/holder";
+import { fill, type Copy } from "./copy";
 import type { WalletCore } from "./core";
 import { WalletError } from "./errors";
 import { detectKind, hardFailures, probeArtifact, signedPayloadOf } from "./records";
@@ -25,6 +25,11 @@ export interface CheckResult {
   readonly notProven: string;
   readonly signer: string | null;
   readonly listed: boolean;
+  /** What a pinned list says they sign as, and the grade their key was shown at (d91; KS-Q4). Null when no list says. */
+  readonly issuerClass: IssuerClass | null;
+  readonly grade: 0 | 1 | 2 | 3 | null;
+  /** A pinned list names them and no longer counts them. */
+  readonly refused: "suspended" | "removed" | "out-of-scope" | null;
   /** The status verdict, in attest's words, naming its time — or saying it wasn't checked. */
   readonly status: StatusVerdict;
   /** attest's own report. The only thing a "signed by both" mark may be drawn from. */
@@ -96,8 +101,37 @@ export async function checkArtifact(core: WalletCore, value: unknown): Promise<C
     "doesnt-match": c.checkDoesntMatch,
     expired: c.checkExpired,
   };
-  const words = [stateWords[state], listed ? fill(c.checkListed, { name }) : c.checkUnlisted];
+  const refused = report.listing.refused;
+  const words = [stateWords[state]];
+  if (listed) words.push(fill(c.checkListed, { name }));
+  else if (refused === "suspended") words.push(fill(c.checkSuspended, { name: report.issuer ?? "" }));
+  else if (refused === "removed") words.push(fill(c.checkRemoved, { name: report.issuer ?? "" }));
+  else words.push(c.checkUnlisted);
+  // What a pinned list says about them — never more than it says (d51: a tick says what it does not prove).
+  const issuerClass = listed ? report.listing.class : null;
+  const grade = listed ? report.listing.grade : null;
+  if (issuerClass !== null) words.push(classWords(c, issuerClass));
+  if (grade !== null) words.push(gradeWords(c, grade));
   const practice = isPractice(artifact, payload);
   if (practice) words.push(c.checkPractice);
-  return { state, practice, words, notProven, signer: report.issuer, listed, status: report.status, report };
+  return { state, practice, words, notProven, signer: report.issuer, listed, issuerClass, grade, refused, status: report.status, report };
+}
+
+function classWords(c: Copy, k: IssuerClass): string {
+  switch (k) {
+    case "self-issuer":
+      return c.classSelfIssuer;
+    case "counterparty":
+      return c.classCounterparty;
+    case "assessor":
+      return c.classAssessor;
+    case "accredited-body":
+      return c.classAccreditedBody;
+    case "insurer":
+      return c.classInsurer;
+  }
+}
+
+function gradeWords(c: Copy, g: 0 | 1 | 2 | 3): string {
+  return [c.grade0, c.grade1, c.grade2, c.grade3][g]!;
 }

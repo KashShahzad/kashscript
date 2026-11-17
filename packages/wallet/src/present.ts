@@ -269,8 +269,9 @@ export class Present {
       const parsed = parseSdJwt(entry.artifact.value);
       const claims = parsed === null ? null : decodeJws(parsed.issuerJwt)?.payload ?? null;
       if (claims === null) continue;
-      const status = checkStatus(statusEntryOf(claims), lists).state;
-      if (status === "revoked" || status === "suspended") continue;
+      // d91's terminal states, beside revoked and suspended: a superseded or withdrawn copy is never offered (KS-Q4).
+      const status = checkStatus(statusEntryOf(claims), lists, { nowSec: this.core.now() }).state;
+      if (status === "revoked" || status === "suspended" || status === "superseded" || status === "withdrawn" || status === "expired") continue;
       out.push({ entry, claims });
     }
     return out;

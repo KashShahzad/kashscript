@@ -25,6 +25,7 @@ export * from "./holder";
 export * from "./sd-jwt";
 export * from "./exchange";
 export * from "./profiles";
+export * from "./log";
 
-/** Bumped whenever a wire-level verification behaviour changes. */
-export const ATTEST_VERSION = "0.2.0-alpha.8" as const;
+/** Bumped whenever a wire-level verification behaviour changes. KS-Q4: a presentation needs its audience and nonce; the trust list's standing, class and scope are read; status verdicts carry a cache time; the trust log. */
+export const ATTEST_VERSION = "0.3.0-alpha.0" as const;

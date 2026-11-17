@@ -1,0 +1,10 @@
+{
+  "height": 974295,
+  "hash": "000000000000000000000c3caf5193ab69e0955153c74135f8afc615ff2400b3",
+  "header": "0020ac23cec526def7e28981cbaa89a45db74c89176b473778d0010000000000000000002e804e87b7a099f5b0d4302e0b9cc2776fefe6a4b13da1a6fc1b62d56dcf299daef3e86aace501177518be4f",
+  "sources": [
+    "https://mempool.space/api",
+    "https://blockstream.info/api"
+  ],
+  "fetched_utc": "2026-11-03T10:49:10Z"
+}

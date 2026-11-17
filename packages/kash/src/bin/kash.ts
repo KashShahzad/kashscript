@@ -4,15 +4,19 @@
  * `kash` — the station kit (d59).
  *
  * Makes a station's own keys, issues a cohort record as a file, countersigns it
- * as the station, checks any record offline, and signs a trust list with the
- * publisher key. Local files only: no server, no upload, no delivery into a
- * wallet (the wallet receives only over OpenID4VCI, from an issuer's own origin).
+ * as the station, checks any record offline, signs a trust list with the
+ * publisher key, and keeps the trust log. Local files only: no server, no
+ * upload, no delivery into a wallet (the wallet receives only over OpenID4VCI,
+ * from an issuer's own origin). Two commands go online, to public witnesses
+ * only, and say so first: `log witness` and `log upgrade` (KS-Q4).
  *
  *   kash station init [--name station]        make a key in the keystore; print its DID
  *   kash issue cohort ...                     the teacher's organisation writes a pending record
  *   kash countersign <link>                   the station countersigns it → the finished record
  *   kash verify <file>                        attest's verifier, exit 0 / 1 / 2, never the network
  *   kash trust sign <file>                    sign a trust or status list with the publisher key
+ *   kash log init|add|checkpoint|proof        the trust log, a folder any host mirrors
+ *   kash log witness|upgrade                  ONLINE — a head's hash to OpenTimestamps / RFC 3161
  *   kash status | doctor                      the keystore · integration checks
  *   kash add <product> | rollback             the older project-integration commands
  */
@@ -23,6 +27,7 @@ import { runAdd }      from "../commands/add";
 import { runCountersign } from "../commands/countersign";
 import { runDoctor }   from "../commands/doctor";
 import { runIssueCohort } from "../commands/issue";
+import { runLogAdd, runLogCheckpoint, runLogInit, runLogProof, runLogUpgrade, runLogWitness } from "../commands/log";
 import { runRollback } from "../commands/rollback";
 import { runStationInit } from "../commands/station";
 import { runStatus }   from "../commands/status";
@@ -39,7 +44,7 @@ async function main(): Promise<void> {
 
   program
     .name("kash")
-    .description("The station kit: a station's own keys, cohort records as files, offline verification, and signed trust lists. Local files only — no server, no upload.")
+    .description("The station kit: a station's own keys, cohort records as files, offline verification, signed trust lists and the trust log. Local files only — no server, no upload; only `log witness` and `log upgrade` go online, to public witnesses.")
     .version(VERSION);
 
   /* ── station ──────────────────────────────────────────────────── */
@@ -144,6 +149,83 @@ async function main(): Promise<void> {
       await runTrustSign(file, {
         ...(opts.key !== undefined ? { key: opts.key } : {}),
         ...(opts.keystore !== undefined ? { keystore: opts.keystore } : {}),
+        ...(opts.out !== undefined ? { out: opts.out } : {}),
+      });
+    });
+
+  /* ── log ──────────────────────────────────────────────────────── */
+
+  const log = program
+    .command("log")
+    .description("The trust log: issuers and lists, and attestations by salted hash, in a folder any host serves and mirrors. Never a person or a record. Only witness and upgrade go online.");
+  log
+    .command("init <dir>")
+    .description("Start a log whose key is the publisher key: writes log.json and the empty folders.")
+    .requiredOption("--name <slug>", "the log's short name; its id is <publisher did>/log/<slug>")
+    .option("--max-batch-delay <seconds>", "how long an entry may wait for its first witnessed head before its claimed time is not supported (default 86400)")
+    .option("--origin <https-url>", "where you will serve the folder (or put it in log.json later)")
+    .option("--key <name|path>", "the log's key (default: publisher — never the station's)")
+    .option("--keystore <dir>", "keystore folder (default: $KASH_KEYSTORE, else ~/.kash/keys)")
+    .action(async (dir: string, opts: { name: string; maxBatchDelay?: string; origin?: string; key?: string; keystore?: string }) => {
+      await runLogInit(dir, {
+        name: opts.name,
+        ...(opts.maxBatchDelay !== undefined ? { maxBatchDelay: opts.maxBatchDelay } : {}),
+        ...(opts.origin !== undefined ? { origin: opts.origin } : {}),
+        ...(opts.key !== undefined ? { key: opts.key } : {}),
+        ...(opts.keystore !== undefined ? { keystore: opts.keystore } : {}),
+      });
+    });
+  log
+    .command("add <dir> <files...>")
+    .description("Append a signed trust list's version and its key changes, a signed status list's version, or attestation entries (JSON or .jsonl). Checks the whole batch before writing any of it.")
+    .option("--previous <file>", "the signed version of a trust list the log already holds, so the key changes to the next are logged (repeatable)", collect, [] as string[])
+    .option("--trust-list <file>", "a signed trust list whose keys check a status list's signature (repeatable)", collect, [] as string[])
+    .action(async (dir: string, files: string[], opts: { previous: string[]; trustList: string[] }) => {
+      await runLogAdd(dir, files, { previous: opts.previous, trustList: opts.trustList });
+    });
+  log
+    .command("checkpoint <dir>")
+    .description("Sign the log's head with the publisher key. Its time is the log's own claim until a public witness stamps it.")
+    .option("--key <name|path>", "the log's key (default: publisher)")
+    .option("--keystore <dir>", "keystore folder (default: $KASH_KEYSTORE, else ~/.kash/keys)")
+    .action(async (dir: string, opts: { key?: string; keystore?: string }) => {
+      await runLogCheckpoint(dir, {
+        ...(opts.key !== undefined ? { key: opts.key } : {}),
+        ...(opts.keystore !== undefined ? { keystore: opts.keystore } : {}),
+      });
+    });
+  log
+    .command("witness <dir>")
+    .description("GOES ONLINE: send the newest head's 32-byte hash to public witnesses and keep their proofs in witness/.")
+    .option("--size <n>", "witness the head of this size instead of the newest")
+    .option("--no-ots", "skip OpenTimestamps, which runs by default")
+    .option("--calendar <url>", "an OpenTimestamps calendar to submit to (repeatable; default the four public pools)", collect, [] as string[])
+    .option("--tsa [url]", "also an RFC 3161 time-stamp authority: a second witness that fails differently (default http://timestamp.digicert.com)")
+    .option("--tsa-root <pem>", "keep the authority's token only if its signature verifies against this root (needs openssl)")
+    .action(async (dir: string, opts: { size?: string; ots?: boolean; calendar: string[]; tsa?: string | boolean; tsaRoot?: string }) => {
+      await runLogWitness(dir, {
+        ...(opts.size !== undefined ? { size: opts.size } : {}),
+        ...(opts.ots === false ? { ots: false } : {}),
+        calendar: opts.calendar,
+        ...(opts.tsa === true ? { tsa: true as const } : typeof opts.tsa === "string" ? { tsa: opts.tsa } : {}),
+        ...(opts.tsaRoot !== undefined ? { tsaRoot: opts.tsaRoot } : {}),
+      });
+    });
+  log
+    .command("upgrade <dir>")
+    .description("GOES ONLINE: ask the calendars for the Bitcoin attestation each pending OpenTimestamps proof waits for.")
+    .option("--calendar <url>", "a calendar a pending proof may be upgraded from (repeatable; default the four known)", collect, [] as string[])
+    .action(async (dir: string, opts: { calendar: string[] }) => {
+      await runLogUpgrade(dir, { calendar: opts.calendar });
+    });
+  log
+    .command("proof <dir> <index>")
+    .description("Print the inclusion proof for entry <index>: its path to the first head that held it, that head, and the head's witnesses. Offline.")
+    .option("--size <n>", "prove against the head of this size instead")
+    .option("--out <file>", "also write the proof here")
+    .action(async (dir: string, index: string, opts: { size?: string; out?: string }) => {
+      await runLogProof(dir, index, {
+        ...(opts.size !== undefined ? { size: opts.size } : {}),
         ...(opts.out !== undefined ? { out: opts.out } : {}),
       });
     });

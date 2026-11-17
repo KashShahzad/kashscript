@@ -65,6 +65,11 @@ const txt = (f: string): string => readFileSync(join(V, f), "utf8").trim();
 const json = <T = any>(f: string): T => JSON.parse(readFileSync(join(V, f), "utf8")) as T;
 const ctx = json("context.v1.json");
 const NOW = ctx.nowUnix as number;
+/**
+ * The frozen presentations' bindings were made an hour before the context's now (iat 1790298000, now 1790301600).
+ * KS-Q4 bounds a presentation's binding to ten minutes by default, so the tests that read them state the hour.
+ */
+const AN_HOUR = { maxKbAgeSec: 3_600 } as const;
 const resolveKey = makeKeyResolver(new Map(), new Map());
 const kjs = (k: KashKeyPair) => ({ privateKey: k.privateKey, publicKey: k.publicKey });
 async function carried(f: string): Promise<StatusListReport> {
@@ -143,25 +148,37 @@ describe("predicate — a yes, bound to the holder, offline except for status", 
 
   it("verifies presentation A against the audience and nonce A sent, with status carried", async () => {
     const r = await verifyPredicatePresentation(txt("predicate-presentation-a.v1.txt"), {
-      resolveKey, audience: A.did, nonce: A.nonce, nowSec: NOW, statusLists: [await carried("predicate-status-list.v1.json")],
+      resolveKey, audience: A.did, nonce: A.nonce, nowSec: NOW, ...AN_HOUR, statusLists: [await carried("predicate-status-list.v1.json")],
     });
     expect(r.ok).toBe(true);
     expect(r.predicate?.rule.version).toBe("3");
     expect(r.disclosedRecordHashes).toEqual([]); // hidden unless the holder shows them
     expect(r.status.state).toBe("not-revoked");
     expect(r.status.text).toStartWith("valid unless revoked, as of ");
+    // KS-Q4: the list's own ttl was a day, and its day was over by the context's now — the reading stands as of its time, and says so.
+    expect(r.status.stale).toBe(true);
+    expect(r.status.cacheUntilUnix).toBe(1_790_208_000 + 86_400);
+    expect(r.status.text).toContain("older than its cache time");
     expect(r.issuer).toBe(ctx.predicateIssuer);
+  });
+
+  it("KS-Q4: under the default ten-minute window, the same frozen presentation is stale at the context's now", async () => {
+    const r = await verifyPredicatePresentation(txt("predicate-presentation-a.v1.txt"), { resolveKey, audience: A.did, nonce: A.nonce, nowSec: NOW });
+    expect(r.ok).toBe(false);
+    expect(r.sdJwt.reason).toBe("KEY_BINDING_STALE");
+    // At the moment it was made (plus a minute), it binds.
+    expect((await verifyPredicatePresentation(txt("predicate-presentation-a.v1.txt"), { resolveKey, audience: A.did, nonce: A.nonce, nowSec: 1_790_298_060 })).ok).toBe(true);
   });
 
   it("A and B — two copies to two verifiers — share nothing that links them (rule 6)", async () => {
     expect(await linkabilityBetween(txt("predicate-presentation-a.v1.txt"), txt("predicate-presentation-b.v1.txt"))).toEqual([]);
-    const b = await verifyPredicatePresentation(txt("predicate-presentation-b.v1.txt"), { resolveKey, audience: B.did, nonce: B.nonce, nowSec: NOW });
+    const b = await verifyPredicatePresentation(txt("predicate-presentation-b.v1.txt"), { resolveKey, audience: B.did, nonce: B.nonce, nowSec: NOW, ...AN_HOUR });
     expect(b.ok).toBe(true);
-    expect(b.holder).not.toBe((await verifyPredicatePresentation(txt("predicate-presentation-a.v1.txt"), { resolveKey, nowSec: NOW })).holder);
+    expect(b.holder).not.toBe((await verifyPredicatePresentation(txt("predicate-presentation-a.v1.txt"), { resolveKey, audience: A.did, nonce: A.nonce, nowSec: NOW, ...AN_HOUR })).holder);
   });
 
   it("a presentation for A is refused by B", async () => {
-    const r = await verifyPredicatePresentation(txt("predicate-presentation-a.v1.txt"), { resolveKey, audience: B.did, nonce: A.nonce, nowSec: NOW });
+    const r = await verifyPredicatePresentation(txt("predicate-presentation-a.v1.txt"), { resolveKey, audience: B.did, nonce: A.nonce, nowSec: NOW, ...AN_HOUR });
     expect(r.ok).toBe(false);
     expect(r.sdJwt.reason).toBe("AUDIENCE_MISMATCH");
   });
@@ -169,28 +186,37 @@ describe("predicate — a yes, bound to the holder, offline except for status", 
   it("record hashes appear only because the holder disclosed them, and an attached record binds to one", async () => {
     const work = JSON.parse(readFileSync(join(import.meta.dir, "vectors", "holder", "source", "oreoasis-work-record.json"), "utf8")).envelope;
     const r = await verifyPredicatePresentation(txt("predicate-presentation-c-records.v1.txt"), {
-      resolveKey, audience: C.did, nonce: C.nonce, nowSec: NOW, attachedRecords: [{ kind: "dsse", value: work }],
+      resolveKey, audience: C.did, nonce: C.nonce, nowSec: NOW, ...AN_HOUR, attachedRecords: [{ kind: "dsse", value: work }],
     });
     expect(r.ok).toBe(true);
     expect([...r.disclosedRecordHashes].sort()).toEqual([...ctx.restsOn].sort());
     expect(r.attachments).toEqual([{ recordId: ctx.restsOn[0], bound: true }]);
     expect(r.notes.join(" ")).toContain("link the presentations");
     const stray = await verifyPredicatePresentation(txt("predicate-presentation-c-records.v1.txt"), {
-      resolveKey, audience: C.did, nonce: C.nonce, nowSec: NOW, attachedRecords: [{ kind: "dsse", value: { not: "a record it rests on" } }],
+      resolveKey, audience: C.did, nonce: C.nonce, nowSec: NOW, ...AN_HOUR, attachedRecords: [{ kind: "dsse", value: { not: "a record it rests on" } }],
     });
     expect(stray.reason).toBe("ATTACHMENT_NOT_BOUND");
   });
 
   it("a revoked copy says revoked, with its time", async () => {
     const r = await verifyPredicatePresentation(txt("predicate-presentation-revoked.v1.txt"), {
-      resolveKey, audience: ctx.verifiers.revoked.did, nonce: ctx.verifiers.revoked.nonce, nowSec: NOW, statusLists: [await carried("predicate-status-list.v1.json")],
+      resolveKey, audience: ctx.verifiers.revoked.did, nonce: ctx.verifiers.revoked.nonce, nowSec: NOW, ...AN_HOUR, statusLists: [await carried("predicate-status-list.v1.json")],
     });
     expect(r.status.state).toBe("revoked");
     expect(r.status.text).toStartWith("revoked as of ");
   });
 
+  it("KS-Q4: a verifier that states the most it accepts gets no verdict from an older list", async () => {
+    const r = await verifyPredicatePresentation(txt("predicate-presentation-revoked.v1.txt"), {
+      resolveKey, audience: ctx.verifiers.revoked.did, nonce: ctx.verifiers.revoked.nonce, nowSec: NOW, ...AN_HOUR,
+      statusLists: [await carried("predicate-status-list.v1.json")], maxStatusAgeSec: 86_400,
+    });
+    expect(r.status.state).toBe("unknown");
+    expect(r.status.text).toContain("older than this verifier accepts");
+  });
+
   it("without the list, status says it was not checked — it never guesses", async () => {
-    const r = await verifyPredicatePresentation(txt("predicate-presentation-a.v1.txt"), { resolveKey, audience: A.did, nonce: A.nonce, nowSec: NOW });
+    const r = await verifyPredicatePresentation(txt("predicate-presentation-a.v1.txt"), { resolveKey, audience: A.did, nonce: A.nonce, nowSec: NOW, ...AN_HOUR });
     expect(r.ok).toBe(true);
     expect(r.status.state).toBe("unknown");
     expect(r.status.text).toContain("networked check");
@@ -198,10 +224,10 @@ describe("predicate — a yes, bound to the holder, offline except for status", 
 
   it("answers the ask it was made for, and nothing else", async () => {
     const ask = json<Ask>("asks/valid.json");
-    const ok = await verifyPredicatePresentation(txt("predicate-presentation-a.v1.txt"), { resolveKey, audience: A.did, nonce: A.nonce, nowSec: NOW, ask, needId: "n1" });
+    const ok = await verifyPredicatePresentation(txt("predicate-presentation-a.v1.txt"), { resolveKey, audience: A.did, nonce: A.nonce, nowSec: NOW, ...AN_HOUR, ask, needId: "n1" });
     expect(ok.ok).toBe(true);
     const other: Ask = { ...ask, needs: [{ id: "n1", predicate: "within-mandate", withinDays: 30 }] };
-    const bad = await verifyPredicatePresentation(txt("predicate-presentation-a.v1.txt"), { resolveKey, audience: A.did, nonce: A.nonce, nowSec: NOW, ask: other, needId: "n1" });
+    const bad = await verifyPredicatePresentation(txt("predicate-presentation-a.v1.txt"), { resolveKey, audience: A.did, nonce: A.nonce, nowSec: NOW, ...AN_HOUR, ask: other, needId: "n1" });
     expect(bad.reason).toBe("ASK_MISMATCH");
   });
 
@@ -212,7 +238,7 @@ describe("predicate — a yes, bound to the holder, offline except for status", 
     await expect(issuePredicateCredential({ issuer, holderPublicKey: h.publicKey, predicate: base, restsOn: [], credentialStatus: null, iatUnix: NOW, expUnix: NOW + 86_400 })).rejects.toThrow();
     const raw = await issueSdJwt({ claims: { iss: issuer.did, vct: PREDICATE_VCT, exp: NOW + 86_400, cnf: { jwk: jwkOf(h.publicKey) }, predicate: base }, signer: kjs(iss) });
     const p = await presentSdJwt(raw, () => true, kjs(h), { aud: "v", nonce: "n", iatUnix: NOW });
-    expect((await verifyPredicatePresentation(p, { resolveKey, nowSec: NOW })).reason).toBe("RULE_VERSION_MISSING");
+    expect((await verifyPredicatePresentation(p, { resolveKey, audience: "v", nonce: "n", nowSec: NOW })).reason).toBe("RULE_VERSION_MISSING");
   });
 
   it("an issuer is listed only by a pinned trust list naming its vct", async () => {
@@ -222,7 +248,7 @@ describe("predicate — a yes, bound to the holder, offline except for status", 
       { format: TRUST_LIST_FORMAT, listId: "l", version: 1, publisher: pubDid, issuedAtUnix: NOW - 10, validFromUnix: NOW - 10, validUntilUnix: NOW + 86_400, issuers: [{ issuerId: ctx.predicateIssuer, label: "A workshop (sample)", keys: [], dsts: [PREDICATE_VCT], validFromUnix: NOW - 10, validUntilUnix: NOW + 86_400 }] },
       { keyid: pubDid, ...kjs(pub) },
     );
-    const opts = { resolveKey, audience: A.did, nonce: A.nonce, nowSec: NOW };
+    const opts = { resolveKey, audience: A.did, nonce: A.nonce, nowSec: NOW, ...AN_HOUR };
     const unpinned = await verifyPredicatePresentation(txt("predicate-presentation-a.v1.txt"), { ...opts, trustLists: [await verifyTrustList(list, { nowSec: NOW })] });
     expect(unpinned.trusted).toBe(false);
     const pinned = await verifyPredicatePresentation(txt("predicate-presentation-a.v1.txt"), { ...opts, trustLists: [await verifyTrustList(list, { nowSec: NOW, pinnedPublishers: [pubDid] })] });
@@ -423,13 +449,14 @@ describe("thank-you — a promise, never a balance; it cannot move", () => {
   });
 
   it("redeems once with its own issuer; after the issuer marks it used, it is refused", async () => {
+    // A redemption is a presentation to the voucher's own issuer: it names itself (the café) and the nonce it sent (KS-Q4).
     const before = await verifyRedemption(txt("thank-you-redemption.v1.txt"), {
-      resolveKey, nonce: ctx.redemptionNonce, nowSec: REDEEM_NOW, statusLists: [await carried("thank-you-status-before.v1.json")],
+      resolveKey, audience: ctx.cafe, nonce: ctx.redemptionNonce, nowSec: REDEEM_NOW, statusLists: [await carried("thank-you-status-before.v1.json")],
     });
     expect(before.ok).toBe(true);
     expect(before.status.text).toStartWith("not yet used");
     const after = await verifyRedemption(txt("thank-you-redemption.v1.txt"), {
-      resolveKey, nonce: ctx.redemptionNonce, nowSec: REDEEM_NOW, statusLists: [await carried("thank-you-status-after.v1.json")],
+      resolveKey, audience: ctx.cafe, nonce: ctx.redemptionNonce, nowSec: REDEEM_NOW, statusLists: [await carried("thank-you-status-after.v1.json")],
     });
     expect(after.reason).toBe("USED_OR_WITHDRAWN");
     expect(after.status.text).toStartWith("used or withdrawn");
@@ -448,13 +475,16 @@ describe("thank-you — a promise, never a balance; it cannot move", () => {
   it("cannot be passed on: shown by any key but its holder's, it fails", async () => {
     const { v, giverDid, other } = await fresh();
     const p = await presentSdJwt(v, () => true, kjs(other), { aud: giverDid, nonce: "n", iatUnix: NOW });
-    expect((await verifyRedemption(p, { resolveKey, nowSec: NOW })).reason).toBe("SD_JWT_INVALID");
+    expect((await verifyRedemption(p, { resolveKey, audience: giverDid, nonce: "n", nowSec: NOW })).reason).toBe("SD_JWT_INVALID");
   });
 
   it("is redeemed only with its own issuer", async () => {
-    const { v, holder } = await fresh();
+    const { v, holder, giverDid } = await fresh();
     const p = await presentSdJwt(v, () => true, kjs(holder), { aud: "did:kash:someone-else", nonce: "n", iatUnix: NOW });
-    expect((await verifyRedemption(p, { resolveKey, nowSec: NOW })).reason).toBe("REDEEMED_ELSEWHERE");
+    expect((await verifyRedemption(p, { resolveKey, audience: giverDid, nonce: "n", nowSec: NOW })).reason).toBe("REDEEMED_ELSEWHERE");
+    // Someone else holding a voucher bound to them cannot redeem another's: the redeeming party must be the issuer.
+    const q = await presentSdJwt(v, () => true, kjs(holder), { aud: "did:kash:someone-else", nonce: "n", iatUnix: NOW });
+    expect((await verifyRedemption(q, { resolveKey, audience: "did:kash:someone-else", nonce: "n", nowSec: NOW })).reason).toBe("REDEEMED_ELSEWHERE");
   });
 
   it("refuses any field that could sum it — amount, balance, points, nested or not", async () => {

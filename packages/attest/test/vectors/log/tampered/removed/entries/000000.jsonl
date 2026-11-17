@@ -1,0 +1,8 @@
+{"issuedAtUnix":1794945059,"kind":"trust-list","listId":"sample-list","publisher":"did:kash:8kCvT4dL7i2iX33ub1YCAJSCdyvHD1WrKPpvoBH3Wbd5","sha256":"ab3c09a73e09e67cda38072e514e816946adbe9999eda521657e2d29a7c7096b","v":1,"version":1}
+{"action":"added","alg":"Ed25519","atUnix":1794945059,"issuerId":"did:web:issuer-a.sample.example","keyid":"did:web:issuer-a.sample.example#1","kind":"issuer-key","listId":"sample-list","listVersion":1,"v":1}
+{"action":"added","alg":"ES256","atUnix":1794945059,"issuerId":"did:web:issuer-b.sample.example","keyid":"did:web:issuer-b.sample.example#1","kind":"issuer-key","listId":"sample-list","listVersion":1,"v":1}
+{"claimedAtUnix":1794945159,"issuer":"did:web:issuer-a.sample.example","kind":"attestation","salted":"77671b023c577db0ca1172f61f7f7f5a93ec86b11e39878de5981170ec9d93a8","v":1}
+{"issuedAtUnix":1794945359,"kind":"trust-list","listId":"sample-list","publisher":"did:kash:8kCvT4dL7i2iX33ub1YCAJSCdyvHD1WrKPpvoBH3Wbd5","sha256":"87fd052484db0959bd5c0ca9fccaade8c6aff2c4f204980c8257c0f0339bcf06","v":1,"version":2}
+{"backfilled":true,"claimedAtUnix":1792353059,"issuer":"did:web:issuer-b.sample.example","kind":"attestation","salted":"f02b67c8a8337256fa3f604106197ed55eb42c4752e1ed975714ed3072d4a8cb","v":1}
+{"id":"https://sample.example/status/withdrawals","issuedAtUnix":1794945459,"issuer":"did:web:issuer-b.sample.example","kind":"status-list","sha256":"ae4e24281c620b4e21e5956ad2070f3b4f032c6ad27f71d716b6ada65b6caaba","statusPurpose":"withdrawal","v":1}
+{"claimedAtUnix":1794081059,"issuer":"did:web:issuer-a.sample.example","kind":"attestation","salted":"5c30c3469f9fec464f7baad55b33f8eb5950bbb5149350b0727d0d1fc0d000d8","v":1}

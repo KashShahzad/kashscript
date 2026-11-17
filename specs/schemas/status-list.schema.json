@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kashscript.com/lexicons/kash.status-list@1.0.0",
+  "$id": "https://kashscript.com/lexicons/kash.status-list@1.1.0",
   "title": "A status list",
-  "description": "An issuer's revocation or suspension bitstring — attest's kashscript-status-list/1 payload in clear, aligned to W3C Bitstring Status List v1.0: the list's URL, its issuer, purpose, the encoded bitstring, and the time the issuer says it was true. Signed by its issuer as DSSE; any host may mirror it.",
+  "description": "An issuer's status bitstring — attest's kashscript-status-list/1 payload in clear, aligned to W3C Bitstring Status List v1.0 — for revocation, suspension, or two of d91's terminal states: supersession (a later attestation that cites it replaces it) and withdrawal (withdrawn by its signer, inside the withdrawal window only). The list's URL, its issuer, purpose, the encoded bitstring, and the time the issuer says it was true. Signed by its issuer as DSSE; any host may mirror it.",
   "type": "object",
   "properties": {
     "format": {
@@ -24,7 +24,9 @@
     "statusPurpose": {
       "enum": [
         "revocation",
-        "suspension"
+        "suspension",
+        "supersession",
+        "withdrawal"
       ]
     },
     "encodedList": {

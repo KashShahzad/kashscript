@@ -38,6 +38,20 @@ export interface Copy {
   readonly checkPractice: string;
   readonly checkListed: string;
   readonly checkUnlisted: string;
+  /** What your list says they sign as — one per issuer class (KS-Q4). */
+  readonly classSelfIssuer: string;
+  readonly classCounterparty: string;
+  readonly classAssessor: string;
+  readonly classAccreditedBody: string;
+  readonly classInsurer: string;
+  /** How their key was shown to be theirs — one per grade, 0 to 3 (KS-Q4). */
+  readonly grade0: string;
+  readonly grade1: string;
+  readonly grade2: string;
+  readonly grade3: string;
+  /** Your list names them and no longer counts them (KS-Q4). */
+  readonly checkSuspended: string;
+  readonly checkRemoved: string;
   readonly notProvenCountersigned: string;
   readonly notProvenSigned: string;
   readonly notProvenDeviceOnly: string;
@@ -89,6 +103,17 @@ export const DEFAULT_COPY: Copy = {
   checkPractice: "Practice. Not a real-world fact.",
   checkListed: "From {name}, who is on your list of known senders.",
   checkUnlisted: "From someone who isn't on your list of known senders.",
+  classSelfIssuer: "Your list says they sign for their own work.",
+  classCounterparty: "Your list says they sign as the other side of the work.",
+  classAssessor: "Your list says they sign as an independent assessor.",
+  classAccreditedBody: "Your list says they sign as an accredited body.",
+  classInsurer: "Your list says they sign as an insurer.",
+  grade0: "Their key was a one-time key, for practice only.",
+  grade1: "Their key was a passkey made on their own site, after a one-time code.",
+  grade2: "Their key is held on their own device, by them alone.",
+  grade3: "The organisation signs as itself.",
+  checkSuspended: "Your list has paused {name} as a sender. What they sent isn't counted as from a known sender.",
+  checkRemoved: "Your list has taken {name} off its known senders. What they sent isn't counted as from a known sender.",
   notProvenCountersigned: "This shows two independent sides signed it at a time. It doesn't show that what it says is true, or that nothing was left out.",
   notProvenSigned: "This shows who signed it. It doesn't show that anyone else agrees.",
   notProvenDeviceOnly: "This shows a device signed it. No one else vouches for it.",

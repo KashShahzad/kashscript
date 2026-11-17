@@ -159,6 +159,14 @@ const ENTRIES: DstEntry[] = [
   // anchor adopts one version of a rule with its own values for the parameters
   // the rule bounds. A public record the anchor signs as itself (d62(d)2).
   { tag: "application/vnd.kash.adoption+json", owner: "@kashscript/predicate", family: "dsse-type", kind: "DSSE rule adoption — an anchor adopts one version of a rule with local values for its bounded parameters; signed by the adopting organisation" },
+  // The trust log (KS-Q4; specs/trust-log.md; d84 P6, d91(a), (f), (i)). The leaf
+  // is SHA-256(0x00 ‖ tag ‖ JCS(entry)) over one of four closed entry shapes —
+  // a trust list's version, a status list's version, an issuer key event, an
+  // attestation by salted hash — never a person, a presentation or a record's
+  // content. The checkpoint is the log's signed tree head (RFC 9162's fields),
+  // signed by the log's own key; a public witness stamps its payload hash.
+  { tag: "kash-log-entry-v1\n", owner: "@kashscript/attest", family: "merkle-leaf", kind: "trust-log leaf — one closed entry (trust-list, status-list, issuer-key, attestation by salted hash) in RFC 8785 canonical form; a mirror rebuilds the same root from the entries alone" },
+  { tag: "application/vnd.kash.log-checkpoint+json", owner: "@kashscript/attest", family: "dsse-type", kind: "DSSE trust-log checkpoint — the log's signed tree head: size, root, the log's claimed time and the previous head; signed only by the log's own key; its payload hash is what a public witness stamps" },
   // reserved — protocol-layer slots (ROADMAP)
   { tag: "hudhud-action-ledger-v1\n", owner: "@kashscript/hudhud", family: "kash-event", kind: "reserved: hudhud action ledger", reserved: true },
   { tag: "kash-identity-event-v1\n", owner: "@kashscript/identity-server", family: "kash-event", kind: "reserved: identity server event", reserved: true },

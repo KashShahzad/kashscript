@@ -1,6 +1,6 @@
 {
   "name": "@kashscript/muffler",
-  "version": "0.2.0-alpha.0",
+  "version": "0.2.0-alpha.1",
   "description": "The Data Protocol — a transport-agnostic, did:kash-bound atproto-style PDS client + firehose indexer with CID content-addressing, an injectable Refiner (lexicon validation via @kashscript/lexicons), the guard that admits only public, organisation-authored records (ECOSYSTEM d59), and pluggable record sinks (in-memory + Supabase adapter). Apache-2.0 — portable hosting is free.",
   "type": "module",
   "main": "./src/index.ts",

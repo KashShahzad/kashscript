@@ -79,7 +79,19 @@ export type AgentTokenFailureReason =
   | "NOT_YET_VALID"
   | "ISSUER_MISMATCH"
   | "AUDIENCE_MISMATCH"
-  | "MISSING_OWNER_BINDING";
+  | "MISSING_OWNER_BINDING"
+  /** The token lives longer than the verifier's stated `maxLifetimeSeconds` (KS-Q4; d84 P6: short-lived MCP tokens). */
+  | "LIFETIME_TOO_LONG";
+
+/**
+ * The lifetime d84 P6's *short-lived MCP tokens* recommends for an ordinary
+ * agent token: one hour. A ceiling, not a default — a verifier states it with
+ * `maxLifetimeSeconds`, a minter with the same option. It is not imposed on
+ * every token because a deliberately long one exists: Oreoasis's booking
+ * mandate, the year-long authority an organisation gives an app (KS-Q4's
+ * report raises it with the founder).
+ */
+export const RECOMMENDED_AGENT_TOKEN_LIFETIME_SECONDS = 3600;
 
 // ----------------------------------------------------------------------------
 // Mint
@@ -111,6 +123,8 @@ export interface MintAgentTokenOptions {
   /** Space-delimited `scope`. */
   readonly scope: string;
   readonly expiresInSeconds: number;
+  /** When set, refuse to mint a token that lives longer (e.g. {@link RECOMMENDED_AGENT_TOKEN_LIFETIME_SECONDS}). */
+  readonly maxLifetimeSeconds?: number;
   readonly nowSec?: UnixSeconds;
   readonly jti?: string;
   /** Header `kid` (defaults to the owner `did:kash`). */
@@ -169,6 +183,9 @@ export async function mintAgentToken(opts: MintAgentTokenOptions): Promise<MintA
   if (typeof opts.expiresInSeconds !== "number" || opts.expiresInSeconds <= 0) {
     throw new KashscriptIdentityMalformedPayloadError("expiresInSeconds");
   }
+  if (opts.maxLifetimeSeconds !== undefined && opts.expiresInSeconds > opts.maxLifetimeSeconds) {
+    throw new KashscriptIdentityMalformedPayloadError("expiresInSeconds");
+  }
   if (typeof opts.issuer !== "string" || opts.issuer.length === 0) {
     throw new KashscriptIdentityMalformedPayloadError("issuer");
   }
@@ -217,6 +234,8 @@ export interface VerifyAgentTokenOptions {
   readonly nowSec?: UnixSeconds;
   /** Allowed clock skew for exp/nbf, in seconds (default 0). */
   readonly clockSkewSeconds?: number;
+  /** When set, a token whose `exp − iat` is longer is refused: the verifier's stated ceiling (KS-Q4; e.g. {@link RECOMMENDED_AGENT_TOKEN_LIFETIME_SECONDS}). */
+  readonly maxLifetimeSeconds?: number;
   /** Resolve the signer key by header `kid` from this JWKS. */
   readonly jwks?: Jwks;
   /** Explicit signer public key (overrides jwks + self-certifying resolution).
@@ -379,6 +398,10 @@ export async function verifyAgentToken(
   if (claims.exp + skew <= now) return fail("EXPIRED", { claims, ownerBinding });
   if (typeof claims.nbf === "number" && claims.nbf - skew > now) {
     return fail("NOT_YET_VALID", { claims, ownerBinding });
+  }
+  // KS-Q4: the verifier's own ceiling on how long any token it accepts may live, whoever minted it.
+  if (opts.maxLifetimeSeconds !== undefined && claims.exp - claims.iat > opts.maxLifetimeSeconds) {
+    return fail("LIFETIME_TOO_LONG", { claims, ownerBinding });
   }
 
   // -------- Issuer (optional) -------------------------------------------

@@ -34,7 +34,22 @@ export const STATUS_LIST_FORMAT = "kashscript-status-list/1" as const;
 /** 131,072 entries = 16 KiB uncompressed — W3C Bitstring Status List's minimum. */
 export const STATUS_LIST_MIN_ENTRIES = 131_072;
 
-export type StatusPurpose = "revocation" | "suspension";
+/**
+ * What a set bit means. `revocation` and `suspension` are W3C Bitstring Status
+ * List's. The other two are d91's terminal states, as custom purposes (the
+ * standard allows any string): `supersession` — a later attestation that cites
+ * this one replaces it (W3C's `refresh` does not invalidate, so it is not this);
+ * `withdrawal` — withdrawn by its signer, which counts only inside the
+ * withdrawal window (d84 P4.4). The third terminal state, expiry, is the clock's
+ * and needs no list.
+ */
+export const STATUS_PURPOSES = ["revocation", "suspension", "supersession", "withdrawal"] as const;
+export type StatusPurpose = (typeof STATUS_PURPOSES)[number];
+
+/** How long a verifier here relies on a list that states no `ttl` (W3C assumes no default; this is the checker's own, stated in every verdict): one day. */
+export const DEFAULT_STATUS_CACHE_SEC = 86_400;
+
+const isPurpose = (v: unknown): v is StatusPurpose => typeof v === "string" && (STATUS_PURPOSES as readonly string[]).includes(v);
 
 /** What a record carries as `credentialStatus` — W3C `BitstringStatusListEntry`. */
 export interface StatusListEntry {
@@ -80,6 +95,10 @@ export interface StatusListReport {
   readonly validUntilUnix: number | null;
   /** `validUntilUnix` is null or not yet passed. An expired list decides nothing. */
   readonly current: boolean;
+  /** The list's own `ttl`, in milliseconds, or null when it states none. */
+  readonly ttlMs: number | null;
+  /** Until when a verifier relies on it: `issuedAt + ttl` (or the checker's day when it states none), never past `validUntil`. */
+  readonly cacheUntilUnix: number | null;
   readonly entries: number;
   /** How the verifier got it. `fetched` is the only networked path in attest. */
   readonly source: "carried" | "fetched";
@@ -90,10 +109,16 @@ export interface StatusListReport {
 }
 
 export type StatusState =
+  /** The list's bit is clear, as of its time: not revoked, suspended, superseded or withdrawn — whichever the list is for. */
   | "not-revoked"
   | "revoked"
   | "suspended"
+  /** d91: a later attestation that cites this one replaces it. */
+  | "superseded"
+  /** d91: withdrawn by its signer (a presented countersign withdrawal, or a withdrawal list's bit). */
   | "withdrawn"
+  /** d91: expired by the clock — terminal, and no list is needed to say so. */
+  | "expired"
   | "unknown"
   | "no-status-entry";
 
@@ -103,8 +128,25 @@ export interface StatusVerdict {
   readonly asOfUnix: number | null;
   readonly source: "carried" | "fetched" | "presented" | null;
   readonly listId: string | null;
+  /** Until when the list it rests on is relied on — its `ttl`, or the checker's day; null when no list. */
+  readonly cacheUntilUnix: number | null;
+  /** Past its cache time when checked: the reading stands as of the list's time, and a fresh list may say otherwise. */
+  readonly stale: boolean;
   /** The sentence a surface shows. It always says what it rests on. */
   readonly text: string;
+}
+
+export interface CheckStatusOptions {
+  /** The time checked. With it, the verdict says whether the list is past its cache time. */
+  readonly nowSec?: number;
+  /** The most this verifier accepts: a list older than this decides nothing (`unknown`). Unset, a stale list still decides, and says it is stale. */
+  readonly maxAgeSec?: number;
+  /** The record's own signed expiry: past it, the state is `expired` (d91's clock), whatever any list says. */
+  readonly recordExpiresAtUnix?: number | null;
+  /** When the record was signed, for the withdrawal window. */
+  readonly recordSignedAtUnix?: number | null;
+  /** d84 P4.4's window — the founder's number. Unset, a withdrawal reads as withdrawn and the verdict says the window was not checked. */
+  readonly withdrawalWindowSec?: number;
 }
 
 /* ── the bitstring ─────────────────────────────────────────────────────── */
@@ -157,7 +199,7 @@ export function statusEntryOf(signedPayload: unknown): StatusListEntry | null {
   if (
     !isPlainObject(s) ||
     s.type !== "BitstringStatusListEntry" ||
-    (s.statusPurpose !== "revocation" && s.statusPurpose !== "suspension") ||
+    !isPurpose(s.statusPurpose) ||
     typeof s.statusListIndex !== "string" ||
     !/^(0|[1-9][0-9]*)$/.test(s.statusListIndex) ||
     typeof s.statusListCredential !== "string"
@@ -184,6 +226,8 @@ function failedList(reason: StatusListFailureReason, note: string, source: "carr
     issuedAtUnix: null,
     validUntilUnix: null,
     current: false,
+    ttlMs: null,
+    cacheUntilUnix: null,
     entries: 0,
     bits: null,
     ...partial,
@@ -191,6 +235,12 @@ function failedList(reason: StatusListFailureReason, note: string, source: "carr
     reason,
     notes: [note],
   };
+}
+
+/** Until when a list is relied on: `issuedAt + ttl` (or the checker's day when it states none), never past its `validUntil`. */
+function cacheUntilOf(issuedAtUnix: number, validUntilUnix: number | null, ttlMs: number | null): number {
+  const byTtl = issuedAtUnix + (ttlMs !== null ? Math.floor(ttlMs / 1000) : DEFAULT_STATUS_CACHE_SEC);
+  return validUntilUnix === null ? byTtl : Math.min(byTtl, validUntilUnix);
 }
 
 export interface VerifyStatusListOptions {
@@ -217,19 +267,23 @@ export async function verifyStatusList(envelope: DsseEnvelope, opts: VerifyStatu
     p.type !== "BitstringStatusList" ||
     typeof p.id !== "string" ||
     typeof p.issuer !== "string" ||
-    (p.statusPurpose !== "revocation" && p.statusPurpose !== "suspension") ||
+    !isPurpose(p.statusPurpose) ||
     typeof p.encodedList !== "string" ||
     typeof p.issuedAtUnix !== "number" ||
-    (p.validUntilUnix !== null && typeof p.validUntilUnix !== "number")
+    (p.validUntilUnix !== null && typeof p.validUntilUnix !== "number") ||
+    (p.ttl !== undefined && !(typeof p.ttl === "number" && Number.isSafeInteger(p.ttl) && p.ttl >= 0))
   ) {
     return failedList("MALFORMED_STATUS_LIST", "payload is not a kashscript-status-list/1 document", source);
   }
+  const ttlMs = typeof p.ttl === "number" ? p.ttl : null;
   const partial: Partial<StatusListReport> = {
     id: p.id,
     issuer: p.issuer,
     statusPurpose: p.statusPurpose,
     issuedAtUnix: p.issuedAtUnix,
     validUntilUnix: p.validUntilUnix as number | null,
+    ttlMs,
+    cacheUntilUnix: cacheUntilOf(p.issuedAtUnix, p.validUntilUnix as number | null, ttlMs),
   };
   const key = opts.resolveKey(p.issuer);
   let signed = false;
@@ -277,13 +331,41 @@ export async function verifyStatusList(envelope: DsseEnvelope, opts: VerifyStatu
 
 const iso = (unix: number): string => new Date(unix * 1000).toISOString().replace(".000Z", "Z");
 
+/** What a clear bit says, by the list's purpose. */
+const CLEAR_TEXT: Readonly<Record<StatusPurpose, string>> = {
+  revocation: "valid unless revoked",
+  suspension: "not suspended",
+  supersession: "not superseded",
+  withdrawal: "not withdrawn",
+};
+
 /**
  * The status of one record, from lists already verified. Never touches the
  * network. `lists` may mix carried and fetched lists; the verdict names which.
+ *
+ * KS-Q4: with `opts.nowSec` the verdict states the list's cache time and
+ * whether it has passed — a stale list's reading stands as of its own time and
+ * says a fresh list may differ (W3C: `ttl` asks for a refresh and does not end
+ * a list's validity). With `opts.maxAgeSec` a list older than that decides
+ * nothing. A list past its `validUntil` decides nothing, as before. d91's three
+ * terminal states are named: `expired` (the record's own clock, given in
+ * `opts.recordExpiresAtUnix`), `superseded` and `withdrawn`.
  */
-export function checkStatus(entry: StatusListEntry | null, lists: readonly StatusListReport[]): StatusVerdict {
+export function checkStatus(entry: StatusListEntry | null, lists: readonly StatusListReport[], opts: CheckStatusOptions = {}): StatusVerdict {
+  const base = { cacheUntilUnix: null, stale: false } as const;
+  if (opts.recordExpiresAtUnix != null && opts.nowSec !== undefined && opts.nowSec >= opts.recordExpiresAtUnix) {
+    return {
+      ...base,
+      state: "expired",
+      asOfUnix: opts.recordExpiresAtUnix,
+      source: null,
+      listId: entry?.statusListCredential ?? null,
+      text: `expired by the clock at ${iso(opts.recordExpiresAtUnix)} — a terminal state; no list is needed to say so`,
+    };
+  }
   if (entry === null) {
     return {
+      ...base,
       state: "no-status-entry",
       asOfUnix: null,
       source: null,
@@ -294,6 +376,7 @@ export function checkStatus(entry: StatusListEntry | null, lists: readonly Statu
   const list = lists.find((l) => l.ok && l.id === entry.statusListCredential && l.statusPurpose === entry.statusPurpose);
   if (list === undefined) {
     return {
+      ...base,
       state: "unknown",
       asOfUnix: null,
       source: null,
@@ -301,31 +384,70 @@ export function checkStatus(entry: StatusListEntry | null, lists: readonly Statu
       text: `status not checked — the list ${entry.statusListCredential} was not presented (fetching it is the one networked check)`,
     };
   }
+  const cacheUntilUnix = list.cacheUntilUnix ?? cacheUntilOf(list.issuedAtUnix as number, list.validUntilUnix, list.ttlMs);
   if (!list.current || list.bits === null) {
     return {
       state: "unknown",
       asOfUnix: list.issuedAtUnix,
       source: list.source,
       listId: list.id,
+      cacheUntilUnix,
+      stale: true,
       text: `status unknown — the presented list is past its validUntil`,
     };
   }
   const index = Number(entry.statusListIndex);
   if (!Number.isSafeInteger(index) || index >= list.entries) {
-    return { state: "unknown", asOfUnix: list.issuedAtUnix, source: list.source, listId: list.id, text: "status unknown — the index is outside the list" };
+    return { state: "unknown", asOfUnix: list.issuedAtUnix, source: list.source, listId: list.id, cacheUntilUnix, stale: false, text: "status unknown — the index is outside the list" };
   }
   const asOf = list.issuedAtUnix as number;
+  if (opts.maxAgeSec !== undefined && opts.nowSec !== undefined && opts.nowSec - asOf > opts.maxAgeSec) {
+    return {
+      state: "unknown",
+      asOfUnix: asOf,
+      source: list.source,
+      listId: list.id,
+      cacheUntilUnix,
+      stale: true,
+      text: `status unknown — the list is from ${iso(asOf)}, older than this verifier accepts (${opts.maxAgeSec} s): fetch a fresh one`,
+    };
+  }
+  const stale = opts.nowSec !== undefined && opts.nowSec > cacheUntilUnix;
   const how = list.source === "fetched" ? "fetched from the issuer" : "carried with the record, nothing fetched";
+  const staleText = stale ? ` — older than its cache time (until ${iso(cacheUntilUnix)}): a newer list may say otherwise; fetch a fresh one` : "";
+  const purpose = entry.statusPurpose;
   if (getStatusBit(list.bits, index)) {
-    const state = entry.statusPurpose === "suspension" ? "suspended" : "revoked";
-    return { state, asOfUnix: asOf, source: list.source, listId: list.id, text: `${state} as of ${iso(asOf)} (${how})` };
+    if (purpose === "withdrawal") {
+      const windowText =
+        opts.withdrawalWindowSec === undefined || opts.recordSignedAtUnix == null
+          ? " — the withdrawal window was not checked here (d84 P4.4's number, set by the founder)"
+          : asOf <= opts.recordSignedAtUnix + opts.withdrawalWindowSec
+            ? " — inside the withdrawal window"
+            : " — this list is dated after the withdrawal window closed: an earlier list, or the trust log, shows whether it came in time";
+      return { state: "withdrawn", asOfUnix: asOf, source: list.source, listId: list.id, cacheUntilUnix, stale, text: `withdrawn as of ${iso(asOf)} (${how})${windowText}${staleText}` };
+    }
+    if (purpose === "supersession") {
+      return {
+        state: "superseded",
+        asOfUnix: asOf,
+        source: list.source,
+        listId: list.id,
+        cacheUntilUnix,
+        stale,
+        text: `superseded as of ${iso(asOf)} (${how}) — a later attestation that cites it replaces it; this list does not say which${staleText}`,
+      };
+    }
+    const state = purpose === "suspension" ? "suspended" : "revoked";
+    return { state, asOfUnix: asOf, source: list.source, listId: list.id, cacheUntilUnix, stale, text: `${state} as of ${iso(asOf)} (${how})${staleText}` };
   }
   return {
     state: "not-revoked",
     asOfUnix: asOf,
     source: list.source,
     listId: list.id,
-    text: `valid unless revoked, as of ${iso(asOf)} (${how})`,
+    cacheUntilUnix,
+    stale,
+    text: `${CLEAR_TEXT[purpose]}, as of ${iso(asOf)} (${how})${staleText}`,
   };
 }
 

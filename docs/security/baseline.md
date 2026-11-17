@@ -8,7 +8,10 @@ one text for all five repositories of the ecosystem. This file holds what is spe
 In scope here: the twelve `@kashscript/*` packages in this repository and their published versions.
 We most want to hear about anything that lets a record **pass a check it should fail**: a forged or
 re-bound signature, an issuer not bound to its key, a countersignature counted twice, a disclosure
-proof that verifies without the commitment, a rule that grants what its criteria refuse.
+proof that verifies without the commitment, a rule that grants what its criteria refuse, a
+presentation accepted for another audience or with a replayed nonce, an algorithm outside the
+allow-list, a trust-log entry that carries a person, or a claimed time that passes where its witness
+does not support it.
 
 A useful report includes the package and version, a minimal reproduction (a failing test is best),
 the class of bug, and your view of its severity.

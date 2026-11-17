@@ -20,6 +20,7 @@ import type { HolderExportReport, StatusListReport, TrustListReport } from "../h
 import type { SdJwtReport } from "../sd-jwt";
 import type { PredicatePresentationReport, SessionReceiptReport, ThankYouReport } from "../exchange";
 import type { CohortRecordReport } from "../profiles";
+import type { CheckpointReport, LogAuditReport, LogConsistencyReport, LogInclusionReport } from "../log";
 
 /** The three statements. `signed` is who put their name to it, in the file's own words (keys, not people). */
 export interface PlainLayer {
@@ -163,6 +164,44 @@ export function plainStatusList(r: StatusListReport): PlainLayer {
     signed: uniq([r.issuer]),
     checked: "the list's signature, against the key inside its issuer's did:kash",
     notProven: "that a record's status is current — a newer list may exist; who the issuer is",
+  };
+}
+
+const LOG_HOLDS = "the log holds lists and hashes, never a record, so it cannot show what a record says";
+const NO_GOSSIP = "that no other view of the log was shown to someone else — mirrors do not compare notes yet";
+
+const logKey = (key: string | null | undefined): string | null => (typeof key === "string" ? `the log's key (${key})` : null);
+
+export function plainCheckpoint(r: CheckpointReport): PlainLayer {
+  return {
+    signed: uniq([logKey(r.key)]),
+    checked: "the head's signature, by the key inside its log id and no other; its shape",
+    notProven: `when it was made — its time is the log's own claim until a public witness stamps it; ${NO_GOSSIP}`,
+  };
+}
+
+export function plainLogInclusion(r: LogInclusionReport): PlainLayer {
+  const witnesses = r.witnesses.filter((w) => w.state === "final" && w.digestOk).map((w) => w.by);
+  return {
+    signed: uniq([logKey(r.checkpoint?.key), ...witnesses]),
+    checked: "the entry against the log's own rules; its path to the root the log's key signed; each witness over that head; the entry's claimed time against the earliest witness",
+    notProven: `that what the entry names is true — ${LOG_HOLDS}; who holds the record; ${NO_GOSSIP}`,
+  };
+}
+
+export function plainLogConsistency(r: LogConsistencyReport): PlainLayer {
+  return {
+    signed: uniq([logKey(r.first?.key), logKey(r.second?.key)]),
+    checked: "both heads' signatures by the log's key; that the later head keeps every entry of the earlier one, in order (RFC 9162)",
+    notProven: `that the entries are true; when either head was made, unless a witness stamped it; ${NO_GOSSIP}`,
+  };
+}
+
+export function plainLogAudit(r: LogAuditReport): PlainLayer {
+  return {
+    signed: uniq([logKey(r.key)]),
+    checked: "every head rebuilt from the entries alone: its signature, its root, the head before it, its time order, that each head extends the last; each witness file's digest; every entry's claimed time against its first head's witness",
+    notProven: `that the entries are true — ${LOG_HOLDS}; ${NO_GOSSIP}`,
   };
 }
 
