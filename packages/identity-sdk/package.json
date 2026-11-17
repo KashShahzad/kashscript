@@ -41,11 +41,11 @@
   },
   "devDependencies": {
     "@kashscript/lexicons": "workspace:*",
-    "@types/bun":       "^1.2.5",
-    "@types/react":     "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "react":            "^19.0.0",
-    "react-dom":        "^19.0.0",
+    "@types/bun":       "^1.4.4",
+    "@types/react":     "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "react":            "^19.3.1",
+    "react-dom":        "^19.3.1",
     "typescript":       "^5.6.3"
   },
   "engines": {
