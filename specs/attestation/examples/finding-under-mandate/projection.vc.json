@@ -1,0 +1,30 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2"
+  ],
+  "type": [
+    "VerifiableCredential",
+    "KashAttestation"
+  ],
+  "issuer": "did:kash:8MaqbZ2usVQdT9AMNJgXSL3WZQvqvcv567wDkw7EAyuc",
+  "validFrom": "2026-11-19T00:00:00Z",
+  "validUntil": "2027-02-17T00:00:00Z",
+  "credentialSubject": {
+    "kind": "finding",
+    "outcome": "finding",
+    "profile": "site-review/1",
+    "grade": 2,
+    "practice": true,
+    "reference": {
+      "id": "SAMPLE site safety standard, clause 4.2",
+      "kind": "standard",
+      "sha256": "c4a8e2f6b0d4a8c2e6f0b4d8a2c6e0f4b8d2a6c0e4f8b2d6a0c4e8f2b6d0a4c8",
+      "version": 3
+    },
+    "statement": "The fire exit on the second floor was blocked by stock during the visit; cleared before the visit ended.",
+    "mandate": {
+      "hash": "76c985d37a633cf1029611f5097d80aedbe04d8ec5735b64eb754b7bfc7f2acb",
+      "id": "did:kash:8MaqbZ2usVQdT9AMNJgXSL3WZQvqvcv567wDkw7EAyuc/mandate/site-review-seat"
+    }
+  }
+}

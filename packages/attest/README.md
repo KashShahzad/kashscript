@@ -43,6 +43,11 @@ code that seeds it (Oreoasis, Duedale, Indusland), never invented.
   `kashscript-cohort/1`, station zero's record of a finished cohort over the Oreoasis work record
   ([`specs/cohort-profile.md`](../../specs/cohort-profile.md)). `verifyCohortRecord` checks the two
   organisations' countersignatures, the profile, and who signed; the record carries no grade, score or rank.
+- **`attestation`** — d91(a)'s one record type and its mandate ([`specs/attestation/README.md`](../../specs/attestation/README.md)):
+  `kash.attestation@1.0.0` and `kash.mandate@1.0.0` as closed shapes, the rules a shape cannot write
+  (`checkAttestation`, `checkMandate`, each fault naming its decision), the stranger's offline check of a record of truth
+  (`verifyAttestationRecord`, with the mandates it cites presented beside it), and the copy's and the projection's mappings — `copyClaimsOf`, which copies only a record that checks, and `projectVc`. Pure;
+  the one subpath that reads `@kashscript/lexicons`, so the root export stays as light as it was.
 - **`compat`** — verify shipped venture formats: the Duedale Every-Rupee report, Indus tokens, and the
   presented revocation of a Tehzeeb mark.
 - **`ed25519`** — raw Ed25519 over arbitrary bytes (WebCrypto; the layer identity-core doesn't expose).

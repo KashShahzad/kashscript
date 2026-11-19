@@ -1,0 +1,11 @@
+{
+  "note": "SAMPLE parties, practice only. Public identifiers; no key material.",
+  "issuer": "did:kash:BB1czjCZLmA32nQk1XYdU8pkZ3CeA1jjnHEeHC1LNYU6",
+  "signers": {
+    "issuer": "did:kash:BB1czjCZLmA32nQk1XYdU8pkZ3CeA1jjnHEeHC1LNYU6",
+    "counterparty": "did:kash:HgPFwMTQBqbJasdBhrKHwvfq62783iab9YCqzHQgCxap"
+  },
+  "counterparty": "did:kash:8xZNAeDfkLhehqi6N9Va8i9NY3YQmJ5NM6hEzUV6sW4u",
+  "record": "2d8a25d68ff43886f21b73087ec81161d3c668fa9f3dfe144122bc9c7f24b8c4",
+  "copies": "none — the agency holds its own sign-off, so a copy it issued would be its own word (d26). A door that needs the client's acceptance reads this record of truth (a kash-artifact query with attestation: countersigned), whose two signatures are the proof (§2.4)."
+}

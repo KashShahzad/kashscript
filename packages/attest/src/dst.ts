@@ -167,6 +167,15 @@ const ENTRIES: DstEntry[] = [
   // signed by the log's own key; a public witness stamps its payload hash.
   { tag: "kash-log-entry-v1\n", owner: "@kashscript/attest", family: "merkle-leaf", kind: "trust-log leaf — one closed entry (trust-list, status-list, issuer-key, attestation by salted hash) in RFC 8785 canonical form; a mirror rebuilds the same root from the entries alone" },
   { tag: "application/vnd.kash.log-checkpoint+json", owner: "@kashscript/attest", family: "dsse-type", kind: "DSSE trust-log checkpoint — the log's signed tree head: size, root, the log's claimed time and the previous head; signed only by the log's own key; its payload hash is what a public witness stamps" },
+  // The one record type (RW-14; specs/attestation/README.md; ECOSYSTEM d91(a), (e)). An attestation is a
+  // signed outcome — accepted, not yet, refused, finding — against a content-addressed reference, by a party
+  // who answers for it; a mandate is a principal's grant to one key, which every signature that is not the
+  // principal's own cites. New tags rather than a profile (d59(e)): the only candidate type is an engine's
+  // work record, and the open protocol does not pin its one record type to one engine's shape (d91(e)).
+  // The shapes are kash.attestation@1.0.0 and kash.mandate@1.0.0 (./attestation, ADR-0031).
+  { tag: "application/vnd.kash.attestation+json", owner: "@kashscript/attest", family: "dsse-type", kind: "DSSE attestation — the record of truth: kash.attestation@1.0.0, canonical, signed by its issuer or by a delegate under a cited mandate" },
+  { tag: "application/vnd.kash.mandate+json", owner: "@kashscript/attest", family: "dsse-type", kind: "DSSE mandate — kash.mandate@1.0.0: a principal grants one key the authority to sign within a scope until a date; signed by the principal" },
+  { tag: "https://kashscript.com/vct/attestation/1", owner: "@kashscript/attest", family: "sd-jwt-vct", kind: "SD-JWT VC attestation copy — one per verifier, issued by the attestation's issuer; what could join two copies (a private reference, the exact time, the record id, a mandate) is selectively disclosable" },
   // reserved — protocol-layer slots (ROADMAP)
   { tag: "hudhud-action-ledger-v1\n", owner: "@kashscript/hudhud", family: "kash-event", kind: "reserved: hudhud action ledger", reserved: true },
   { tag: "kash-identity-event-v1\n", owner: "@kashscript/identity-server", family: "kash-event", kind: "reserved: identity server event", reserved: true },

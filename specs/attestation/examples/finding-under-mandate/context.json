@@ -1,0 +1,22 @@
+{
+  "note": "SAMPLE parties, practice only. Public identifiers; no key material.",
+  "issuer": "did:kash:8MaqbZ2usVQdT9AMNJgXSL3WZQvqvcv567wDkw7EAyuc",
+  "signers": {
+    "issuer": "did:kash:9shZmdenuXATwAfUfcqpJASMpzRy2f1yyb2voRBHHJ4Q",
+    "counterparty": "did:kash:FKo1sKQ3XKa4DccFHYMfn7JcJN6WiKX6UreRboagFQtN"
+  },
+  "counterparty": "did:kash:FKo1sKQ3XKa4DccFHYMfn7JcJN6WiKX6UreRboagFQtN",
+  "mandate": "../mandate-seat/record.dsse.json",
+  "record": "6cb26c64fb8dee3a410cf640df60d8bafe3f50f44104f9ef0a7a68c860d2e505",
+  "presentation": {
+    "audience": "https://review-door.example/verifier",
+    "nonce": "sample-nonce-finding-under-mandate",
+    "iatUnix": 1795080600,
+    "disclosed": [
+      "statement",
+      "mandate"
+    ],
+    "copyKey": "did:kash:Ad4aJdtMa8oB8xB5YYki1pSVUtZo7PRuFWF3HwJDDgtT"
+  },
+  "checkAt": 1795080660
+}

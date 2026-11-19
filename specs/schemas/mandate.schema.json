@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kashscript.com/lexicons/kash.mandate@1.0.0",
+  "title": "A mandate",
+  "description": "A principal's signed grant to one key — a seat, an agent, a desk, a representative or another organisation — to sign within a scope until a date, revocable through its status entry (d91(a)). Every signature that is not the principal's own cites one. One link: no chain in this version. Presented beside what it authorised; never published.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/mandate\\/[a-z0-9][a-z0-9-]{0,62}$"
+    },
+    "principal": {
+      "type": "string",
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})$"
+    },
+    "delegate": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}$"
+        },
+        "kind": {
+          "enum": [
+            "seat",
+            "agent",
+            "desk",
+            "representative",
+            "organisation"
+          ]
+        },
+        "role": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "kind"
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "kinds": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "receipt",
+              "decision",
+              "finding",
+              "assurance",
+              "contest"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 5
+        },
+        "outcomes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "accepted",
+              "not-yet",
+              "refused",
+              "finding"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 4
+        },
+        "dsts": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "profiles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9.-]{0,62}\\/[1-9][0-9]{0,3}$"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "enum": [
+                  "agreement",
+                  "purpose",
+                  "artefact",
+                  "attestation",
+                  "rule",
+                  "standard"
+                ]
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "version": {
+                "type": "integer",
+                "minimum": 1
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "sha256"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 16
+        }
+      },
+      "additionalProperties": false
+    },
+    "dates": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        },
+        "until": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "from",
+        "until"
+      ]
+    },
+    "credentialStatus": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "BitstringStatusListEntry"
+        },
+        "statusPurpose": {
+          "enum": [
+            "revocation",
+            "suspension",
+            "supersession",
+            "withdrawal"
+          ]
+        },
+        "statusListIndex": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "statusListCredential": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https?:\\/\\/[^\\s]+$"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "statusPurpose",
+        "statusListIndex",
+        "statusListCredential"
+      ]
+    },
+    "practice": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "principal",
+    "delegate",
+    "scope",
+    "dates",
+    "credentialStatus"
+  ]
+}

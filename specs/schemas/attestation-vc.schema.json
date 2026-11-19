@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kashscript.com/schemas/attestation-vc/1.json",
+  "title": "The W3C VC 2.0 projection of an attestation",
+  "description": "What @kashscript/attest/attestation's projectVc produces: an unsecured credential in the VC 2.0 data model, using only the base context, never naming the counterparty, whose relatedResource names the record of truth's payload bytes by RFC 6920 named information. It proves nothing by itself.",
+  "type": "object",
+  "properties": {
+    "@context": {
+      "type": "array",
+      "items": {
+        "const": "https://www.w3.org/ns/credentials/v2"
+      },
+      "minItems": 1,
+      "maxItems": 1
+    },
+    "type": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "VerifiableCredential",
+          "KashAttestation"
+        ]
+      },
+      "minItems": 2,
+      "maxItems": 2
+    },
+    "issuer": {
+      "type": "string",
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})$"
+    },
+    "validFrom": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "validUntil": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "credentialSubject": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "receipt",
+            "finding",
+            "assurance",
+            "contest"
+          ]
+        },
+        "outcome": {
+          "enum": [
+            "accepted",
+            "not-yet",
+            "refused",
+            "finding"
+          ]
+        },
+        "profile": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9.-]{0,62}\\/[1-9][0-9]{0,3}$"
+        },
+        "grade": {
+          "enum": [
+            0,
+            1,
+            2,
+            3
+          ]
+        },
+        "practice": {
+          "type": "boolean"
+        },
+        "reference": {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "enum": [
+                "agreement",
+                "purpose",
+                "artefact",
+                "attestation",
+                "rule",
+                "standard"
+              ]
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "version": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "sha256"
+          ]
+        },
+        "statement": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 280
+        },
+        "reasons": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "mandate": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/mandate\\/[a-z0-9][a-z0-9-]{0,62}$"
+            },
+            "hash": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "hash"
+          ]
+        },
+        "supersedes": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "contests": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "outcome"
+      ]
+    },
+    "credentialStatus": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "BitstringStatusListEntry"
+        },
+        "statusPurpose": {
+          "enum": [
+            "revocation",
+            "suspension",
+            "supersession",
+            "withdrawal"
+          ]
+        },
+        "statusListIndex": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "statusListCredential": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https?:\\/\\/[^\\s]+$"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "statusPurpose",
+        "statusListIndex",
+        "statusListCredential"
+      ]
+    },
+    "relatedResource": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^ni:\\/\\/\\/sha-256;[A-Za-z0-9_-]{43}$"
+          },
+          "digestSRI": {
+            "type": "string",
+            "pattern": "^sha256-[A-Za-z0-9+/]{43}=$"
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "digestSRI"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 1
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "@context",
+    "type",
+    "issuer",
+    "validUntil",
+    "credentialSubject"
+  ]
+}

@@ -3,13 +3,13 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { getSchemaDefinition } from "@kashscript/lexicons/engine";
 import { LexiconRegistry } from "@kashscript/lexicons/registry";
-import { KASH_DECISION_ID, KASH_DECISION_LEXICON } from "../src/decision-schema";
+import { KASH_DECISION_1_2_ID, KASH_DECISION_1_2_LEXICON } from "../src/decision-schema";
 
 const SPECS = join(import.meta.dir, "..", "..", "..", "specs", "schemas");
 
 describe("the decision's published JSON Schema stays in step with predicate (its home since KS-Q1b)", () => {
-  test("decision.schema.json", () => {
-    const generated = getSchemaDefinition(KASH_DECISION_ID, new LexiconRegistry().register(KASH_DECISION_LEXICON));
+  test("decision.schema.json — the newest version, 1.2.0 (RW-14)", () => {
+    const generated = getSchemaDefinition(KASH_DECISION_1_2_ID, new LexiconRegistry().register(KASH_DECISION_1_2_LEXICON));
     const published = JSON.parse(readFileSync(join(SPECS, "decision.schema.json"), "utf8"));
     expect(published).toEqual(JSON.parse(JSON.stringify(generated)));
   });

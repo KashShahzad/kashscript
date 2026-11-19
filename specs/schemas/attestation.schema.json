@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://kashscript.com/lexicons/kash.attestation@1.0.0",
+  "title": "An attestation",
+  "description": "A signed outcome — accepted, not yet, refused or finding — against a content-addressed reference, by a party who answers for it (d91(a)). A receipt, a finding, an assurance or a contest; a decision keeps kash.decision. Held by its holder and its issuer's book; never published.",
+  "type": "object",
+  "properties": {
+    "issuer": {
+      "type": "string",
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})$"
+    },
+    "kind": {
+      "enum": [
+        "receipt",
+        "finding",
+        "assurance",
+        "contest"
+      ]
+    },
+    "outcome": {
+      "enum": [
+        "accepted",
+        "not-yet",
+        "refused",
+        "finding"
+      ]
+    },
+    "reference": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "agreement",
+            "purpose",
+            "artefact",
+            "attestation",
+            "rule",
+            "standard"
+          ]
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "sha256"
+      ]
+    },
+    "statement": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 280
+    },
+    "profile": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9.-]{0,62}\\/[1-9][0-9]{0,3}$"
+    },
+    "counterparty": {
+      "type": "string",
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})$"
+    },
+    "mandate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/mandate\\/[a-z0-9][a-z0-9-]{0,62}$"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "hash"
+      ]
+    },
+    "counterpartyMandate": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/mandate\\/[a-z0-9][a-z0-9-]{0,62}$"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "hash"
+      ]
+    },
+    "grade": {
+      "enum": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "contests": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "claimedAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "supersedes": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "credentialStatus": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "BitstringStatusListEntry"
+        },
+        "statusPurpose": {
+          "enum": [
+            "revocation",
+            "suspension",
+            "supersession",
+            "withdrawal"
+          ]
+        },
+        "statusListIndex": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)$"
+        },
+        "statusListCredential": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https?:\\/\\/[^\\s]+$"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "statusPurpose",
+        "statusListIndex",
+        "statusListCredential"
+      ]
+    },
+    "reasons": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9][a-z0-9-]{0,62}$"
+      },
+      "minItems": 1,
+      "maxItems": 16
+    },
+    "practice": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "issuer",
+    "kind",
+    "outcome",
+    "reference",
+    "statement",
+    "claimedAt",
+    "expiresAt"
+  ]
+}

@@ -1,0 +1,202 @@
+{
+  "lexicon": "kash.attestation@1.0.0",
+  "about": "Conformance cases for the attestation record (specs/attestation/README.md §2.2). Each case is a body; a reader runs the shape (KASH_ATTESTATION_BODY_SCHEMA, or specs/schemas/attestation.schema.json) and then the cross-field rules, and must reach `valid` with exactly the listed fault codes. The DIDs are SAMPLE strings that match the patterns; nothing here is signed. Reference implementation: @kashscript/attest/attestation's checkAttestation.",
+  "cases": [
+    {
+      "name": "a receipt the client accepted, grade 1",
+      "valid": true,
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "Milestone 2, delivered and accepted.", "profile": "client-signoff/1", "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "grade": 1, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    },
+    {
+      "name": "a receipt a client company accepted through an employee's seat, citing its mandate",
+      "valid": true,
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81", "version": 1 }, "statement": "Milestone 2, delivered and accepted.", "counterparty": "did:kash:CustomerGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG", "counterpartyMandate": { "id": "did:kash:CustomerGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG/mandate/delivery-approvals", "hash": "4358664030978fc689356b0390c938a7137186c1a71ac916c50780ab26544950" }, "grade": 1, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    },
+    {
+      "name": "a receipt an organisation accepted as itself, on its own domain, at grade 3",
+      "valid": true,
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "Milestone 2, delivered and accepted.", "counterparty": "did:web:client.example", "grade": 3, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    },
+    {
+      "name": "a receipt's not yet, saying what is missing",
+      "valid": true,
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "not-yet", "reference": { "kind": "agreement", "sha256": "8b2e4d6f1a3c5e7092b4d6f8a1c3e5079b2d4f6a8c1e3507a9c2e4f6b8d1a3c5", "version": 2 }, "statement": "The payment page: not yet.", "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "grade": 1, "claimedAt": "2026-11-17T10:05:00Z", "expiresAt": "2031-11-17T10:05:00Z", "reasons": ["error-states-missing"] }
+    },
+    {
+      "name": "a finding against a standard, signed under the assessor's mandate, countersigned by the doer",
+      "valid": true,
+      "body": { "issuer": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", "kind": "finding", "outcome": "finding", "reference": { "kind": "standard", "id": "SAMPLE site safety standard, clause 4.2", "version": 3, "sha256": "c4a8e2f6b0d4a8c2e6f0b4d8a2c6e0f4b8d2a6c0e4f8b2d6a0c4e8f2b6d0a4c8" }, "statement": "The fire exit was blocked during the visit; cleared before it ended.", "counterparty": "did:kash:DoerDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", "grade": 2, "mandate": { "id": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC/mandate/site-review-seat", "hash": "4358664030978fc689356b0390c938a7137186c1a71ac916c50780ab26544950" }, "claimedAt": "2026-11-12T11:20:00Z", "expiresAt": "2028-11-12T11:20:00Z", "reasons": ["at-risk"], "practice": true }
+    },
+    {
+      "name": "an assurance by an organisation on its own domain (did:web), with no counterparty",
+      "valid": true,
+      "body": { "issuer": "did:web:assessor.example", "kind": "assurance", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90" }, "statement": "The packet was assembled from the issuer's own book and checked line by line.", "claimedAt": "2026-11-10T09:00:00Z", "expiresAt": "2027-11-10T09:00:00Z" }
+    },
+    {
+      "name": "a contest: the subject's own refusal of a decision, against the rule's recourse clause, with grounds",
+      "valid": true,
+      "body": { "issuer": "did:kash:SubjectEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "kind": "contest", "outcome": "refused", "reference": { "kind": "rule", "id": "did:kash:LenderHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH/rule/income", "version": 1, "sha256": "e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4" }, "contests": "9a8b7c6d5e4f30211a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7081", "statement": "The month of August was confirmed by my second payer; the decision missed it.", "claimedAt": "2026-11-15T16:00:00Z", "expiresAt": "2027-11-15T16:00:00Z", "reasons": ["month-not-read"] }
+    },
+    {
+      "name": "grade 0 is allowed in practice",
+      "valid": true,
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "A practice run.", "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "grade": 0, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2026-12-16T14:30:00Z", "practice": true }
+    },
+    {
+      "name": "a receipt is never refused — a decline leaves no trace (d49)",
+      "valid": false,
+      "faults": ["OUTCOME_FOR_KIND"],
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "refused", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "The client declined.", "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "grade": 1, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    },
+    {
+      "name": "a receipt with no counterparty is one signature, not proof (d41)",
+      "valid": false,
+      "faults": ["COUNTERPARTY_FOR_KIND"],
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "Delivered.", "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z", "practice": true }
+    },
+    {
+      "name": "outside practice, a receipt states its counterparty's grade (d91(d))",
+      "valid": false,
+      "faults": ["GRADE_REQUIRED"],
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "Delivered.", "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    },
+    {
+      "name": "a contest is the subject's alone",
+      "valid": false,
+      "faults": ["COUNTERPARTY_FOR_KIND"],
+      "body": { "issuer": "did:kash:SubjectEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "kind": "contest", "outcome": "refused", "reference": { "kind": "rule", "id": "did:kash:LenderHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH/rule/income", "version": 1, "sha256": "e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4" }, "contests": "9a8b7c6d5e4f30211a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7081", "statement": "I contest the decision.", "counterparty": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "claimedAt": "2026-11-15T16:00:00Z", "expiresAt": "2027-11-15T16:00:00Z", "reasons": ["month-not-read"] }
+    },
+    {
+      "name": "a contest is made against the rule whose recourse clause it invokes",
+      "valid": false,
+      "faults": ["REFERENCE_FOR_KIND"],
+      "body": { "issuer": "did:kash:SubjectEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "kind": "contest", "outcome": "refused", "reference": { "kind": "attestation", "sha256": "e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4" }, "contests": "9a8b7c6d5e4f30211a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7081", "statement": "I contest the decision.", "claimedAt": "2026-11-15T16:00:00Z", "expiresAt": "2027-11-15T16:00:00Z", "reasons": ["month-not-read"] }
+    },
+    {
+      "name": "a contest names the decision it contests",
+      "valid": false,
+      "faults": ["CONTESTS"],
+      "body": { "issuer": "did:kash:SubjectEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "kind": "contest", "outcome": "refused", "reference": { "kind": "rule", "id": "did:kash:LenderHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH/rule/income", "version": 1, "sha256": "e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4" }, "statement": "I contest the decision.", "claimedAt": "2026-11-15T16:00:00Z", "expiresAt": "2027-11-15T16:00:00Z", "reasons": ["month-not-read"] }
+    },
+    {
+      "name": "only a contest names a decision it contests",
+      "valid": false,
+      "faults": ["CONTESTS"],
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "contests": "9a8b7c6d5e4f30211a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7081", "statement": "Delivered.", "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "grade": 1, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    },
+    {
+      "name": "a not yet says what is missing",
+      "valid": false,
+      "faults": ["REASONS"],
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "not-yet", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "Not yet.", "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "grade": 1, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    },
+    {
+      "name": "a contest gives its grounds",
+      "valid": false,
+      "faults": ["REASONS"],
+      "body": { "issuer": "did:kash:SubjectEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE", "kind": "contest", "outcome": "refused", "reference": { "kind": "rule", "id": "did:kash:LenderHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH/rule/income", "version": 1, "sha256": "e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4" }, "contests": "9a8b7c6d5e4f30211a2b3c4d5e6f708192a3b4c5d6e7f8091a2b3c4d5e6f7081", "statement": "I contest the decision.", "claimedAt": "2026-11-15T16:00:00Z", "expiresAt": "2027-11-15T16:00:00Z" }
+    },
+    {
+      "name": "a public reference is cited by id, version and hash",
+      "valid": false,
+      "faults": ["PUBLIC_REFERENCE"],
+      "body": { "issuer": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", "kind": "finding", "outcome": "finding", "reference": { "kind": "rule", "sha256": "c4a8e2f6b0d4a8c2e6f0b4d8a2c6e0f4b8d2a6c0e4f8b2d6a0c4e8f2b6d0a4c8" }, "statement": "A deviation.", "counterparty": "did:kash:DoerDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", "grade": 2, "claimedAt": "2026-11-12T11:20:00Z", "expiresAt": "2028-11-12T11:20:00Z" }
+    },
+    {
+      "name": "a private reference is cited by hash and version — a book's id is a key to look up by (d41)",
+      "valid": false,
+      "faults": ["PRIVATE_REFERENCE_ID"],
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "agreement", "id": "engagement-4471", "sha256": "8b2e4d6f1a3c5e7092b4d6f8a1c3e5079b2d4f6a8c1e3507a9c2e4f6b8d1a3c5" }, "statement": "Delivered.", "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "grade": 1, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    },
+    {
+      "name": "a finding is made against a standard or a rule",
+      "valid": false,
+      "faults": ["REFERENCE_FOR_KIND"],
+      "body": { "issuer": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", "kind": "finding", "outcome": "finding", "reference": { "kind": "artefact", "sha256": "c4a8e2f6b0d4a8c2e6f0b4d8a2c6e0f4b8d2a6c0e4f8b2d6a0c4e8f2b6d0a4c8" }, "statement": "A deviation.", "counterparty": "did:kash:DoerDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", "grade": 2, "claimedAt": "2026-11-12T11:20:00Z", "expiresAt": "2028-11-12T11:20:00Z" }
+    },
+    {
+      "name": "an attestation expires after it is made (d27.5)",
+      "valid": false,
+      "faults": ["DATES"],
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "Delivered.", "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "grade": 1, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2026-11-16T14:30:00Z" }
+    },
+    {
+      "name": "grade 0 is never a customer's record (d91(d))",
+      "valid": false,
+      "faults": ["GRADE_ZERO_PRACTICE"],
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "Delivered.", "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "grade": 0, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    },
+    {
+      "name": "a cited mandate is one the issuer granted",
+      "valid": false,
+      "faults": ["MANDATE_PRINCIPAL"],
+      "body": { "issuer": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", "kind": "finding", "outcome": "finding", "reference": { "kind": "standard", "id": "SAMPLE standard, clause 1", "version": 1, "sha256": "c4a8e2f6b0d4a8c2e6f0b4d8a2c6e0f4b8d2a6c0e4f8b2d6a0c4e8f2b6d0a4c8" }, "statement": "A deviation.", "counterparty": "did:kash:DoerDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", "grade": 2, "mandate": { "id": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/mandate/someone-elses", "hash": "4358664030978fc689356b0390c938a7137186c1a71ac916c50780ab26544950" }, "claimedAt": "2026-11-12T11:20:00Z", "expiresAt": "2028-11-12T11:20:00Z" }
+    },
+    {
+      "name": "a counterparty's mandate is one the counterparty granted",
+      "valid": false,
+      "faults": ["COUNTERPARTY_MANDATE"],
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "Delivered.", "counterparty": "did:kash:CustomerGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG", "counterpartyMandate": { "id": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/mandate/approvals", "hash": "4358664030978fc689356b0390c938a7137186c1a71ac916c50780ab26544950" }, "grade": 1, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    },
+    {
+      "name": "a did:web counterparty is an organisation signing as itself, at grade 3 — a person signs with a key for this relationship alone",
+      "valid": false,
+      "faults": ["COUNTERPARTY_WEB"],
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "Delivered.", "counterparty": "did:web:people.example:a-person", "grade": 1, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    },
+    {
+      "name": "the statement names no person's contact",
+      "valid": false,
+      "faults": ["PERSON_IDENTITY"],
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "Accepted by amina.k@client.example after review.", "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "grade": 1, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    },
+    {
+      "name": "the statement is words, never a link",
+      "valid": false,
+      "faults": ["PERSON_IDENTITY"],
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "https://client.example/people/03001234567", "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "grade": 1, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    },
+    {
+      "name": "the statement is words, never an identifier",
+      "valid": false,
+      "faults": ["PERSON_IDENTITY"],
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "grade": 1, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    },
+    {
+      "name": "a standard's id names no person",
+      "valid": false,
+      "faults": ["PERSON_IDENTITY"],
+      "body": { "issuer": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", "kind": "finding", "outcome": "finding", "reference": { "kind": "standard", "id": "Ask amina.k@assessor.example for clause 4", "version": 1, "sha256": "c4a8e2f6b0d4a8c2e6f0b4d8a2c6e0f4b8d2a6c0e4f8b2d6a0c4e8f2b6d0a4c8" }, "statement": "A deviation.", "counterparty": "did:kash:DoerDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", "grade": 2, "claimedAt": "2026-11-12T11:20:00Z", "expiresAt": "2028-11-12T11:20:00Z" }
+    },
+    {
+      "name": "the counterparty is the other side (d26)",
+      "valid": false,
+      "faults": ["COUNTERPARTY_IS_ISSUER"],
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "Delivered.", "counterparty": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "grade": 1, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    },
+    {
+      "name": "the grade is the counterparty's ceremony's",
+      "valid": false,
+      "faults": ["GRADE_WITHOUT_COUNTERPARTY"],
+      "body": { "issuer": "did:web:assessor.example", "kind": "assurance", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "a1b2c3d4e5f60718293a4b5c6d7e8f90a1b2c3d4e5f60718293a4b5c6d7e8f90" }, "statement": "Checked.", "grade": 3, "claimedAt": "2026-11-10T09:00:00Z", "expiresAt": "2027-11-10T09:00:00Z" }
+    },
+    {
+      "name": "the shape is closed — no score rides in it",
+      "valid": false,
+      "faults": ["SHAPE"],
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "Delivered.", "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "grade": 1, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z", "score": 4.5 }
+    },
+    {
+      "name": "an engine's opaque id is not a party a stranger can resolve",
+      "valid": false,
+      "faults": ["SHAPE"],
+      "body": { "issuer": "did:kash:org:acme-inc", "kind": "receipt", "outcome": "accepted", "reference": { "kind": "artefact", "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81" }, "statement": "Delivered.", "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB", "grade": 1, "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    },
+    {
+      "name": "a decision keeps its own record, kash.decision",
+      "valid": false,
+      "faults": ["SHAPE"],
+      "body": { "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "kind": "decision", "outcome": "accepted", "reference": { "kind": "rule", "id": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/rule/hiring", "version": 1, "sha256": "c4a8e2f6b0d4a8c2e6f0b4d8a2c6e0f4b8d2a6c0e4f8b2d6a0c4e8f2b6d0a4c8" }, "statement": "Yes.", "claimedAt": "2026-11-16T14:30:00Z", "expiresAt": "2031-11-16T14:30:00Z" }
+    }
+  ]
+}

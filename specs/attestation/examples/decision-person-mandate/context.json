@@ -1,0 +1,16 @@
+{
+  "note": "SAMPLE parties, practice only. Public identifiers; no key material.",
+  "lender": "did:kash:dC3E2sfMhu9bKqZhXc6gKEEGb8ztkajA46x7nep3ES3",
+  "seat": "did:kash:7iJZMq9F2KcBSaEN59MVLYsAd2i9kHsiwrZFk3dzjg5N",
+  "copyKey": "did:kash:G6DXtRAMSDReGitaYkPRszVYsVGEfbXqGpeMKpCbcDiT",
+  "rule": {
+    "id": "did:kash:dC3E2sfMhu9bKqZhXc6gKEEGb8ztkajA46x7nep3ES3/rule/income-six-months",
+    "version": 1,
+    "hash": "05467c847aa7dd3681cd6ab24b6a8595dfbaa30d97e132be9f87b1e3a7c05b4d"
+  },
+  "mandate": {
+    "id": "did:kash:dC3E2sfMhu9bKqZhXc6gKEEGb8ztkajA46x7nep3ES3/mandate/credit-officer-seat",
+    "hash": "1e8a582ec086a6951cdc244fb862b9bd8050324f8bfad7a7c30d0469c633aeb3"
+  },
+  "checkAt": 1793178060
+}

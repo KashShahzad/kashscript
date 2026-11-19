@@ -22,20 +22,34 @@
  */
 
 import { canonicalize } from "@kashscript/identity-core";
-import { bytesToBase64Url } from "@kashscript/attest/ed25519";
+import { base64ToBytes, bytesToBase64Url } from "@kashscript/attest/ed25519";
+import { verifyEnvelope, type DsseEnvelope } from "@kashscript/attest/dsse";
+import { checkMandate, MANDATE_DST, payloadSha256 } from "@kashscript/attest/attestation";
 import { decodeJws, issueSdJwt, jwkOf, signJws, verifySdJwt, verifyJws, type JwsSigner } from "@kashscript/attest/sd-jwt";
 import { makeKeyResolver, type KeyResolver } from "@kashscript/attest/holder";
 import { resolveVerificationKey, type VerifyKey } from "@kashscript/attest/signing";
 import { validate } from "@kashscript/lexicons/schema";
 import type { DecisionOutcome } from "@kashscript/lexicons/extensions/door";
 import type { ReadAdoption } from "./adoption";
-import { KASH_DECISION_BODY_SCHEMA, type DecisionBody } from "./decision-schema";
+import { KASH_DECISION_1_2_BODY_SCHEMA, type DecisionBody, type MandateCitation } from "./decision-schema";
 import type { ReadRule } from "./rule";
 import type { RouteResult } from "./route";
 import { DAY, DECISION_VCT } from "./constants";
 
 export type { DecisionOutcome } from "@kashscript/lexicons/extensions/door";
-export { KASH_DECISION_BODY_SCHEMA, KASH_DECISION_ID, KASH_DECISION_LEXICON, KASH_DECISION_NSID, type DecidedBy, type DecisionBody } from "./decision-schema";
+export {
+  KASH_DECISION_BODY_SCHEMA,
+  KASH_DECISION_ID,
+  KASH_DECISION_LEXICON,
+  KASH_DECISION_NSID,
+  KASH_DECISION_1_2_BODY_SCHEMA,
+  KASH_DECISION_1_2_ID,
+  KASH_DECISION_1_2_LEXICON,
+  MANDATE_ID_PATTERN,
+  type DecidedBy,
+  type DecisionBody,
+  type MandateCitation,
+} from "./decision-schema";
 
 export type DecisionRefusalCode =
   | "SHAPE"
@@ -51,19 +65,53 @@ export type DecisionRefusalCode =
   | "REASON_NOT_IN_RULE"
   | "NOT_YET_NAMES_NOTHING"
   | "ROWS"
-  | "CONTEST_WINDOW";
+  | "CONTEST_WINDOW"
+  | "MANDATE_MISMATCH";
 
 export interface DecisionValidation {
   readonly ok: boolean;
   readonly refusals: readonly { readonly code: DecisionRefusalCode; readonly message: string }[];
+  /** What could not be checked without more in hand — never a pass by silence (1.2.0: a cited mandate not presented). */
+  readonly notChecked?: readonly string[];
+}
+
+/** A decision's outcome in d91's words, as a mandate's scope names outcomes. */
+const OUTCOME_IN_D91: Readonly<Record<DecisionOutcome, "accepted" | "not-yet" | "refused">> = { yes: "accepted", "not-yet": "not-yet", no: "refused", partial: "refused" };
+
+/** A cited mandate, presented beside the decision: the deciding organisation's, to this seat, covering this decision (d91(a), (f)). */
+async function mandateProblems(envelope: DsseEnvelope, d: DecisionBody, decider: string): Promise<string[]> {
+  const db = d.decidedBy;
+  if (db.kind !== "person" || db.mandate === undefined) return ["a mandate is cited only by a person's decision"];
+  const out: string[] = [];
+  if (envelope.payloadType !== MANDATE_DST) out.push(`it is not a ${MANDATE_DST} envelope`);
+  let json: unknown = null;
+  try {
+    json = JSON.parse(new TextDecoder().decode(base64ToBytes(envelope.payload)));
+  } catch {
+    return [...out, "its payload is not JSON"];
+  }
+  const m = checkMandate(json);
+  if (!m.ok || m.body === null) return [...out, `it does not check: ${m.faults.map((f) => f.code).join(", ")}`];
+  const mb = m.body;
+  if (mb.id !== db.mandate.id || (await payloadSha256(envelope)) !== db.mandate.hash) out.push("it is not the mandate the decision cites — its id or its hash differs");
+  if (mb.principal !== decider) out.push(`its principal is not the deciding organisation, ${decider}`);
+  const v = await verifyEnvelope(envelope, resolveVerificationKey);
+  if (!v.verifiedKeyids.some((k) => k.split("#")[0] === decider)) out.push("the deciding organisation's signature on it does not check");
+  if (mb.delegate.key !== db.seat) out.push("its delegate is not the deciding seat");
+  if (mb.delegate.kind !== "seat") out.push("a decision is a person's: its mandate is a seat's (d91(f): a refusal carries a person-role signature, never a machine mandate)");
+  if (mb.scope.kinds !== undefined && !mb.scope.kinds.includes("decision")) out.push("its scope does not cover decisions");
+  if (mb.scope.outcomes !== undefined && !mb.scope.outcomes.includes(OUTCOME_IN_D91[d.outcome])) out.push(`its scope does not cover ${OUTCOME_IN_D91[d.outcome]}`);
+  const at = Date.parse(d.decidedAt);
+  if (!(at >= Date.parse(mb.dates.from) && at < Date.parse(mb.dates.until))) out.push("the decision's time is outside its dates");
+  return out;
 }
 
 export const SEAT_JWS_TYP = "kash-decision-seat+jwt" as const;
 
-/** The bytes a seat signs: the body, with the signature itself left out, in JCS. */
+/** The bytes a seat signs: the body, with the signature itself left out, in JCS. A cited mandate (1.2.0) is signed with it; without one the bytes are 1.1.0's. */
 function seatPayload(body: DecisionBody): Record<string, unknown> {
   const db = body.decidedBy;
-  const unsigned = { ...body, decidedBy: db.kind === "person" ? { kind: db.kind, role: db.role, seat: db.seat } : db };
+  const unsigned = { ...body, decidedBy: db.kind === "person" ? { kind: db.kind, role: db.role, seat: db.seat, ...(db.mandate !== undefined ? { mandate: db.mandate } : {}) } : db };
   return JSON.parse(canonicalize(unsigned)) as Record<string, unknown>;
 }
 
@@ -84,12 +132,13 @@ async function seatSignatureOk(body: DecisionBody): Promise<boolean> {
  * adoption it was made under: then the anchor is the one who decided, and an
  * automatic outcome is the anchor's standing decision (d85(d)).
  */
-export async function validateDecision(body: unknown, rule: ReadRule, adoption?: ReadAdoption): Promise<DecisionValidation> {
+export async function validateDecision(body: unknown, rule: ReadRule, adoption?: ReadAdoption, opts: { readonly mandate?: DsseEnvelope } = {}): Promise<DecisionValidation> {
   const refusals: { code: DecisionRefusalCode; message: string }[] = [];
   const refuse = (code: DecisionRefusalCode, message: string): void => {
     refusals.push({ code, message });
   };
-  const shape = validate<DecisionBody>(KASH_DECISION_BODY_SCHEMA, body);
+  // 1.2.0's shape: every 1.1.0 body is a 1.2.0 body, so both validate here.
+  const shape = validate<DecisionBody>(KASH_DECISION_1_2_BODY_SCHEMA, body);
   if (!shape.ok) {
     for (const e of shape.errors) refuse("SHAPE", `$.${e.path.join(".")}: ${e.message}`);
     return { ok: false, refusals };
@@ -111,6 +160,16 @@ export async function validateDecision(body: unknown, rule: ReadRule, adoption?:
     if (d.decidedBy.kind !== "person") refuse("STANDING_MISMATCH", "a decision a person made names their role and their seat's signature");
     else if (!(await seatSignatureOk(d))) refuse("SEAT_SIGNATURE", "the deciding seat's signature does not check");
   }
+  // d91(a): a signature that is not the principal's own cites its mandate. The principal here is the
+  // deciding organisation, so a cited mandate's id is under that DID. With the mandate presented beside the
+  // decision, it is checked whole: the organisation's, to this seat, a seat's, covering this outcome, in force.
+  // Without it, only the id is checked, and the result says so.
+  const notChecked: string[] = [];
+  const mandate = d.decidedBy.kind === "person" ? d.decidedBy.mandate : undefined;
+  const decider = adoption?.body.anchor ?? r.author;
+  if (mandate !== undefined && !mandate.id.startsWith(`${decider}/mandate/`)) refuse("MANDATE_MISMATCH", `a cited mandate is one the deciding organisation granted — its id is under ${decider}`);
+  else if (mandate !== undefined && opts.mandate === undefined) notChecked.push("the cited mandate — not presented, so its delegate, scope and dates were not read");
+  else if (mandate !== undefined && opts.mandate !== undefined) for (const p of await mandateProblems(opts.mandate, d, decider)) refuse("MANDATE_MISMATCH", `the cited mandate: ${p}`);
 
   if (d.outcome === "no" || d.outcome === "partial") {
     if (d.refusal === undefined || d.refusal.unmet.length === 0) refuse("REFUSAL_UNEXPLAINED", "a refusal or a partial grant names the criterion that was not met");
@@ -130,7 +189,7 @@ export async function validateDecision(body: unknown, rule: ReadRule, adoption?:
 
   const window = Date.parse(d.contestUntil) - Date.parse(d.decidedAt);
   if (!(window >= r.contest.windowDays * DAY * 1000)) refuse("CONTEST_WINDOW", `the contest window is at least the rule's ${r.contest.windowDays} days`);
-  return { ok: refusals.length === 0, refusals };
+  return { ok: refusals.length === 0, refusals, ...(notChecked.length > 0 ? { notChecked } : {}) };
 }
 
 const isoOf = (ms: number): string => new Date(ms).toISOString().replace(/\.\d{3}Z$/, "Z");
@@ -166,7 +225,7 @@ export interface PersonDecisionInput {
   /** For `no` and `partial`: the unmet criteria the decider chose, and their confirmation that they read the receipts. */
   readonly refusal?: { readonly unmet: readonly string[]; readonly receiptsRead: true };
   /** The deciding seat: its role and its own key. The receipt names the role, never the person. */
-  readonly seat: { readonly role: string; readonly did: string; readonly signer: JwsSigner };
+  readonly seat: { readonly role: string; readonly did: string; readonly signer: JwsSigner; readonly mandate?: MandateCitation };
   readonly decidedAt: string;
 }
 
@@ -180,7 +239,7 @@ export async function decidePerson(input: PersonDecisionInput): Promise<Decision
     reasons: [...input.reasons],
     rows: { fired: [...input.fired], missing: [...input.missing] },
     reliedOn: [...input.reliedOn],
-    decidedBy: { kind: "person", role: input.seat.role, seat: input.seat.did, signature: "" },
+    decidedBy: { kind: "person", role: input.seat.role, seat: input.seat.did, signature: "", ...(input.seat.mandate !== undefined ? { mandate: input.seat.mandate } : {}) },
     automatic: false,
     ...(input.refusal !== undefined ? { refusal: { unmet: [...input.refusal.unmet], receiptsRead: input.refusal.receiptsRead } } : {}),
     decidedAt: isoOf(at),
@@ -189,7 +248,7 @@ export async function decidePerson(input: PersonDecisionInput): Promise<Decision
   };
   const compact = await signJws({ typ: SEAT_JWS_TYP, kid: input.seat.did }, seatPayload(draft), input.seat.signer);
   const [h, , s] = compact.split(".");
-  return { ...draft, decidedBy: { kind: "person", role: input.seat.role, seat: input.seat.did, signature: `${h}..${s}` } };
+  return { ...draft, decidedBy: { kind: "person", role: input.seat.role, seat: input.seat.did, signature: `${h}..${s}`, ...(input.seat.mandate !== undefined ? { mandate: input.seat.mandate } : {}) } };
 }
 
 export class DecisionError extends Error {

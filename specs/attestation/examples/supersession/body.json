@@ -1,0 +1,18 @@
+{
+  "issuer": "did:kash:BudJ2eKicGp3BYhfzkqnkSBrnDZimEccdmedqkrtBo78",
+  "kind": "receipt",
+  "outcome": "accepted",
+  "reference": {
+    "kind": "agreement",
+    "sha256": "a7c3e9f1b5d7a3c9e1f5b7d3a9c5e1f7b3d9a5c1e7f3b9d5a1c7e3f9b5d1a7c3",
+    "version": 1
+  },
+  "statement": "Two nights in the garden room, 15 to 17 November, delivered as booked.",
+  "profile": "booking.delivered/1",
+  "counterparty": "did:kash:6CFjX61MHPCBWGygNJ5TKH9mUQ7EvWeE1ug3rhcisggB",
+  "grade": 1,
+  "claimedAt": "2026-11-18T09:15:00Z",
+  "expiresAt": "2028-11-18T09:15:00Z",
+  "practice": true,
+  "supersedes": "0927aba773befc22fbb788078f3ff76df0f659e2379b52962842d5447a3c3aa2"
+}

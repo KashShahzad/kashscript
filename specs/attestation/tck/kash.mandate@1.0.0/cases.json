@@ -1,0 +1,116 @@
+{
+  "lexicon": "kash.mandate@1.0.0",
+  "about": "Conformance cases for the mandate (specs/attestation/README.md §1.4, §2.2). A reader runs the shape (KASH_MANDATE_BODY_SCHEMA, or specs/schemas/mandate.schema.json) and then the cross-field rules, and must reach `valid` with exactly the listed fault codes. SAMPLE DIDs; nothing here is signed. Reference implementation: @kashscript/attest/attestation's checkMandate.",
+  "cases": [
+    {
+      "name": "a seat may sign findings for its assessor",
+      "valid": true,
+      "body": { "id": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC/mandate/site-review-seat", "principal": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", "delegate": { "key": "did:kash:SeatFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "kind": "seat", "role": "Site reviewer" }, "scope": { "kinds": ["finding"], "outcomes": ["finding"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-10-31T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "1907", "statusListCredential": "https://assessor.example/status/mandates" } }
+    },
+    {
+      "name": "a desk may apply a rule author's standing yes, and say not yet",
+      "valid": true,
+      "body": { "id": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG/mandate/desk", "principal": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG", "delegate": { "key": "did:kash:DeskHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH", "kind": "desk" }, "scope": { "kinds": ["decision"], "outcomes": ["accepted", "not-yet"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-10-31T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "22", "statusListCredential": "https://lender.example/status/mandates" } }
+    },
+    {
+      "name": "an agent may carry receipts under one tag, accepted only",
+      "valid": true,
+      "body": { "id": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/mandate/coding-agent", "principal": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "delegate": { "key": "did:kash:AgentJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ", "kind": "agent" }, "scope": { "kinds": ["receipt"], "outcomes": ["accepted"], "dsts": ["application/vnd.kash.attestation+json"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-01-31T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "5", "statusListCredential": "https://agency.example/status/mandates" } }
+    },
+    {
+      "name": "an organisation acting for a host names its outcomes and profiles, from a did:web principal",
+      "valid": true,
+      "body": { "id": "did:web:host.example/mandate/booking-app", "principal": "did:web:host.example", "delegate": { "key": "did:kash:AppKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK", "kind": "organisation", "role": "Booking app" }, "scope": { "outcomes": ["accepted"], "profiles": ["booking.delivered/1", "booking.confirmed/1"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-11-01T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "730", "statusListCredential": "https://host.example/status/mandates" }, "practice": true }
+    },
+    {
+      "name": "a mandate carries a status entry — it can be revoked before it ends",
+      "valid": false,
+      "faults": ["SHAPE"],
+      "body": { "id": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC/mandate/site-review-seat", "principal": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", "delegate": { "key": "did:kash:SeatFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "kind": "seat" }, "scope": { "kinds": ["finding"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-10-31T00:00:00Z" } }
+    },
+    {
+      "name": "a chain is not in this version — one link, a principal to a key",
+      "valid": false,
+      "faults": ["SHAPE"],
+      "body": { "id": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC/mandate/sub", "principal": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", "delegate": { "key": "did:kash:SeatFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "kind": "seat" }, "scope": { "kinds": ["finding"] }, "parent": { "id": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC/mandate/site-review-seat", "hash": "4358664030978fc689356b0390c938a7137186c1a71ac916c50780ab26544950" }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-10-31T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "1908", "statusListCredential": "https://assessor.example/status/mandates" } }
+    },
+    {
+      "name": "a mandate's id is under its principal",
+      "valid": false,
+      "faults": ["ID_PRINCIPAL"],
+      "body": { "id": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/mandate/seat", "principal": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", "delegate": { "key": "did:kash:SeatFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "kind": "seat" }, "scope": { "kinds": ["finding"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-10-31T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "1909", "statusListCredential": "https://assessor.example/status/mandates" } }
+    },
+    {
+      "name": "a principal signing as itself needs no mandate",
+      "valid": false,
+      "faults": ["DELEGATE_IS_PRINCIPAL"],
+      "body": { "id": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC/mandate/self", "principal": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", "delegate": { "key": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", "kind": "seat" }, "scope": { "kinds": ["finding"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-10-31T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "1910", "statusListCredential": "https://assessor.example/status/mandates" } }
+    },
+    {
+      "name": "a mandate is bounded",
+      "valid": false,
+      "faults": ["SCOPE_EMPTY"],
+      "body": { "id": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC/mandate/anything", "principal": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", "delegate": { "key": "did:kash:SeatFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "kind": "seat" }, "scope": {}, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-10-31T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "1911", "statusListCredential": "https://assessor.example/status/mandates" } }
+    },
+    {
+      "name": "an agent never carries a refusal (d91(f))",
+      "valid": false,
+      "faults": ["MACHINE_REFUSAL"],
+      "body": { "id": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/mandate/agent", "principal": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "delegate": { "key": "did:kash:AgentJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ", "kind": "agent" }, "scope": { "kinds": ["receipt"], "outcomes": ["accepted", "refused"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-01-31T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "6", "statusListCredential": "https://agency.example/status/mandates" } }
+    },
+    {
+      "name": "a desk names its outcomes, so a refusal cannot hide in 'any'",
+      "valid": false,
+      "faults": ["MACHINE_REFUSAL"],
+      "body": { "id": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG/mandate/desk", "principal": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG", "delegate": { "key": "did:kash:DeskHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH", "kind": "desk" }, "scope": { "kinds": ["decision"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-10-31T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "23", "statusListCredential": "https://lender.example/status/mandates" } }
+    },
+    {
+      "name": "another organisation acting for a principal names its outcomes, never refused",
+      "valid": false,
+      "faults": ["MACHINE_REFUSAL"],
+      "body": { "id": "did:web:host.example/mandate/booking-app", "principal": "did:web:host.example", "delegate": { "key": "did:kash:AppKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK", "kind": "organisation" }, "scope": { "profiles": ["booking.delivered/1"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-11-01T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "731", "statusListCredential": "https://host.example/status/mandates" } }
+    },
+    {
+      "name": "an agent never decides (d88; d84 F)",
+      "valid": false,
+      "faults": ["AGENT_SCOPE"],
+      "body": { "id": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/mandate/agent", "principal": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "delegate": { "key": "did:kash:AgentJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ", "kind": "agent" }, "scope": { "kinds": ["receipt", "decision"], "outcomes": ["accepted"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-01-31T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "7", "statusListCredential": "https://agency.example/status/mandates" } }
+    },
+    {
+      "name": "an agent never judges a deviation — a named person classifies it (d43)",
+      "valid": false,
+      "faults": ["AGENT_SCOPE"],
+      "body": { "id": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC/mandate/agent", "principal": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", "delegate": { "key": "did:kash:AgentJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ", "kind": "agent" }, "scope": { "kinds": ["finding"], "outcomes": ["finding"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-01-31T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "1912", "statusListCredential": "https://assessor.example/status/mandates" } }
+    },
+    {
+      "name": "an agent names its kinds",
+      "valid": false,
+      "faults": ["AGENT_SCOPE"],
+      "body": { "id": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/mandate/agent", "principal": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", "delegate": { "key": "did:kash:AgentJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ", "kind": "agent" }, "scope": { "outcomes": ["accepted"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-01-31T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "8", "statusListCredential": "https://agency.example/status/mandates" } }
+    },
+    {
+      "name": "a desk decides and does nothing else",
+      "valid": false,
+      "faults": ["DESK_DECIDES_ONLY"],
+      "body": { "id": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG/mandate/desk", "principal": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG", "delegate": { "key": "did:kash:DeskHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH", "kind": "desk" }, "scope": { "kinds": ["decision", "receipt"], "outcomes": ["accepted"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-10-31T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "24", "statusListCredential": "https://lender.example/status/mandates" } }
+    },
+    {
+      "name": "a mandate renews within 366 days (d43)",
+      "valid": false,
+      "faults": ["DATES"],
+      "body": { "id": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC/mandate/forever", "principal": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", "delegate": { "key": "did:kash:SeatFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "kind": "seat" }, "scope": { "kinds": ["finding"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2028-11-01T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "1913", "statusListCredential": "https://assessor.example/status/mandates" } }
+    },
+    {
+      "name": "a role names a role, never a person",
+      "valid": false,
+      "faults": ["PERSON_IDENTITY"],
+      "body": { "id": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC/mandate/seat", "principal": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", "delegate": { "key": "did:kash:SeatFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF", "kind": "seat", "role": "Reviewer, call 03001234567" }, "scope": { "kinds": ["finding"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-10-31T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "1914", "statusListCredential": "https://assessor.example/status/mandates" } }
+    },
+    {
+      "name": "a delegate is a key a stranger checks with no lookup",
+      "valid": false,
+      "faults": ["SHAPE"],
+      "body": { "id": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC/mandate/seat", "principal": "did:kash:AssessorCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC", "delegate": { "key": "did:web:seat.example", "kind": "seat" }, "scope": { "kinds": ["finding"] }, "dates": { "from": "2026-11-01T00:00:00Z", "until": "2027-10-31T00:00:00Z" }, "credentialStatus": { "type": "BitstringStatusListEntry", "statusPurpose": "revocation", "statusListIndex": "1915", "statusListCredential": "https://assessor.example/status/mandates" } }
+    }
+  ]
+}

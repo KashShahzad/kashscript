@@ -1,0 +1,21 @@
+{
+  "note": "SAMPLE parties, practice only. Public identifiers; no key material.",
+  "issuer": "did:kash:BudJ2eKicGp3BYhfzkqnkSBrnDZimEccdmedqkrtBo78",
+  "signers": {
+    "issuer": "did:kash:BudJ2eKicGp3BYhfzkqnkSBrnDZimEccdmedqkrtBo78",
+    "counterparty": "did:kash:6CFjX61MHPCBWGygNJ5TKH9mUQ7EvWeE1ug3rhcisggB"
+  },
+  "counterparty": "did:kash:6CFjX61MHPCBWGygNJ5TKH9mUQ7EvWeE1ug3rhcisggB",
+  "record": "4c2044b6fc5615c7792d77cef877a79a3703cdec165f69d945aa0b30f8a5ba53",
+  "supersedes": "../receipt-booking/record.dsse.json",
+  "presentation": {
+    "audience": "https://review-door.example/verifier",
+    "nonce": "sample-nonce-supersession",
+    "iatUnix": 1795080600,
+    "disclosed": [
+      "supersedes"
+    ],
+    "copyKey": "did:kash:FLxob1Zoqa93M7QtDxCReRusjSH3hCUwEoqzj76Cf4ps"
+  },
+  "checkAt": 1795080660
+}

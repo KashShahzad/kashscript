@@ -1,0 +1,30 @@
+{
+  "id": "did:kash:dC3E2sfMhu9bKqZhXc6gKEEGb8ztkajA46x7nep3ES3/mandate/credit-officer-seat",
+  "principal": "did:kash:dC3E2sfMhu9bKqZhXc6gKEEGb8ztkajA46x7nep3ES3",
+  "delegate": {
+    "key": "did:kash:7iJZMq9F2KcBSaEN59MVLYsAd2i9kHsiwrZFk3dzjg5N",
+    "kind": "seat",
+    "role": "Credit officer"
+  },
+  "scope": {
+    "kinds": [
+      "decision"
+    ],
+    "outcomes": [
+      "accepted",
+      "not-yet",
+      "refused"
+    ]
+  },
+  "dates": {
+    "from": "2026-10-01T00:00:00Z",
+    "until": "2027-09-30T00:00:00Z"
+  },
+  "credentialStatus": {
+    "type": "BitstringStatusListEntry",
+    "statusPurpose": "revocation",
+    "statusListIndex": "33418",
+    "statusListCredential": "https://lender.example/status/mandates"
+  },
+  "practice": true
+}

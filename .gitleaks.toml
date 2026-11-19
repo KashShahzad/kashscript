@@ -31,3 +31,14 @@ paths = ['''^packages/(attest|wallet|whiffin)/test/''']
 description = "attest domain-separation constant"
 targetRules = ["generic-api-key"]
 paths = ['''^packages/attest/src/(succession|countersign)\.ts$''']
+
+# The attestation specification's worked examples and conformance cases
+# (specs/attestation/README.md §2.7). Their parties are SAMPLE: the keys were made
+# fresh by the generators and thrown away, so the files hold public identifiers and
+# signed bytes — SD-JWT copies and presentations, DSSE envelopes — and no key. A
+# test (packages/attest/test/attestation.test.ts) checks no example carries key
+# material.
+[[allowlists]]
+description = "attestation specification examples and conformance cases (SAMPLE, keys thrown away)"
+targetRules = ["jwt", "generic-api-key"]
+paths = ['''^specs/attestation/(examples|tck)/''']

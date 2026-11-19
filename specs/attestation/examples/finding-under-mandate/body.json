@@ -1,0 +1,25 @@
+{
+  "issuer": "did:kash:8MaqbZ2usVQdT9AMNJgXSL3WZQvqvcv567wDkw7EAyuc",
+  "kind": "finding",
+  "outcome": "finding",
+  "reference": {
+    "kind": "standard",
+    "id": "SAMPLE site safety standard, clause 4.2",
+    "version": 3,
+    "sha256": "c4a8e2f6b0d4a8c2e6f0b4d8a2c6e0f4b8d2a6c0e4f8b2d6a0c4e8f2b6d0a4c8"
+  },
+  "statement": "The fire exit on the second floor was blocked by stock during the visit; cleared before the visit ended.",
+  "profile": "site-review/1",
+  "counterparty": "did:kash:FKo1sKQ3XKa4DccFHYMfn7JcJN6WiKX6UreRboagFQtN",
+  "grade": 2,
+  "mandate": {
+    "id": "did:kash:8MaqbZ2usVQdT9AMNJgXSL3WZQvqvcv567wDkw7EAyuc/mandate/site-review-seat",
+    "hash": "76c985d37a633cf1029611f5097d80aedbe04d8ec5735b64eb754b7bfc7f2acb"
+  },
+  "claimedAt": "2026-11-12T11:20:00Z",
+  "expiresAt": "2028-11-12T11:20:00Z",
+  "reasons": [
+    "at-risk"
+  ],
+  "practice": true
+}

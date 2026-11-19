@@ -1,0 +1,29 @@
+{
+  "id": "did:kash:8xZNAeDfkLhehqi6N9Va8i9NY3YQmJ5NM6hEzUV6sW4u/mandate/delivery-approvals",
+  "principal": "did:kash:8xZNAeDfkLhehqi6N9Va8i9NY3YQmJ5NM6hEzUV6sW4u",
+  "delegate": {
+    "key": "did:kash:HgPFwMTQBqbJasdBhrKHwvfq62783iab9YCqzHQgCxap",
+    "kind": "seat",
+    "role": "Product owner"
+  },
+  "scope": {
+    "kinds": [
+      "receipt"
+    ],
+    "outcomes": [
+      "accepted",
+      "not-yet"
+    ]
+  },
+  "dates": {
+    "from": "2026-09-01T00:00:00Z",
+    "until": "2027-08-31T00:00:00Z"
+  },
+  "credentialStatus": {
+    "type": "BitstringStatusListEntry",
+    "statusPurpose": "revocation",
+    "statusListIndex": "61204",
+    "statusListCredential": "https://client.example/status/mandates"
+  },
+  "practice": true
+}

@@ -1,0 +1,12 @@
+{
+  "note": "SAMPLE parties, practice only. Public identifiers; no key material.",
+  "issuer": "did:kash:BB1czjCZLmA32nQk1XYdU8pkZ3CeA1jjnHEeHC1LNYU6",
+  "signers": {
+    "issuer": "did:kash:BB1czjCZLmA32nQk1XYdU8pkZ3CeA1jjnHEeHC1LNYU6",
+    "counterparty": "did:kash:HgPFwMTQBqbJasdBhrKHwvfq62783iab9YCqzHQgCxap"
+  },
+  "counterparty": "did:kash:8xZNAeDfkLhehqi6N9Va8i9NY3YQmJ5NM6hEzUV6sW4u",
+  "counterpartyMandate": "../receipt-client-signoff/counterparty-mandate.dsse.json",
+  "record": "b7ca42a3700106f6bed703883b615f9d27c876b30a8aa75c2a0fe08fb29d5f6a",
+  "copies": "none — held by its parties; the reasons are the client's words, written when the client answered (§2.3)."
+}

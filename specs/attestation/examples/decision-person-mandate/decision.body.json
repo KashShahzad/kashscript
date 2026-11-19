@@ -1,0 +1,35 @@
+{
+  "rule": {
+    "id": "did:kash:dC3E2sfMhu9bKqZhXc6gKEEGb8ztkajA46x7nep3ES3/rule/income-six-months",
+    "version": 1,
+    "hash": "05467c847aa7dd3681cd6ab24b6a8595dfbaa30d97e132be9f87b1e3a7c05b4d"
+  },
+  "outcome": "yes",
+  "reasons": [
+    "income-shown"
+  ],
+  "rows": {
+    "fired": [
+      "monthly",
+      "payers"
+    ],
+    "missing": []
+  },
+  "reliedOn": [
+    "5d41402abc4b2a76b9719d911017c592ae2f1e3c5b7d9f1a3c5e7092b4d6f8a1"
+  ],
+  "decidedBy": {
+    "kind": "person",
+    "role": "Credit officer",
+    "seat": "did:kash:7iJZMq9F2KcBSaEN59MVLYsAd2i9kHsiwrZFk3dzjg5N",
+    "signature": "eyJ0eXAiOiJrYXNoLWRlY2lzaW9uLXNlYXQrand0Iiwia2lkIjoiZGlkOmthc2g6N2lKWk1xOUYyS2NCU2FFTjU5TVZMWXNBZDJpOWtIc2l3clpGazNkempnNU4iLCJhbGciOiJFZERTQSJ9..pH7zfydBWaM4tPhQMIJKuG_U4GW-Ywbld8PVQy3QJFQ5Xm-P9De-o1eNhhcnsqJoPZZYjYPqzpcv7HgHEHOxBw",
+    "mandate": {
+      "id": "did:kash:dC3E2sfMhu9bKqZhXc6gKEEGb8ztkajA46x7nep3ES3/mandate/credit-officer-seat",
+      "hash": "1e8a582ec086a6951cdc244fb862b9bd8050324f8bfad7a7c30d0469c633aeb3"
+    }
+  },
+  "automatic": false,
+  "decidedAt": "2026-10-28T09:00:00Z",
+  "contestUntil": "2026-11-27T09:00:00Z",
+  "practice": true
+}

@@ -1,0 +1,227 @@
+{
+  "lexicon": "kash.decision@1.2.0",
+  "about": "Conformance cases for the decision's shape across its versions (specs/decision.md v3; specs/attestation/README.md §1.6). Each body is run against both the frozen 1.1.0 shape and 1.2.0, and must reach the listed result for each: every 1.1.0 body is a 1.2.0 body, and 1.1.0 refuses the mandate. The checks against a rule (validateDecision: the seat's signature, MANDATE_MISMATCH) need a signed rule and run in predicate's own tests. SAMPLE DIDs and hashes; nothing here is signed.",
+  "cases": [
+    {
+      "name": "an automatic yes as 1.1.0 wrote it",
+      "valid": {
+        "kash.decision@1.1.0": true,
+        "kash.decision@1.2.0": true
+      },
+      "body": {
+        "rule": {
+          "id": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG/rule/hiring",
+          "version": 1,
+          "hash": "c4a8e2f6b0d4a8c2e6f0b4d8a2c6e0f4b8d2a6c0e4f8b2d6a0c4e8f2b6d0a4c8"
+        },
+        "outcome": "yes",
+        "reasons": [
+          "meets-all"
+        ],
+        "rows": {
+          "fired": [
+            "projects"
+          ],
+          "missing": []
+        },
+        "reliedOn": [
+          "5d41402abc4b2a76b9719d911017c592ae2f1e3c5b7d9f1a3c5e7092b4d6f8a1"
+        ],
+        "decidedBy": {
+          "kind": "standing",
+          "standing": "standing:did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG"
+        },
+        "automatic": true,
+        "decidedAt": "2026-10-28T09:00:00Z",
+        "contestUntil": "2026-11-27T09:00:00Z",
+        "practice": true
+      }
+    },
+    {
+      "name": "a person's decision citing the seat's mandate",
+      "valid": {
+        "kash.decision@1.1.0": false,
+        "kash.decision@1.2.0": true
+      },
+      "body": {
+        "rule": {
+          "id": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG/rule/income",
+          "version": 1,
+          "hash": "c4a8e2f6b0d4a8c2e6f0b4d8a2c6e0f4b8d2a6c0e4f8b2d6a0c4e8f2b6d0a4c8"
+        },
+        "outcome": "yes",
+        "reasons": [
+          "income-shown"
+        ],
+        "rows": {
+          "fired": [
+            "monthly",
+            "payers"
+          ],
+          "missing": []
+        },
+        "reliedOn": [],
+        "decidedBy": {
+          "kind": "person",
+          "role": "Credit officer",
+          "seat": "did:kash:SeatFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+          "signature": "eyJhbGciOiJFZERTQSJ9..c2lnbmF0dXJl",
+          "mandate": {
+            "id": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG/mandate/credit-officer-seat",
+            "hash": "4358664030978fc689356b0390c938a7137186c1a71ac916c50780ab26544950"
+          }
+        },
+        "automatic": false,
+        "decidedAt": "2026-10-28T09:00:00Z",
+        "contestUntil": "2026-11-27T09:00:00Z",
+        "practice": true
+      }
+    },
+    {
+      "name": "a standing decision cites no mandate — its copy is the deciding organisation's own signature",
+      "valid": {
+        "kash.decision@1.1.0": false,
+        "kash.decision@1.2.0": false
+      },
+      "body": {
+        "rule": {
+          "id": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG/rule/hiring",
+          "version": 1,
+          "hash": "c4a8e2f6b0d4a8c2e6f0b4d8a2c6e0f4b8d2a6c0e4f8b2d6a0c4e8f2b6d0a4c8"
+        },
+        "outcome": "yes",
+        "reasons": [
+          "meets-all"
+        ],
+        "rows": {
+          "fired": [
+            "projects"
+          ],
+          "missing": []
+        },
+        "reliedOn": [],
+        "decidedBy": {
+          "kind": "standing",
+          "standing": "standing:did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG",
+          "mandate": {
+            "id": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG/mandate/desk",
+            "hash": "4358664030978fc689356b0390c938a7137186c1a71ac916c50780ab26544950"
+          }
+        },
+        "automatic": true,
+        "decidedAt": "2026-10-28T09:00:00Z",
+        "contestUntil": "2026-11-27T09:00:00Z"
+      }
+    },
+    {
+      "name": "a mandate's id names a mandate",
+      "valid": {
+        "kash.decision@1.1.0": false,
+        "kash.decision@1.2.0": false
+      },
+      "body": {
+        "rule": {
+          "id": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG/rule/hiring",
+          "version": 1,
+          "hash": "c4a8e2f6b0d4a8c2e6f0b4d8a2c6e0f4b8d2a6c0e4f8b2d6a0c4e8f2b6d0a4c8"
+        },
+        "outcome": "yes",
+        "reasons": [
+          "meets-all"
+        ],
+        "rows": {
+          "fired": [
+            "projects"
+          ],
+          "missing": []
+        },
+        "reliedOn": [],
+        "decidedBy": {
+          "kind": "standing",
+          "standing": "standing:did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG",
+          "mandate": {
+            "id": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG/rule/hiring",
+            "hash": "4358664030978fc689356b0390c938a7137186c1a71ac916c50780ab26544950"
+          }
+        },
+        "automatic": true,
+        "decidedAt": "2026-10-28T09:00:00Z",
+        "contestUntil": "2026-11-27T09:00:00Z"
+      }
+    },
+    {
+      "name": "a mandate is cited by its hash",
+      "valid": {
+        "kash.decision@1.1.0": false,
+        "kash.decision@1.2.0": false
+      },
+      "body": {
+        "rule": {
+          "id": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG/rule/hiring",
+          "version": 1,
+          "hash": "c4a8e2f6b0d4a8c2e6f0b4d8a2c6e0f4b8d2a6c0e4f8b2d6a0c4e8f2b6d0a4c8"
+        },
+        "outcome": "yes",
+        "reasons": [
+          "meets-all"
+        ],
+        "rows": {
+          "fired": [
+            "projects"
+          ],
+          "missing": []
+        },
+        "reliedOn": [],
+        "decidedBy": {
+          "kind": "standing",
+          "standing": "standing:did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG",
+          "mandate": {
+            "id": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG/mandate/desk"
+          }
+        },
+        "automatic": true,
+        "decidedAt": "2026-10-28T09:00:00Z",
+        "contestUntil": "2026-11-27T09:00:00Z"
+      }
+    },
+    {
+      "name": "the citation is closed — it carries no name",
+      "valid": {
+        "kash.decision@1.1.0": false,
+        "kash.decision@1.2.0": false
+      },
+      "body": {
+        "rule": {
+          "id": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG/rule/income",
+          "version": 1,
+          "hash": "c4a8e2f6b0d4a8c2e6f0b4d8a2c6e0f4b8d2a6c0e4f8b2d6a0c4e8f2b6d0a4c8"
+        },
+        "outcome": "yes",
+        "reasons": [
+          "income-shown"
+        ],
+        "rows": {
+          "fired": [
+            "monthly"
+          ],
+          "missing": []
+        },
+        "reliedOn": [],
+        "decidedBy": {
+          "kind": "person",
+          "role": "Credit officer",
+          "seat": "did:kash:SeatFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+          "signature": "eyJhbGciOiJFZERTQSJ9..c2lnbmF0dXJl",
+          "mandate": {
+            "id": "did:kash:LenderGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG/mandate/credit-officer-seat",
+            "hash": "4358664030978fc689356b0390c938a7137186c1a71ac916c50780ab26544950",
+            "holder": "A. Officer"
+          }
+        },
+        "automatic": false,
+        "decidedAt": "2026-10-28T09:00:00Z",
+        "contestUntil": "2026-11-27T09:00:00Z"
+      }
+    }
+  ]
+}

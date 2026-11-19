@@ -1,0 +1,19 @@
+{
+  "@context": [
+    "https://www.w3.org/ns/credentials/v2"
+  ],
+  "type": [
+    "VerifiableCredential",
+    "KashAttestation"
+  ],
+  "issuer": "did:kash:BudJ2eKicGp3BYhfzkqnkSBrnDZimEccdmedqkrtBo78",
+  "validFrom": "2026-11-19T00:00:00Z",
+  "validUntil": "2027-02-17T00:00:00Z",
+  "credentialSubject": {
+    "kind": "receipt",
+    "outcome": "accepted",
+    "profile": "booking.delivered/1",
+    "grade": 1,
+    "practice": true
+  }
+}

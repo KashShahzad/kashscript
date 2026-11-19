@@ -37,6 +37,7 @@ import { checkFeel, fromJson, type FeelValue, type InputType } from "./feel";
 import { CONTACT_PATTERNS, proxyTerms, refusedTerms, type RefusalCategory, type WarningCategory } from "./vocabulary";
 import { DAY, DECISION_VCT, MAX_LIFE_DAYS, MAX_RENEW_DAYS, RESERVED_NAMES, RULE_PAYLOAD_TYPE, TA_ISSUER, TA_TRUST_LIST } from "./constants";
 import { adoptionInForce, readAdoption, type ReadAdoption } from "./adoption";
+import { ATTESTATION_DST, ATTESTATION_VCT } from "@kashscript/attest/attestation";
 
 /** The rule as `kash.rule@1.2.0` reads it — a 1.0.0 body is one with no address; a 1.1.0 body one whose queries name no `holder`. */
 export type { RuleBody1_1 as RuleBody, Criterion1_1 as Criterion, RuleAddress, Subject } from "@kashscript/lexicons/extensions/door";
@@ -267,6 +268,19 @@ export function validateRule(body: unknown): RuleValidation {
         const outcome = (q.claims ?? []).find((cl) => cl.path.length === 2 && cl.path[0] === "decision" && cl.path[1] === "outcome");
         if (outcome === undefined || outcome.values === undefined || outcome.values.length !== 1 || outcome.values[0] !== "yes") {
           refuse("ASKS_FOR_A_REFUSAL", `${at}.answer.query[${j}]`, `${PLAIN.ASKS_FOR_A_REFUSAL}: a decision receipt is read only as a yes — its claim ["decision","outcome"] takes values ["yes"]`);
+        }
+      });
+      // Node rule 10 for the attestation (RW-14; specs/attestation/README.md §1.5): read only as accepted — never a
+      // not yet, a finding or a contest, each of which a door would be asking to see against someone (P4.2; d43).
+      // A copy carries the outcome at ["attestation","outcome"]; the record of truth at ["outcome"].
+      c.answer.query.forEach((q, j) => {
+        const copy = (q.meta?.vct_values ?? []).includes(ATTESTATION_VCT);
+        const record = (q.meta?.dst_values ?? []).includes(ATTESTATION_DST);
+        if (!copy && !record) return;
+        const path = copy ? ["attestation", "outcome"] : ["outcome"];
+        const outcome = (q.claims ?? []).find((cl) => cl.path.length === path.length && cl.path.every((s, i) => s === path[i]));
+        if (outcome === undefined || outcome.values === undefined || outcome.values.length !== 1 || outcome.values[0] !== "accepted") {
+          refuse("ASKS_FOR_A_REFUSAL", `${at}.answer.query[${j}]`, `${PLAIN.ASKS_FOR_A_REFUSAL}: an attestation is read only as accepted — its claim ${JSON.stringify(path)} takes values ["accepted"]`);
         }
       });
       // One issuer is a proxy risk.

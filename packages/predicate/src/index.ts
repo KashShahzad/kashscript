@@ -13,7 +13,7 @@
  *   packet    → what the person sends by choice: a copy per viewer, bound to
  *               that viewer's nonce and audience; and the desk's free check;
  *   route     → automatic-yes, not-yet or to-a-person — never a refusal;
- *   decision  → the decision receipt (`kash.decision@1.1.0`, its shape kept
+ *   decision  → the decision receipt (`kash.decision@1.2.0`, its shape kept
  *               here — a person's record, not a public one, d59), signed by the
  *               deciding organisation to the person, who keeps it.
  *

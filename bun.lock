@@ -11,12 +11,13 @@
     },
     "packages/attest": {
       "name": "@kashscript/attest",
-      "version": "0.3.0-alpha.0",
+      "version": "0.3.0-alpha.1",
       "bin": {
         "attest": "./src/bin/attest.ts",
       },
       "dependencies": {
         "@kashscript/identity-core": "workspace:*",
+        "@kashscript/lexicons": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "^1.2.5",
@@ -127,7 +128,7 @@
     },
     "packages/predicate": {
       "name": "@kashscript/predicate",
-      "version": "0.3.0-alpha.3",
+      "version": "0.3.0-alpha.4",
       "dependencies": {
         "@kashscript/attest": "workspace:*",
         "@kashscript/identity-core": "workspace:*",

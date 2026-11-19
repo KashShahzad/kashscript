@@ -1,0 +1,28 @@
+{
+  "id": "did:kash:8MaqbZ2usVQdT9AMNJgXSL3WZQvqvcv567wDkw7EAyuc/mandate/site-review-seat",
+  "principal": "did:kash:8MaqbZ2usVQdT9AMNJgXSL3WZQvqvcv567wDkw7EAyuc",
+  "delegate": {
+    "key": "did:kash:9shZmdenuXATwAfUfcqpJASMpzRy2f1yyb2voRBHHJ4Q",
+    "kind": "seat",
+    "role": "Site reviewer"
+  },
+  "scope": {
+    "kinds": [
+      "finding"
+    ],
+    "outcomes": [
+      "finding"
+    ]
+  },
+  "dates": {
+    "from": "2026-11-01T00:00:00Z",
+    "until": "2027-10-31T00:00:00Z"
+  },
+  "credentialStatus": {
+    "type": "BitstringStatusListEntry",
+    "statusPurpose": "revocation",
+    "statusListIndex": "1907",
+    "statusListCredential": "https://assessor.example/status/mandates"
+  },
+  "practice": true
+}

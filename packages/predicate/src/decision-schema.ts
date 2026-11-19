@@ -11,6 +11,9 @@
  *
  * 1.1.0 adds `adoption`: the anchor's adoption the decision was made under
  * (d85(d)). A 1.0.0 decision is a 1.1.0 decision without one.
+ *
+ * 1.2.0 (RW-14) lets `decidedBy` cite the mandate its signature was made under
+ * (d91(a)). A 1.1.0 decision is a 1.2.0 decision without one.
  */
 
 import type { LexiconDef } from "@kashscript/lexicons/registry";
@@ -18,11 +21,21 @@ import { S, type ObjectSchema } from "@kashscript/lexicons/schema";
 import { DECISION_OUTCOMES, type DecisionOutcome } from "@kashscript/lexicons/extensions/door";
 
 export const KASH_DECISION_NSID = "kash.decision" as const;
+/** The 1.1.0 id, frozen. The newest is {@link KASH_DECISION_1_2_ID}. */
 export const KASH_DECISION_ID = "kash.decision@1.1.0" as const;
 
+/** A citation of the mandate a signature was made under (1.2.0). */
+export interface MandateCitation {
+  /** `<principal DID>/mandate/<slug>`. */
+  readonly id: string;
+  /** SHA-256 hex of the mandate envelope's signed payload bytes. */
+  readonly hash: string;
+}
+
+/** `mandate` is 1.2.0's, and only a person's decision carries one; a 1.1.0 body never does. */
 export type DecidedBy =
   | { readonly kind: "standing"; readonly standing: string }
-  | { readonly kind: "person"; readonly role: string; readonly seat: string; readonly signature: string };
+  | { readonly kind: "person"; readonly role: string; readonly seat: string; readonly signature: string; readonly mandate?: MandateCitation };
 
 export interface DecisionBody {
   readonly rule: { readonly id: string; readonly version: number; readonly hash: string };
@@ -81,4 +94,54 @@ export const KASH_DECISION_LEXICON: LexiconDef = {
   title: "A decision receipt",
   description:
     "The outcome under one version of a rule (and the anchor's adoption it was made under), its reasons, the rows that fired and the hashes of the receipts relied on — never their content. The person's own record: signed to them, never published.",
+};
+
+/* ── kash.decision@1.2.0 — the mandate a signature was made under (RW-14) ── */
+
+/**
+ * d91(a): *every signature that is not the principal's own cites its mandate, with scope and expiry.*
+ * A person's decision carries two signatures — the deciding organisation's on the copy, and the seat's
+ * over the body — and the seat's is not the organisation's own. 1.2.0 lets it cite the mandate it signed
+ * under, by id and by the SHA-256 of the mandate's signed bytes (`kash.mandate@1.0.0`,
+ * `@kashscript/attest/attestation`; `specs/attestation/README.md` §1.6). A standing decision carries no
+ * citation: its copy is signed by the deciding organisation's own key (`issueDecision`), so nothing signs
+ * under a mandate there — a desk signing with a key of its own is open (§4). A 1.1.0 body is a 1.2.0 body;
+ * 1.1.0 stays frozen and refuses the field.
+ */
+export const KASH_DECISION_1_2_ID = "kash.decision@1.2.0" as const;
+
+/** A mandate's id: its principal's DID, then `/mandate/<slug>` — a `did:kash`, or a `did:web` (d91(e), d97(h)). */
+export const MANDATE_ID_PATTERN = /^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\/mandate\/[a-z0-9][a-z0-9-]{0,62}$/;
+
+const MANDATE_CITATION = S.object({ id: S.string({ pattern: MANDATE_ID_PATTERN }), hash: HEX64 }, ["id", "hash"]);
+
+export const KASH_DECISION_1_2_BODY_SCHEMA: ObjectSchema = S.object(
+  {
+    ...KASH_DECISION_BODY_SCHEMA.properties,
+    decidedBy: S.union(
+      S.object({ kind: S.literal("standing"), standing: S.string({ pattern: new RegExp(`^standing:${B58_DID}$`) }) }, ["kind", "standing"]),
+      S.object(
+        {
+          kind: S.literal("person"),
+          role: S.string({ minLength: 1, maxLength: 64 }),
+          seat: S.string({ format: "did-ks" }),
+          signature: S.string({ pattern: /^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$/, maxLength: 1024 }),
+          mandate: S.optional(MANDATE_CITATION),
+        },
+        ["kind", "role", "seat", "signature"],
+      ),
+    ),
+  },
+  KASH_DECISION_BODY_SCHEMA.required,
+);
+
+/** For JSON Schema export and tooling only — a decision is never registered for publishing. */
+export const KASH_DECISION_1_2_LEXICON: LexiconDef = {
+  id: KASH_DECISION_1_2_ID,
+  nsid: KASH_DECISION_NSID,
+  semver: { major: 1, minor: 2, patch: 0 },
+  bodySchema: KASH_DECISION_1_2_BODY_SCHEMA,
+  title: "A decision receipt, citing the mandate its signature was made under",
+  description:
+    "kash.decision@1.1.0, whose person's decidedBy may cite the mandate the seat signed under (d91(a)), by id and by the SHA-256 of its signed bytes. A 1.1.0 body is a 1.2.0 body. The person's own record: signed to them, never published.",
 };

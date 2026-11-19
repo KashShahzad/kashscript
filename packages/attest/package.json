@@ -1,6 +1,6 @@
 {
   "name": "@kashscript/attest",
-  "version": "0.3.0-alpha.0",
+  "version": "0.3.0-alpha.1",
   "description": "The Evidence Commons — JCS + Ed25519/ES256, DSSE/PAE envelopes, a canonical DST registry, the trust log (an RFC 9162 Merkle log with signed checkpoints, inclusion and consistency proofs, OpenTimestamps and RFC 3161 witnesses), hash-chains, a standalone verifier CLI, and offline compat verifiers for the KashScript ecosystem's signed artifacts. Apache-2.0 — verification is free.",
   "type": "module",
   "main": "./src/index.ts",
@@ -26,13 +26,15 @@
     "./sd-jwt":  "./src/sd-jwt/index.ts",
     "./exchange": "./src/exchange/index.ts",
     "./profiles": "./src/profiles/index.ts",
+    "./attestation": "./src/attestation/index.ts",
     "./compat":  "./src/compat/index.ts"
   },
   "bin": {
     "attest": "./src/bin/attest.ts"
   },
   "dependencies": {
-    "@kashscript/identity-core": "workspace:*"
+    "@kashscript/identity-core": "workspace:*",
+    "@kashscript/lexicons": "workspace:*"
   },
   "files": [
     "dist",

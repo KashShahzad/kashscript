@@ -27,7 +27,7 @@ const routed = await route(rule, check, { asOf });               // automatic-ye
 if (routed.route !== "to-a-person") decisionFromRoute(routed, rule, { decidedAt: asOf });
 ```
 
-Specs: [`specs/rule.md`](../../specs/rule.md) · [`specs/decision.md`](../../specs/decision.md) · [`specs/feel-subset.md`](../../specs/feel-subset.md) · [ADR-0021](../../docs/adr/0021-rule-and-decision.md).
+Specs: [`specs/rule.md`](../../specs/rule.md) · [`specs/decision.md`](../../specs/decision.md) · [`specs/feel-subset.md`](../../specs/feel-subset.md) · [`specs/attestation/README.md`](../../specs/attestation/README.md) (the record algebra; the decision is one of its six types) · [ADR-0021](../../docs/adr/0021-rule-and-decision.md).
 
 **Size** (browser, minified): 163.4 KiB, 54.6 KiB gzipped, with attest's verification inside; `/feel` alone 36.2 KiB, 11.9 KiB gzipped.
 

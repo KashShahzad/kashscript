@@ -1,0 +1,14 @@
+{
+  "payloadType": "application/vnd.kash.attestation+json",
+  "payload": "eyJjbGFpbWVkQXQiOiIyMDI2LTExLTE3VDEwOjA1OjAwWiIsImNvdW50ZXJwYXJ0eSI6ImRpZDprYXNoOjh4Wk5BZURma0xoZWhxaTZOOVZhOGk5TlkzWVFtSjVOTTZoRXpVVjZzVzR1IiwiY291bnRlcnBhcnR5TWFuZGF0ZSI6eyJoYXNoIjoiYjI0NzU5YjBhYWQxNmU2Yjc4MjgyNmU5Njc2M2FkOGU5YjcwMjFkMDQ5NDNjOTBhZjU2OGFmNGE0NzFjYjY3MCIsImlkIjoiZGlkOmthc2g6OHhaTkFlRGZrTGhlaHFpNk45VmE4aTlOWTNZUW1KNU5NNmhFelVWNnNXNHUvbWFuZGF0ZS9kZWxpdmVyeS1hcHByb3ZhbHMifSwiZXhwaXJlc0F0IjoiMjAzMS0xMS0xN1QxMDowNTowMFoiLCJncmFkZSI6MSwiaXNzdWVyIjoiZGlkOmthc2g6QkIxY3pqQ1pMbUEzMm5RazFYWWRVOHBrWjNDZUExampuSEVlSEMxTE5ZVTYiLCJraW5kIjoicmVjZWlwdCIsIm91dGNvbWUiOiJub3QteWV0IiwicHJhY3RpY2UiOnRydWUsInByb2ZpbGUiOiJjbGllbnQtc2lnbm9mZi8xIiwicmVhc29ucyI6WyJlcnJvci1zdGF0ZXMtbWlzc2luZyJdLCJyZWZlcmVuY2UiOnsia2luZCI6ImFydGVmYWN0Iiwic2hhMjU2IjoiOGIyZTRkNmYxYTNjNWU3MDkyYjRkNmY4YTFjM2U1MDc5YjJkNGY2YThjMWUzNTA3YTljMmU0ZjZiOGQxYTNjNSIsInZlcnNpb24iOjF9LCJzdGF0ZW1lbnQiOiJNaWxlc3RvbmUgMzogdGhlIHBheW1lbnQgcGFnZS4gTm90IHlldCDigJQgdGhlIGVycm9yIHN0YXRlcyBhcmUgbWlzc2luZy4ifQ==",
+  "signatures": [
+    {
+      "keyid": "did:kash:HgPFwMTQBqbJasdBhrKHwvfq62783iab9YCqzHQgCxap",
+      "sig": "BxVKf6cHSdT+6+UyB5Dp8gpYEYvYVSS1DKQ+guPQTD+99dHr1zeiD67stoMnPOzIUoBQgadhpNjqT9FKYUMjDw=="
+    },
+    {
+      "keyid": "did:kash:BB1czjCZLmA32nQk1XYdU8pkZ3CeA1jjnHEeHC1LNYU6",
+      "sig": "K+XBSKUAUf42BwN9MvGz9ft+2n5DiA0hNy/cvi4ocLrmP7C3AoqlOQMuoCF0VVLx8MTCPuCaZST1QFsOyJxTBA=="
+    }
+  ]
+}

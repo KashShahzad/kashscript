@@ -1,0 +1,24 @@
+{
+  "issuer": "did:kash:BB1czjCZLmA32nQk1XYdU8pkZ3CeA1jjnHEeHC1LNYU6",
+  "kind": "receipt",
+  "outcome": "not-yet",
+  "reference": {
+    "kind": "artefact",
+    "sha256": "8b2e4d6f1a3c5e7092b4d6f8a1c3e5079b2d4f6a8c1e3507a9c2e4f6b8d1a3c5",
+    "version": 1
+  },
+  "statement": "Milestone 3: the payment page. Not yet — the error states are missing.",
+  "profile": "client-signoff/1",
+  "counterparty": "did:kash:8xZNAeDfkLhehqi6N9Va8i9NY3YQmJ5NM6hEzUV6sW4u",
+  "counterpartyMandate": {
+    "id": "did:kash:8xZNAeDfkLhehqi6N9Va8i9NY3YQmJ5NM6hEzUV6sW4u/mandate/delivery-approvals",
+    "hash": "b24759b0aad16e6b782826e96763ad8e9b7021d04943c90af568af4a471cb670"
+  },
+  "grade": 1,
+  "claimedAt": "2026-11-17T10:05:00Z",
+  "expiresAt": "2031-11-17T10:05:00Z",
+  "reasons": [
+    "error-states-missing"
+  ],
+  "practice": true
+}

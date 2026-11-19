@@ -1,0 +1,27 @@
+{
+  "issuer": "did:kash:BB1czjCZLmA32nQk1XYdU8pkZ3CeA1jjnHEeHC1LNYU6",
+  "kind": "receipt",
+  "outcome": "accepted",
+  "reference": {
+    "kind": "artefact",
+    "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81",
+    "version": 1
+  },
+  "statement": "Milestone 2 of the agreed website build: the booking form and its tests, delivered and accepted.",
+  "profile": "client-signoff/1",
+  "counterparty": "did:kash:8xZNAeDfkLhehqi6N9Va8i9NY3YQmJ5NM6hEzUV6sW4u",
+  "counterpartyMandate": {
+    "id": "did:kash:8xZNAeDfkLhehqi6N9Va8i9NY3YQmJ5NM6hEzUV6sW4u/mandate/delivery-approvals",
+    "hash": "b24759b0aad16e6b782826e96763ad8e9b7021d04943c90af568af4a471cb670"
+  },
+  "grade": 1,
+  "claimedAt": "2026-11-16T14:30:00Z",
+  "expiresAt": "2031-11-16T14:30:00Z",
+  "credentialStatus": {
+    "type": "BitstringStatusListEntry",
+    "statusPurpose": "revocation",
+    "statusListIndex": "48211",
+    "statusListCredential": "https://agency.example/status/records-2026-11"
+  },
+  "practice": true
+}

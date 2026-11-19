@@ -1,0 +1,6 @@
+{
+  "note": "SAMPLE parties, practice only. Public identifiers; no key material.",
+  "principal": "did:kash:8MaqbZ2usVQdT9AMNJgXSL3WZQvqvcv567wDkw7EAyuc",
+  "delegate": "did:kash:9shZmdenuXATwAfUfcqpJASMpzRy2f1yyb2voRBHHJ4Q",
+  "record": "76c985d37a633cf1029611f5097d80aedbe04d8ec5735b64eb754b7bfc7f2acb"
+}
