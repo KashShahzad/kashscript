@@ -7,6 +7,12 @@ dist/
 docs/conformance/
 packages/attest/test/vectors/
 packages/attest/test/fixtures/
+# The attestation specification's worked examples and conformance cases (RW-14): signed
+# SAMPLE records - SD-JWT copies and presentations, DSSE envelopes - whose keys the
+# generators threw away (specs/attestation/README.md section 2.7). Semgrep's jwt detector
+# matched all ten copies on 2026-11-20; secrets there stay Gitleaks's job (.gitleaks.toml).
+specs/attestation/examples/
+specs/attestation/tck/
 
 # Test code. Semgrep's own default ignore list skips test/ and tests/, and a
 # custom .semgrepignore replaces that default, so it is restated here (as in
