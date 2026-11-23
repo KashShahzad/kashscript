@@ -196,6 +196,7 @@ export async function openWallet(platform: WalletPlatform, config: WalletConfig 
     Math.max(1, Math.min(config.batchSize ?? 5, 20)),
     pinned,
     platform.transport,
+    config.authorizationRedirectUri ?? null,
   );
   return new Wallet(core);
 }
@@ -209,9 +210,9 @@ export { fetchTransport } from "./transport";
 export type { ProofChoice, Relationship } from "./relationships";
 export type { HeldEntry, RecordLocal } from "./records";
 export type { CheckResult, CheckState } from "./check";
-export type { AskView, NeedView, PresentResult, PresentationRequest } from "./present";
+export type { AskView, InvalidRequestError, NeedView, PresentResult, PresentationRequest, Reply, RequestReading, ResponseMode } from "./present";
 export type { DoorView, DoorSendResult } from "./doors";
-export type { OfferView, PendingRecords, ReceiveResult, CredentialOffer } from "./receive";
+export type { AcceptOptions, OfferGrant, OfferView, PendingRecords, ReceiveResult, CredentialOffer } from "./receive";
 export type { ThankYouNote, RedeemRequest } from "./thank-you";
 export type { CosignResult, JoinResult } from "./session";
 export { HOLDER_SIGNABLE_PAYLOAD_TYPES, MAX_SIGNED_PAYLOAD_BYTES, type SignDsseOptions, type SignDsseResult } from "./sign";

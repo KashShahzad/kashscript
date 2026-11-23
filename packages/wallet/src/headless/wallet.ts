@@ -35,6 +35,8 @@ export interface HeadlessOptions {
   readonly copy?: Partial<Copy>;
   /** A practice secure chip: relationship and copy keys are P-256, signing ES256 in it. */
   readonly hardwareSigning?: boolean;
+  /** Where an authorisation page sends the person back to (RW-16). Unset: that grant sends nothing. */
+  readonly authorizationRedirectUri?: string;
 }
 
 export interface HeadlessWallet {
@@ -87,6 +89,7 @@ export async function createHeadlessWallet(opts: HeadlessOptions): Promise<Headl
       ...(opts.pinnedPublishers !== undefined ? { pinnedPublishers: opts.pinnedPublishers } : {}),
       ...(opts.batchSize !== undefined ? { batchSize: opts.batchSize } : {}),
       ...(opts.copy !== undefined ? { copy: opts.copy } : {}),
+      ...(opts.authorizationRedirectUri !== undefined ? { authorizationRedirectUri: opts.authorizationRedirectUri } : {}),
     },
   );
   return {

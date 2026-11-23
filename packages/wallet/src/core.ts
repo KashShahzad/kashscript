@@ -20,6 +20,11 @@ export interface WalletConfig {
   /** Copies of a yes asked for at each handoff — one per future verifier. */
   readonly batchSize?: number;
   readonly copy?: Partial<Copy>;
+  /**
+   * Where an authorisation page sends the person back to (OpenID4VCI's
+   * authorization-code grant, RW-16). Unset: the wallet sends nothing for that grant.
+   */
+  readonly authorizationRedirectUri?: string;
 }
 
 export interface JsonResponse {
@@ -42,6 +47,7 @@ export class WalletCore {
     readonly batchSize: number,
     readonly pinnedPublishers: readonly string[],
     private readonly transport: Transport | null,
+    readonly authorizationRedirectUri: string | null = null,
   ) {}
 
   /** Every identifier the wallet holds, in each encoding a request could carry it in. */
@@ -77,6 +83,12 @@ export class WalletCore {
       json = null;
     }
     return { status: res.status, json };
+  }
+
+  /** The same guarded way out, for an answer that is not JSON (a request object is a JWT). */
+  async sendText(req: HttpRequest, allow: readonly string[] = []): Promise<{ readonly status: number; readonly text: string }> {
+    const res = await guardedSend(this.transport, req, await this.identifiers(), allow);
+    return { status: res.status, text: res.text };
   }
 
   getJson(url: string, allow: readonly string[] = []): Promise<JsonResponse> {

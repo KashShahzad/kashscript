@@ -40,7 +40,8 @@ export type WalletErrorCode =
   | "RECOVERY_NOT_STARTED"
   | "RUNTIME_UNSUPPORTED"
   | "PRACTICE_ONLY"
-  | "WEAKER_NOT_ACKNOWLEDGED";
+  | "WEAKER_NOT_ACKNOWLEDGED"
+  | "NOT_BUILT";
 
 /** The words a person may see. Tested against the banned-word list. */
 export const ERROR_MESSAGES: Readonly<Record<WalletErrorCode, string>> = {
@@ -79,6 +80,7 @@ export const ERROR_MESSAGES: Readonly<Record<WalletErrorCode, string>> = {
   RUNTIME_UNSUPPORTED: "This app is missing something it needs to keep your keys safe.",
   PRACTICE_ONLY: "This is for practice runs only, never for real records.",
   WEAKER_NOT_ACKNOWLEDGED: "A browser keeps keys less safely than a phone. Say you understand before using it.",
+  NOT_BUILT: "This app can't do the next step with this place yet. Nothing was kept.",
 };
 
 export class WalletError extends Error {

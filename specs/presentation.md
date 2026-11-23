@@ -7,7 +7,7 @@ Decisions: ECOSYSTEM d27.2, d36, d41, d42 §5, d43, d47(d), d49 · builds on [th
 
 ## 0. The rule
 
-**An ask is answered with a yes, never with the data** (d27.2). Nothing here is invented where a standard exists: a predicate reaches the holder as an **SD-JWT VC** (IETF SD-JWT with SD-JWT VC's `dc+sd-jwt` issuer JWT), and reaches a verifier through **OpenID for Verifiable Presentations 1.0 (OID4VP)** with a DCQL query — *built on* it, not conformant: the Foundation's suites were run on 2026-10-10 and the wallet does not pass them (`docs/conformance/2026-10-10`). An ask is the verifier's presentation request.
+**An ask is answered with a yes, never with the data** (d27.2). Nothing here is invented where a standard exists: a predicate reaches the holder as an **SD-JWT VC** (IETF SD-JWT with SD-JWT VC's `dc+sd-jwt` issuer JWT), and reaches a verifier through **OpenID for Verifiable Presentations 1.0 (OID4VP)** with a DCQL query — *built on* it, not conformant: the Foundation's suites were run on 2026-10-10 and 2026-11-23 and the wallet does not pass them (`docs/conformance/2026-10-10`, `docs/conformance/2026-11-23`). An ask is the verifier's presentation request.
 
 ## 1. The ask
 
@@ -44,6 +44,8 @@ The shape of d42 §5, published as a JSON Schema with a reference validator (`va
 **Forbidden needs (d36).** No need may refer to origin, ethnicity, sect, caste or ancestry. The check is word-bounded, so *original* and *insect* pass.
 
 **The request.** An ask becomes an OID4VP authorization request: `response_type=vp_token`, `response_mode=direct_post`, `client_id` = `who.id`, a fresh `nonce`, and a `dcql_query` with one credential query per need (`format: dc+sd-jwt`, `vct_values: [predicate]`, claims `predicate.kind` = the need's kind and `predicate.answer` = true). The request also carries the ask by value as `kash_ask`, with `kash_ask_sha256`, an extension parameter. Before showing the request, the wallet validates the ask and checks the digest against its cached copy of the public library. It then shows the `why`.
+
+**2026-11-23 (RW-16): requests by reference, signed.** The wallet also reads a request by reference (`request_uri`, GET or POST), signed with ES256 under the `x509_hash` or `x509_san_dns` client identifier prefix (the leaf in `x5c`; **no chain is validated**, because the wallet keeps no X.509 trust list), or unsigned under `redirect_uri`, and answers by `direct_post` or by `direct_post.jwt`, encrypted with ECDH-ES to the verifier's key. Reading ends one of four ways: **the ask**, as above · **untrusted** — not tied to the verifier it names, so nothing is sent, not even an error · **invalid** — tied to its verifier but broken, which the person *may* report (`invalid_request` or `invalid_transaction_data`, about the request only, never about the person or what they hold; the wallet never sends it by itself, OpenID4VP §15.9.2) · **no ask** — refused, nothing sent. A query the wallet cannot answer sends nothing, since "I don't hold that" would be a refusal.
 
 ## 2. The predicate credential
 
@@ -103,6 +105,7 @@ Invent a presentation protocol · carry a raw record the holder did not attach �
 
 | Version | Date | Change |
 |---|---|---|
+| **v1.3.1** | 2026-11-23 | RW-16, no format change: the wallet reads requests by reference (`request_uri`, GET or POST), signed under `x509_hash` or `x509_san_dns` (ES256, no chain validated: there is no X.509 trust list) or unsigned under `redirect_uri`, and answers by `direct_post` or `direct_post.jwt` (ECDH-ES, A128GCM or A256GCM). A request with no ask is refused and nothing is sent; an untrusted one sends nothing; one tied to its verifier but broken may be reported (`invalid_request`, `invalid_transaction_data`) only when the person chooses to. `@kashscript/wallet`, **not published.** |
 | **v1.3** | 2026-11-23 | RW-15: `restsOn` padded to a multiple of eight and `_sd` without decoys, so a copy's counts say nothing; `sharedValues` beside `linkabilityBetween`. Issued bytes change, verified ones do not. attest `0.3.0-alpha.2`, **not published.** |
 | **v1.2** | 2026-11-18 | KS-Q4: audience and nonce required on every presentation (`AUDIENCE_NOT_SUPPLIED`, `NONCE_NOT_SUPPLIED`); a 600-second default for the binding's age; the algorithm allow-list checked before any key, and `crit` refused; the nonce registry. Breaking at alpha. attest `0.3.0-alpha.0`, **not published.** |
 | **v1.1** | 2026-10-01 | Additive (PL-2): the credential and its KB-JWT may be ES256 — the issuer's key and the holder's `cnf.jwk` decide, never the header; an EC P-256 holder key is a relationship key in a phone's secure chip. Verification in attest `0.2.0-alpha.2`, with vectors (`test/vectors/es256`). |
