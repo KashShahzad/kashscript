@@ -11,7 +11,7 @@
     },
     "packages/attest": {
       "name": "@kashscript/attest",
-      "version": "0.3.0-alpha.2",
+      "version": "0.3.0-alpha.3",
       "bin": {
         "attest": "./src/bin/attest.ts",
       },
