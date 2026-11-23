@@ -1,7 +1,7 @@
 # Contributing to KashScript
 
 This page is the same in all five repositories of the Indorania ecosystem (Indorania, KashScript,
-Oreoasis, Duedale, Indusland), except the section on what carries which licence.
+Duedale, Oreoasis, Indusland), except the section on what carries which licence.
 
 ## Sign the CLA first
 

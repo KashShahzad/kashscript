@@ -1,0 +1,65 @@
+{
+  "formatVersion": "kashscript-countersign/1",
+  "subject": {
+    "payloadType": "application/vnd.oreoasis.work-record+json",
+    "payload": "eyJhY3Rpb24iOnsic3VtbWFyeSI6IkRlbGl2ZXJlZCBhIGJvb2tpbmcgdW5kZXIgdGhlIGFncmVlbWVudCB0aGlzIHJlY29yZCBuYW1lcy4iLCJ0eXBlIjoiYm9va2luZy5kZWxpdmVyZWQifSwiYWN0b3IiOnsiY2xhc3MiOiJvcmdhbmlzYXRpb24iLCJpZCI6ImRpZDprYXNoOkF0clRBQmJOdUtlcVhieUJiR3VLa1Zid05nNXIzWFZpd2d2Tk1EcjVFenVTIn0sImlucHV0cyI6W10sIm1ldGEiOnsiZG9vciI6InNhYmFhdCIsImxpc3RpbmciOiJkaWQ6a2FzaDpBdHJUQUJiTnVLZXFYYnlCYkd1S2tWYndOZzVyM1hWaXdndk5NRHI1RXp1Uy9saXN0aW5nL3ByYWN0aWNlLXJvb20iLCJwcmFjdGljZSI6dHJ1ZSwicHJvZmlsZSI6ImJvb2tpbmcuZGVsaXZlcmVkLzEiLCJyZWZlcmVuY2UiOiJrYXNoLXRyYWRlOjB4YWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYiIsIndpbmRvdyI6eyJlbmQiOiIyMDI2LTExLTE2VDEwOjAwOjAwWiIsInN0YXJ0IjoiMjAyNi0xMS0xNFQxMjowMDowMFoifX0sIm9yZyI6InByYWN0aWNlLWhvc3QiLCJvdXRwdXRzIjpbXSwicmVjZWlwdElkIjoiMDFKQ1BSQUNUMUNFMEIwMEsxTkcwMDEwIiwic2hhcGUiOiJhY2NlcHRlZCIsInNwZWMiOiJvcmVvYXNpcy53b3JrLXJlY29yZC8xIiwic3RhdHVzIjoiY29tcGxldGVkIiwidGltZXN0YW1wIjoiMjAyNi0xMS0xNFQxMzowMDowMFoifQ==",
+    "signatures": [
+      {
+        "keyid": "did:kash:AtrTABbNuKeqXbyBbGuKkVbwNg5r3XViwgvNMDr5EzuS",
+        "sig": "kWOIWfeh7yzhp8/hZ7SGsFWRqqM7NL+/vqQTT7Z4YJMbQcTc1QyoB25zdON/6Q/VdTzKhEh8+DBxTN0GJDzZCw=="
+      },
+      {
+        "keyid": "did:kash:Cex96uQBC66jUCU7LbWaucdHLaarC5YDypeZYfC3gDtE",
+        "sig": "azFpn7ogj9I5+K/Htg3ShnxTKdKqsc3mY9WLzuEAPxyYtd8Q5la+b8w42JTIo37BZKDi22pwg5EU1k3qGTxkCw=="
+      }
+    ]
+  },
+  "request": {
+    "header": {
+      "typ": "countersign-request",
+      "v": 1
+    },
+    "body": {
+      "requestId": "csr_00000000000000000000000000000001",
+      "requesterDid": "did:kash:AtrTABbNuKeqXbyBbGuKkVbwNg5r3XViwgvNMDr5EzuS",
+      "subjectPayloadType": "application/vnd.oreoasis.work-record+json",
+      "subjectDigestSha256": "454368bf0038158a13686568175202ad93abd6785294001651dba14ec1976827",
+      "statement": "Accept this delivered booking.",
+      "disclosures": [],
+      "nonceB64": "nJ4Uu0mfzLgYLvRAFejX8LxXRFxu9CHLzd0qObQpqQg=",
+      "issuedAtUnix": 1794661200,
+      "expiresAtUnix": 1795266000,
+      "relationshipContext": "practice",
+      "withdrawalFeed": null
+    },
+    "signature": {
+      "alg": "ed25519",
+      "sig": "z2onQzJaRKXNgsYFkH5Qv4KYWXGcR1LADi1eyhs8AsgKP6fuQUojNnnG1LyQ3PKJLcawQ7QqpdMjLyTCrmPQFKtwJ",
+      "dst": "kash-countersign-request-v1\n"
+    }
+  },
+  "acceptances": [
+    {
+      "header": {
+        "typ": "countersign",
+        "v": 1
+      },
+      "body": {
+        "act": "countersign",
+        "requestId": "csr_00000000000000000000000000000001",
+        "requestDigestSha256": "5f813ed4fd56937ddf91646c8b4cf7db66d88f8e4a0b31f4f86da564ca942001",
+        "subjectPayloadType": "application/vnd.oreoasis.work-record+json",
+        "subjectDigestSha256": "454368bf0038158a13686568175202ad93abd6785294001651dba14ec1976827",
+        "countersignerDid": "did:kash:Cex96uQBC66jUCU7LbWaucdHLaarC5YDypeZYfC3gDtE",
+        "keyCustody": "subject-generated",
+        "signedAtUnix": 1794661260
+      },
+      "signature": {
+        "alg": "ed25519",
+        "sig": "z4YxzGZNaZUukvTjTbo1BXmXvscVRDf6dc9E9zEz7hPombLbCoou3iUoS3fFHSDWni8Qq1jXj8nvSYJGkC6WXpfGs",
+        "dst": "kash-countersign-v1\n"
+      }
+    }
+  ],
+  "withdrawal": null
+}

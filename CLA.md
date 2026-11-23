@@ -1,7 +1,7 @@
 # Contributor Licence Agreement (individual)
 
 **Version 1.0 — 2026-11-09.** The same text applies to all five repositories of the Indorania
-ecosystem: Indorania, KashScript, Oreoasis, Duedale and Indusland.
+ecosystem: Indorania, KashScript, Duedale, Oreoasis and Indusland.
 
 > **Status: a plain-words draft, not yet read by a lawyer.** Until it has been, the founder may
 > decline any contribution, and the governing-law line below is open. How to sign is in

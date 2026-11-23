@@ -18,6 +18,7 @@ import type { IndusVerifyResult } from "../compat/indus-token";
 import type { CountersignVerifyReport } from "../countersign";
 import type { HolderExportReport, StatusListReport, TrustListReport } from "../holder";
 import type { SdJwtReport } from "../sd-jwt";
+import type { PageView } from "../attestation/copies";
 import type { PredicatePresentationReport, SessionReceiptReport, ThankYouReport } from "../exchange";
 import type { CohortRecordReport } from "../profiles";
 import type { CheckpointReport, LogAuditReport, LogConsistencyReport, LogInclusionReport } from "../log";
@@ -90,6 +91,19 @@ export function plainThankYou(r: ThankYouReport, presented: boolean): PlainLayer
       ? "the issuer's signature; the holder's binding; that it went to its own issuer; the nonce where given; status"
       : "the issuer's signature; status where a list was presented",
     notProven: "that the promise will be kept; that the giver was free to give it — it is a promise, not a balance",
+  };
+}
+
+/** An attestation copy (RW-14, RW-15): the issuer's word, and — with an artefact handed in — the page's rule. */
+export function plainAttestationCopy(r: SdJwtReport, page: PageView | null): PlainLayer {
+  return {
+    signed: uniq([r.issuer]),
+    checked:
+      "the issuer's signature; every disclosure against a digest the issuer signed; the holder's binding where one is present" +
+      (page === null ? "" : "; the disclosed record against the artefact handed in"),
+    notProven:
+      "that the other side exists or is independent — a copy is the issuer's word, and the record of truth with both signatures is the proof; who holds it, unless a holder binding was presented" +
+      (page !== null && page.shown !== null ? "" : "; what the artefact says — it is shown only to the holder of the disclosure"),
   };
 }
 

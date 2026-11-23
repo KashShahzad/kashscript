@@ -106,8 +106,8 @@ export function principalOfMandateId(id: string): string | null {
   return at > 0 ? id.slice(0, at) : null;
 }
 
-/** A statement is words: no link, no identifier, no contact. */
-function statementProblem(text: string): string | null {
+/** A statement is words: no link, no identifier, no contact. What it holds otherwise, in two words, or null. */
+export function statementProblem(text: string): string | null {
   if (/https?:\/\/|www\./i.test(text)) return "a link";
   if (/\bdid:[a-z0-9]+:/i.test(text)) return "an identifier";
   const hit = findPersonIdentity(text);

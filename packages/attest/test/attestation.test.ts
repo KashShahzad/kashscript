@@ -73,9 +73,9 @@ const RECORDS = Object.keys(OPTIONS);
 const THREE_FORMS = ["finding-under-mandate", "receipt-booking", "supersession"];
 
 describe("the worked examples are what the spec says", () => {
-  test("five records; three are shown in all three forms, two stay with their parties", () => {
+  test("five records; three are shown in all three forms, two stay with their parties; RW-15 adds a countersigned record's copies", () => {
     const dirs = readdirSync(EXAMPLES).sort();
-    expect(dirs).toEqual(["decision-person-mandate", "finding-under-mandate", "mandate-seat", "receipt-booking", "receipt-client-signoff", "receipt-not-yet", "supersession"]);
+    expect(dirs).toEqual(["decision-person-mandate", "finding-under-mandate", "mandate-seat", "receipt-booking", "receipt-booking-countersigned", "receipt-client-signoff", "receipt-not-yet", "supersession"]);
     for (const d of THREE_FORMS) expect(readdirSync(join(EXAMPLES, d))).toEqual(expect.arrayContaining(["copy.sd-jwt.txt", "presentation.sd-jwt.txt", "projection.vc.json"]));
     for (const d of ["receipt-client-signoff", "receipt-not-yet"]) expect(readdirSync(join(EXAMPLES, d))).not.toContain("copy.sd-jwt.txt");
   });
@@ -220,9 +220,8 @@ describe("the worked examples are what the spec says", () => {
   });
 
   test("no example carries key material", () => {
-    for (const dir of readdirSync(EXAMPLES)) {
-      for (const f of readdirSync(join(EXAMPLES, dir))) expect(read(EXAMPLES, dir, f)).not.toMatch(/privateKey|secretKey|"seed"|"d":|BEGIN [A-Z ]*PRIVATE KEY/);
-    }
+    const walk = (dir: string): string[] => readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(join(dir, e.name)) : [join(dir, e.name)]));
+    for (const f of walk(EXAMPLES)) expect(readFileSync(f, "utf8")).not.toMatch(/privateKey|secretKey|"seed"|"d":|BEGIN [A-Z ]*PRIVATE KEY/);
   });
 });
 

@@ -1,0 +1,227 @@
+{
+  "type": "https://kashscript.com/vct/attestation/1",
+  "about": "Conformance cases for the salted reference of a copy (specs/attestation/README.md §2.4a–§2.4b, RW-15). A copy commits to its record under a fresh salt: the issuer signs `_sd`, a list of `b64u(SHA-256(ASCII(disclosure)))`, and the holder keeps the disclosures, each `b64u(JSON([salt, name, value]))`. A reader is given a copy's `_sd` and the disclosures a holder presents, and must report: which disclosures are committed (their digest is in `_sd`) and which are not; the record hash a committed `record` disclosure opens to (64 lowercase hex characters, else nothing); and, when an artefact's hash is offered, whether the opened record names it (`opens`), null when no record was opened or no artefact was offered. Every salt and every decoy preimage is written here, so every digest is recomputable; nothing is signed and nothing here is a key. Reference implementation: @kashscript/attest/attestation's openRecordCommitment.",
+  "copies": {
+    "a": {
+      "record": "4f0c2e9a7b1d8e3f6a5c0b2d9e8f1a7c3b6d5e0f2a9c8b1d7e4f6a3c5b0d9e2f",
+      "sd": [
+        "1zksa_ei6QgYQk6CdJUBMhzmr1x6uqtjqG2xFbbob-s",
+        "PCxREXWtj4KtquLKMU4z1SFyGsfIY3gQMPrj_c9h948",
+        "WHIQ_LE-h4awDHEPrhc248E-SJbai2E6mUGVSzqs9mg",
+        "YKoTHGifuDC-IU8uv6wj0tEbg0RdcxRH5bCEKPV_xjc",
+        "gouwXzN49Wdo_febN0tU64VdQZmzwNYljsy9b7M-rhY",
+        "hcPfXuZn958Ond1J7sSPJuRixkbdDyLl1Ale85e9LMM",
+        "waNNaEizzns9exuAE-IsdKKt_TJmMQ1yVzsoxDwNcOc",
+        "yyK4oFcjyl5zc3MYY5EbV3joRMSkh3XLxETdRMiNAZQ"
+      ],
+      "preimages": {
+        "record": "WyIyR0xDNDJzS1F2ZUNmR2ZyeU5STjl3IiwicmVjb3JkIiwiNGYwYzJlOWE3YjFkOGUzZjZhNWMwYjJkOWU4ZjFhN2MzYjZkNWUwZjJhOWM4YjFkN2U0ZjZhM2M1YjBkOWUyZiJd",
+        "statement": "WyJlbHVWNU9nM2dTTklJOEVZbnN4QV9BIiwic3RhdGVtZW50IiwiRGVsaXZlcmVkIGEgYm9va2luZyB1bmRlciB0aGUgYWdyZWVtZW50IHRoaXMgcmVjb3JkIG5hbWVzLiJd",
+        "claimedAt": "WyI2SWo3dE0tYTVpVlBHYm9TNXRtdlZBIiwiY2xhaW1lZEF0IiwiMjAyNi0xMS0xNlQxMTowMDowMFoiXQ",
+        "decoys": [
+          "decoy-a-1",
+          "decoy-a-2",
+          "decoy-a-3",
+          "decoy-a-4",
+          "decoy-a-5"
+        ]
+      }
+    },
+    "b": {
+      "record": "4f0c2e9a7b1d8e3f6a5c0b2d9e8f1a7c3b6d5e0f2a9c8b1d7e4f6a3c5b0d9e2f",
+      "sd": [
+        "A992EQh2DSlYxhz1DY7wSjFggvEpjMERSedbWFuHQlI",
+        "GvPSZLF2p4x0yxroFnvciUO03EHm50iIlveBwM3xwJY",
+        "TSam5ftMRpDBZCY1m1N48W0if6SzhD3fO8ow0OTlwjA",
+        "ZNZ8ZikJKpu55AvvjZA60gKYT-LTm8zOSxnNYaOOAsA",
+        "_jbiXhJITPJYcbTNa6hMmahD80j-vLMdi89aiF_3_Eg",
+        "be5ZdpUeus6HF6O4znNFISijZv4Ju60hKtLSB0S0-dw",
+        "coosVELj2V0yZJ27cWQLD_pvgbJIOMivYgvcUm7PwPQ",
+        "k5dSeU3Ah4vlxmJ5vjaZV3qQf7-ea17-k3BCd2l481Q"
+      ],
+      "preimages": {
+        "record": "WyJlSThaV205UW5LUHBOUGVOZW5IZGhRIiwicmVjb3JkIiwiNGYwYzJlOWE3YjFkOGUzZjZhNWMwYjJkOWU4ZjFhN2MzYjZkNWUwZjJhOWM4YjFkN2U0ZjZhM2M1YjBkOWUyZiJd",
+        "statement": "WyJRZ19PNjR6cUF4ZTQxMmExMDhpcm9BIiwic3RhdGVtZW50IiwiRGVsaXZlcmVkIGEgYm9va2luZyB1bmRlciB0aGUgYWdyZWVtZW50IHRoaXMgcmVjb3JkIG5hbWVzLiJd",
+        "claimedAt": "WyJBSngtMDk1VlBycFR0TjRRTU9xUk9BIiwiY2xhaW1lZEF0IiwiMjAyNi0xMS0xNlQxMTowMDowMFoiXQ",
+        "decoys": [
+          "decoy-b-1",
+          "decoy-b-2",
+          "decoy-b-3",
+          "decoy-b-4",
+          "decoy-b-5"
+        ]
+      }
+    },
+    "c": {
+      "record": null,
+      "sd": [
+        "7S2zT14M5Gfi_dppvWXIrj4MphIgZM5dH9Gn6jqdfmI",
+        "qSkOQBh8yCNAdZOV1wmMkFhuCW3QkPM4s_S3Y5CisBQ"
+      ],
+      "preimages": {
+        "record": "WyJQYzMzSk0yTGNoY1VfbEhnZ3ZfdWZRIiwicmVjb3JkIiwibm90LWEtc2hhLTI1NiJd",
+        "decoys": [
+          "decoy-c-1"
+        ]
+      }
+    }
+  },
+  "cases": [
+    {
+      "name": "copy a: its record disclosure opens the artefact",
+      "copy": "a",
+      "disclosures": [
+        "WyIyR0xDNDJzS1F2ZUNmR2ZyeU5STjl3IiwicmVjb3JkIiwiNGYwYzJlOWE3YjFkOGUzZjZhNWMwYjJkOWU4ZjFhN2MzYjZkNWUwZjJhOWM4YjFkN2U0ZjZhM2M1YjBkOWUyZiJd"
+      ],
+      "artefactSha256": "4f0c2e9a7b1d8e3f6a5c0b2d9e8f1a7c3b6d5e0f2a9c8b1d7e4f6a3c5b0d9e2f",
+      "expect": {
+        "committed": [
+          "record"
+        ],
+        "uncommitted": [],
+        "record": "4f0c2e9a7b1d8e3f6a5c0b2d9e8f1a7c3b6d5e0f2a9c8b1d7e4f6a3c5b0d9e2f",
+        "opens": true
+      }
+    },
+    {
+      "name": "copy a: the words and the time disclosed, not the record — nothing opens",
+      "copy": "a",
+      "disclosures": [
+        "WyJlbHVWNU9nM2dTTklJOEVZbnN4QV9BIiwic3RhdGVtZW50IiwiRGVsaXZlcmVkIGEgYm9va2luZyB1bmRlciB0aGUgYWdyZWVtZW50IHRoaXMgcmVjb3JkIG5hbWVzLiJd",
+        "WyI2SWo3dE0tYTVpVlBHYm9TNXRtdlZBIiwiY2xhaW1lZEF0IiwiMjAyNi0xMS0xNlQxMTowMDowMFoiXQ"
+      ],
+      "artefactSha256": "4f0c2e9a7b1d8e3f6a5c0b2d9e8f1a7c3b6d5e0f2a9c8b1d7e4f6a3c5b0d9e2f",
+      "expect": {
+        "committed": [
+          "statement",
+          "claimedAt"
+        ],
+        "uncommitted": [],
+        "record": null,
+        "opens": null
+      }
+    },
+    {
+      "name": "copy a: copy b's record disclosure is not committed here",
+      "copy": "a",
+      "disclosures": [
+        "WyJlSThaV205UW5LUHBOUGVOZW5IZGhRIiwicmVjb3JkIiwiNGYwYzJlOWE3YjFkOGUzZjZhNWMwYjJkOWU4ZjFhN2MzYjZkNWUwZjJhOWM4YjFkN2U0ZjZhM2M1YjBkOWUyZiJd"
+      ],
+      "artefactSha256": "4f0c2e9a7b1d8e3f6a5c0b2d9e8f1a7c3b6d5e0f2a9c8b1d7e4f6a3c5b0d9e2f",
+      "expect": {
+        "committed": [],
+        "uncommitted": [
+          "record"
+        ],
+        "record": null,
+        "opens": null
+      }
+    },
+    {
+      "name": "copy a: the record names another artefact",
+      "copy": "a",
+      "disclosures": [
+        "WyIyR0xDNDJzS1F2ZUNmR2ZyeU5STjl3IiwicmVjb3JkIiwiNGYwYzJlOWE3YjFkOGUzZjZhNWMwYjJkOWU4ZjFhN2MzYjZkNWUwZjJhOWM4YjFkN2U0ZjZhM2M1YjBkOWUyZiJd"
+      ],
+      "artefactSha256": "a1c3e5f7b9d2a4c6e8f0b1d3a5c7e9f2b4d6a8c0e1f3b5d7a9c2e4f6b8d0a3c5",
+      "expect": {
+        "committed": [
+          "record"
+        ],
+        "uncommitted": [],
+        "record": "4f0c2e9a7b1d8e3f6a5c0b2d9e8f1a7c3b6d5e0f2a9c8b1d7e4f6a3c5b0d9e2f",
+        "opens": false
+      }
+    },
+    {
+      "name": "copy a: no artefact offered — the record is opened, nothing is named",
+      "copy": "a",
+      "disclosures": [
+        "WyIyR0xDNDJzS1F2ZUNmR2ZyeU5STjl3IiwicmVjb3JkIiwiNGYwYzJlOWE3YjFkOGUzZjZhNWMwYjJkOWU4ZjFhN2MzYjZkNWUwZjJhOWM4YjFkN2U0ZjZhM2M1YjBkOWUyZiJd"
+      ],
+      "expect": {
+        "committed": [
+          "record"
+        ],
+        "uncommitted": [],
+        "record": "4f0c2e9a7b1d8e3f6a5c0b2d9e8f1a7c3b6d5e0f2a9c8b1d7e4f6a3c5b0d9e2f",
+        "opens": null
+      }
+    },
+    {
+      "name": "copy a: every disclosure at once",
+      "copy": "a",
+      "disclosures": [
+        "WyJlbHVWNU9nM2dTTklJOEVZbnN4QV9BIiwic3RhdGVtZW50IiwiRGVsaXZlcmVkIGEgYm9va2luZyB1bmRlciB0aGUgYWdyZWVtZW50IHRoaXMgcmVjb3JkIG5hbWVzLiJd",
+        "WyIyR0xDNDJzS1F2ZUNmR2ZyeU5STjl3IiwicmVjb3JkIiwiNGYwYzJlOWE3YjFkOGUzZjZhNWMwYjJkOWU4ZjFhN2MzYjZkNWUwZjJhOWM4YjFkN2U0ZjZhM2M1YjBkOWUyZiJd",
+        "WyI2SWo3dE0tYTVpVlBHYm9TNXRtdlZBIiwiY2xhaW1lZEF0IiwiMjAyNi0xMS0xNlQxMTowMDowMFoiXQ"
+      ],
+      "artefactSha256": "4f0c2e9a7b1d8e3f6a5c0b2d9e8f1a7c3b6d5e0f2a9c8b1d7e4f6a3c5b0d9e2f",
+      "expect": {
+        "committed": [
+          "statement",
+          "record",
+          "claimedAt"
+        ],
+        "uncommitted": [],
+        "record": "4f0c2e9a7b1d8e3f6a5c0b2d9e8f1a7c3b6d5e0f2a9c8b1d7e4f6a3c5b0d9e2f",
+        "opens": true
+      }
+    },
+    {
+      "name": "copy b: its record disclosure opens the same artefact",
+      "copy": "b",
+      "disclosures": [
+        "WyJlSThaV205UW5LUHBOUGVOZW5IZGhRIiwicmVjb3JkIiwiNGYwYzJlOWE3YjFkOGUzZjZhNWMwYjJkOWU4ZjFhN2MzYjZkNWUwZjJhOWM4YjFkN2U0ZjZhM2M1YjBkOWUyZiJd"
+      ],
+      "artefactSha256": "4f0c2e9a7b1d8e3f6a5c0b2d9e8f1a7c3b6d5e0f2a9c8b1d7e4f6a3c5b0d9e2f",
+      "expect": {
+        "committed": [
+          "record"
+        ],
+        "uncommitted": [],
+        "record": "4f0c2e9a7b1d8e3f6a5c0b2d9e8f1a7c3b6d5e0f2a9c8b1d7e4f6a3c5b0d9e2f",
+        "opens": true
+      }
+    },
+    {
+      "name": "copy b: a disclosure that does not decode is not committed",
+      "copy": "b",
+      "disclosures": [
+        "not*base64url*at*all"
+      ],
+      "artefactSha256": "4f0c2e9a7b1d8e3f6a5c0b2d9e8f1a7c3b6d5e0f2a9c8b1d7e4f6a3c5b0d9e2f",
+      "expect": {
+        "committed": [],
+        "uncommitted": [
+          "(unreadable)"
+        ],
+        "record": null,
+        "opens": null
+      }
+    },
+    {
+      "name": "copy c: a committed record that is not a SHA-256 hex opens nothing",
+      "copy": "c",
+      "disclosures": [
+        "WyJQYzMzSk0yTGNoY1VfbEhnZ3ZfdWZRIiwicmVjb3JkIiwibm90LWEtc2hhLTI1NiJd"
+      ],
+      "artefactSha256": "4f0c2e9a7b1d8e3f6a5c0b2d9e8f1a7c3b6d5e0f2a9c8b1d7e4f6a3c5b0d9e2f",
+      "expect": {
+        "committed": [
+          "record"
+        ],
+        "uncommitted": [],
+        "record": null,
+        "opens": null
+      }
+    }
+  ],
+  "pairs": [
+    {
+      "name": "two copies of one record share no digest, and each opens the artefact",
+      "a": "a",
+      "b": "b"
+    }
+  ]
+}

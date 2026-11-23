@@ -234,8 +234,11 @@ export async function verifyAttestationRecord(record: DsseEnvelope, opts: Record
 
 /** What one copy adds: the verifier's relationship key and the day it is issued. */
 export interface CopyInput {
-  /** The holder's key for this verifier alone (d62(d)3) — the copy's `cnf`. */
-  readonly holderKey: VerifyKey;
+  /**
+   * The holder's key for this verifier alone (d62(d)3) — the copy's `cnf`. Absent on a page copy (RW-15, §2.4b),
+   * which carries no key and so can never be presented at a door: it is only ever shown.
+   */
+  readonly holderKey?: VerifyKey;
   readonly iatUnix: number;
   /**
    * Not recommended (§2.4, §3 G1): a status bit on a copy can be set only by an issuer that keeps which index
@@ -292,14 +295,9 @@ export async function copyClaimsOf(record: DsseEnvelope, copy: CopyInput, opts: 
   if (body.grade !== undefined) head.grade = body.grade;
   if (body.practice === true) head.practice = true;
   const pub = isPublicReference(body.reference.kind);
-  const claims: Record<string, unknown> = {
-    iss: body.issuer,
-    iat,
-    exp,
-    vct: ATTESTATION_VCT,
-    cnf: { jwk: jwkOf(copy.holderKey) },
-    attestation: head,
-  };
+  const claims: Record<string, unknown> = { iss: body.issuer, iat, exp, vct: ATTESTATION_VCT };
+  if (copy.holderKey !== undefined) claims.cnf = { jwk: jwkOf(copy.holderKey) };
+  claims.attestation = head;
   if (pub) claims.reference = body.reference;
   if (copy.credentialStatus !== undefined) claims.credentialStatus = copy.credentialStatus;
   const sd: Record<string, unknown> = {};

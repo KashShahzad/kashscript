@@ -59,6 +59,7 @@ import {
   type TrustListReport,
 } from "../holder";
 import { isSdJwt, verifySdJwt, type SdJwtReport } from "../sd-jwt";
+import { ATTESTATION_VCT, NOT_DISCLOSED, shownOnPage, viewOfCopy, type PageView } from "../attestation";
 import { COHORT_PROFILE, isCohortRecord, verifyCohortRecord, type CohortRecordReport } from "../profiles";
 import {
   ASK_FORMAT,
@@ -96,6 +97,7 @@ import {
   plainTamper,
   plainThankYou,
   plainTrustList,
+  plainAttestationCopy,
   type PlainLayer,
 } from "./plain";
 
@@ -105,7 +107,7 @@ Usage:
   attest verify <file> [--key <hex|host-key.txt|jwks.json>] [--signer-did <did>] [--offline]
                        [--trust-publisher <did>]... [--check-status]
                        [--audience <id>] [--nonce <n>] [--at <unix>] [--max-age <s>]
-                       [--status-list <file>]...
+                       [--status-list <file>]... [--artifact <file>]
                        [--header <file>]... [--tsa-root <pem>] [--max-batch-delay <s>]
   attest log verify <dir> [--mirror <dir>] [--header <file>]... [--tsa-root <pem>]
 
@@ -113,6 +115,12 @@ A presentation is made to one verifier: check it with --audience and --nonce,
 the identifier you are and the nonce you sent. Its binding must be no further
 than --max-age seconds (default 600) from now, or from --at, the time you
 received it, for a file you check later.
+
+An attestation copy (a receipt's copy: held, presented, or a page's) prints its
+class and what its holder disclosed. --artifact hands in the record it is a copy
+of — the countersigned record, or the attestation record of truth. The artefact
+is shown only when the copy discloses its record and that record names the
+file: the page's rule (RW-15). Without the disclosure it is simply not shown.
 
 The trust log (KS-Q4): a checkpoint, an inclusion proof and a consistency
 proof are auto-detected. --header hands in a Bitcoin block header for an
@@ -133,6 +141,8 @@ Auto-detected, verified offline:
   - Status list         (an issuer's revocation bitstring)
   - SD-JWT              (a predicate or thank-you, held or presented; check a
                          presentation against the --audience and --nonce you sent)
+  - Attestation copy    (a receipt's copy; with --artifact, whether the disclosed
+                         record names the file — shown to the holder of the disclosure)
   - Session receipt     (both parties' signatures on every line; pending or complete)
   - Ask                 (the eight rules and the forbidden needs)
   - Log checkpoint      (the trust log's signed head)
@@ -199,6 +209,8 @@ interface Args {
   readonly at?: number;
   /** A presentation's binding window, seconds. */
   readonly maxAge?: number;
+  /** The record an attestation copy is a copy of — shown only to the holder of its disclosure (RW-15). */
+  readonly artifact?: string;
   readonly headerFiles: readonly string[];
   readonly tsaRoot?: string;
   readonly maxBatchDelay?: number;
@@ -228,6 +240,7 @@ function parseArgs(argv: readonly string[]): Args {
   let tsaRoot: string | undefined;
   let maxBatchDelay: number | undefined;
   let mirror: string | undefined;
+  let artifact: string | undefined;
   const trustPublishers: string[] = [];
   const statusListFiles: string[] = [];
   const headerFiles: string[] = [];
@@ -252,6 +265,7 @@ function parseArgs(argv: readonly string[]): Args {
     else if (a === "--tsa-root") tsaRoot = need(a, argv[++i]);
     else if (a === "--max-batch-delay") maxBatchDelay = seconds(a, argv[++i]);
     else if (a === "--mirror") mirror = need(a, argv[++i]);
+    else if (a === "--artifact") artifact = need(a, argv[++i]);
     else if (a === "--offline") continue; // verify never touches the network unless --check-status asks
     else die(2, `unknown argument: ${a}\n\n${USAGE}`);
   }
@@ -264,6 +278,7 @@ function parseArgs(argv: readonly string[]): Args {
     ...(nonce !== undefined ? { nonce } : {}),
     ...(at !== undefined ? { at } : {}),
     ...(maxAge !== undefined ? { maxAge } : {}),
+    ...(artifact !== undefined ? { artifact } : {}),
     ...(tsaRoot !== undefined ? { tsaRoot } : {}),
     ...(maxBatchDelay !== undefined ? { maxBatchDelay } : {}),
     ...(mirror !== undefined ? { mirror } : {}),
@@ -484,6 +499,29 @@ function printThankYou(r: ThankYouReport, presented: boolean): void {
   for (const n of r.notes) out(`  note               : ${n}`);
   printPlain(plainThankYou(r, presented), r.ok);
   out(`RESULT: ${r.ok ? "PASS" : "FAIL"}`);
+}
+
+/** An attestation copy: its class, what the holder disclosed, and — with --artifact — the page's rule applied (RW-15). */
+function printAttestationCopy(r: SdJwtReport, page: PageView | null, ok: boolean): void {
+  out(`Attestation copy (${r.vct ?? "unknown type"})`);
+  out(`  issuer             : ${r.issuer ?? "unknown"}${r.issuerKeySource ? ` via ${r.issuerKeySource}` : ""}`);
+  printKeyBinding(r);
+  if (r.claims !== null) {
+    const v = viewOfCopy(r.claims);
+    out(`  attests            : ${v.kind} — ${v.outcome}${v.profile !== undefined ? `, ${v.profile}` : ""}${v.grade !== undefined ? `, grade ${v.grade}` : ""}${v.practice === true ? " (practice)" : ""}`);
+    out(`  issued             : ${typeof r.claims.iat === "number" ? iso(r.claims.iat) : "unknown"} — the copy's own day, not the record's`);
+    out(`  expires            : ${v.expiresAt}`);
+    const disclosed = r.disclosed.map((d) => String(d.path[0]));
+    out(`  disclosed          : ${disclosed.length === 0 ? "nothing beyond the class" : [...new Set(disclosed)].join(", ")}`);
+    out(`  record             : ${v.record !== undefined ? `${v.record.slice(0, 12)}… (disclosed by the holder)` : "not disclosed"}`);
+  }
+  if (page !== null) {
+    out(`  artefact           : ${page.shown !== null ? page.why : page.view?.record === undefined ? `not shown — ${NOT_DISCLOSED}` : `DOES NOT MATCH — ${page.why}`}`);
+  }
+  if (r.reason !== null) out(`  reason             : ${r.reason}`);
+  for (const n of r.notes) out(`  note               : ${n}`);
+  printPlain(plainAttestationCopy(r, page), ok);
+  out(`RESULT: ${ok ? "PASS" : "FAIL"}`);
 }
 
 function printSdJwt(r: SdJwtReport): void {
@@ -713,6 +751,28 @@ async function main(): Promise<void> {
         : await verifyThankYou(trimmed, { resolveKey, statusLists, ...asOf });
       printThankYou(report, presented);
       process.exit(report.ok ? 0 : 1);
+    }
+    // An attestation copy (RW-14, RW-15): held, presented, or a page's. With --artifact, the page's rule: the
+    // artefact is shown only when the copy discloses its record and that record names the file.
+    if (first.vct === ATTESTATION_VCT) {
+      const report = presented
+        ? await verifySdJwt(trimmed, { resolveKey, requireKeyBinding: true, audience: args.audience!, nonce: args.nonce!, ...when })
+        : await verifySdJwt(trimmed, { resolveKey, requireKeyBinding: false, ...asOf });
+      let page: PageView | null = null;
+      if (args.artifact !== undefined) {
+        let artefact: unknown;
+        try {
+          artefact = JSON.parse(readFileSync(args.artifact, "utf8"));
+        } catch (e) {
+          die(2, `cannot read --artifact ${args.artifact}: ${(e as Error).message}`);
+        }
+        page = await shownOnPage(trimmed, [artefact], { resolveKey, ...asOf });
+      }
+      // A disclosed record that names no artefact handed in is a failure; a record not disclosed is simply not shown.
+      const mismatch = page !== null && page.view !== null && page.view.record !== undefined && page.shown === null;
+      const ok = report.ok && !mismatch;
+      printAttestationCopy(report, page, ok);
+      process.exit(ok ? 0 : 1);
     }
     const report = presented
       ? await verifySdJwt(trimmed, { resolveKey, requireKeyBinding: true, audience: args.audience!, nonce: args.nonce!, ...when })

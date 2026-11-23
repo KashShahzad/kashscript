@@ -1,0 +1,33 @@
+{
+  "note": "SAMPLE parties, practice only. Public identifiers; no key material.",
+  "issuer": "did:kash:AtrTABbNuKeqXbyBbGuKkVbwNg5r3XViwgvNMDr5EzuS",
+  "counterparty": "did:kash:Cex96uQBC66jUCU7LbWaucdHLaarC5YDypeZYfC3gDtE",
+  "record": "454368bf0038158a13686568175202ad93abd6785294001651dba14ec1976827",
+  "profile": "booking.delivered/1",
+  "grade": 1,
+  "presentations": {
+    "a": {
+      "audience": "https://review-door.example/verifier",
+      "nonce": "sample-nonce-review-door",
+      "iatUnix": 1795426200,
+      "disclosed": [],
+      "copyKey": "did:kash:ATkj1fzwmvMFkAxsyqoXC4HQ6oMtuFqbxSC98F4JgWLG"
+    },
+    "b": {
+      "audience": "https://loyalty-desk.example/verifier",
+      "nonce": "sample-nonce-loyalty-desk",
+      "iatUnix": 1795443120,
+      "disclosed": [],
+      "copyKey": "did:kash:GMWr7McvqSevihHiQ2gTDXJ1GsPPFUuDLrrW7QhMeeQu"
+    }
+  },
+  "page": {
+    "disclosed": [
+      "record",
+      "statement",
+      "claimedAt"
+    ],
+    "holderKey": "none — a page copy cannot be presented"
+  },
+  "checkAt": 1795443180
+}

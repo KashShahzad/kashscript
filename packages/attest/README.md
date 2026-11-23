@@ -46,7 +46,8 @@ code that seeds it (Oreoasis, Duedale, Indusland), never invented.
 - **`attestation`** — d91(a)'s one record type and its mandate ([`specs/attestation/README.md`](../../specs/attestation/README.md)):
   `kash.attestation@1.0.0` and `kash.mandate@1.0.0` as closed shapes, the rules a shape cannot write
   (`checkAttestation`, `checkMandate`, each fault naming its decision), the stranger's offline check of a record of truth
-  (`verifyAttestationRecord`, with the mandates it cites presented beside it), and the copy's and the projection's mappings — `copyClaimsOf`, which copies only a record that checks, and `projectVc`. Pure;
+  (`verifyAttestationRecord`, with the mandates it cites presented beside it), and the copy's and the projection's mappings — `copyClaimsOf`, which copies only a record that checks, and `projectVc`.
+  **RW-15:** the records already in use get the same copy — `copyClaimsOfCountersigned` reads a countersign bundle as *receipt · accepted*, its artefact reference (the digest the acceptance bound) behind its own fresh salt, issued only by a party to the record — so two verifiers' copies share nothing to join on; `openRecordCommitment` and `recordHashOf` open the commitment; `shownOnPage` is the page's rule (the artefact only to the holder of the disclosure) and `pageOf` / `openPage` seal the artefact under the `record` disclosure (JWE `dir`/A256GCM, HKDF). A copy without a holder key is a page copy, which nobody can present. Pure;
   the one subpath that reads `@kashscript/lexicons`, so the root export stays as light as it was.
 - **`compat`** — verify shipped venture formats: the Duedale Every-Rupee report, Indus tokens, and the
   presented revocation of a Tehzeeb mark.

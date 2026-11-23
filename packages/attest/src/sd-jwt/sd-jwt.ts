@@ -59,6 +59,8 @@ export interface IssueSdJwtInput {
   readonly sdArrays?: Readonly<Record<string, readonly unknown[]>>;
   /** Decoy digests added to `_sd` and to each selectively-disclosable array, so counts do not show. */
   readonly decoys?: number;
+  /** Decoys for `_sd` alone, when it should differ from the arrays' (RW-15: a credential whose only hidden claims are array elements keeps a constant `_sd`). Default `decoys`. */
+  readonly sdDecoys?: number;
   readonly signer: JwsSigner;
 }
 
@@ -68,6 +70,7 @@ export async function issueSdJwt(input: IssueSdJwtInput): Promise<string> {
   const disclosures: string[] = [];
   const sd: string[] = [];
   const decoys = input.decoys ?? 0;
+  const sdDecoys = input.sdDecoys ?? decoys;
 
   for (const [name, value] of Object.entries(input.sdProperties ?? {})) {
     if (name in payload || name === "_sd" || name === "...") throw new Error(`claim ${name} is already visible`);
@@ -91,9 +94,9 @@ export async function issueSdJwt(input: IssueSdJwtInput): Promise<string> {
     }
     payload[name] = placeholders;
   }
-  for (let i = 0; i < decoys; i++) sd.push(await digestOf(randomB64u(32)));
+  for (let i = 0; i < sdDecoys; i++) sd.push(await digestOf(randomB64u(32)));
   if (sd.length > 0) payload._sd = [...sd].sort();
-  if (disclosures.length > 0 || decoys > 0) payload._sd_alg = SD_ALG;
+  if (disclosures.length > 0 || decoys > 0 || sdDecoys > 0) payload._sd_alg = SD_ALG;
 
   const jwt = await signJws({ ...(input.header ?? {}), typ: SD_JWT_TYP }, payload, input.signer);
   return `${jwt}~${disclosures.map((d) => `${d}~`).join("")}`;
@@ -545,6 +548,77 @@ export async function linkabilityBetween(a: string, b: string): Promise<readonly
   const va = await vals(pa);
   if ([...(await vals(pb))].some((v) => va.has(v))) {
     out.push({ kind: "disclosed-value", note: "the holder disclosed the same value to both (for example a record hash) — their choice, and it links them" });
+  }
+  return out;
+}
+
+/** One value two SD-JWTs share, and where it sits in each: `issuer.payload.iss`, `disclosure[2].salt`, `kb.payload.aud`. */
+export interface SharedValue {
+  readonly value: string;
+  readonly inA: readonly string[];
+  readonly inB: readonly string[];
+}
+
+async function valuesOf(sdJwt: string): Promise<Map<string, string[]>> {
+  const out = new Map<string, string[]>();
+  const add = (value: string, path: string): void => {
+    const l = out.get(value);
+    if (l === undefined) out.set(value, [path]);
+    else l.push(path);
+  };
+  const walk = (v: unknown, path: string): void => {
+    if (typeof v === "string") add(v, path);
+    else if (typeof v === "number" || typeof v === "boolean") add(String(v), path);
+    else if (Array.isArray(v)) v.forEach((x, i) => walk(x, `${path}[${i}]`));
+    else if (isPlainObject(v)) for (const [k, x] of Object.entries(v)) walk(x, `${path}.${k}`);
+  };
+  const p = parseSdJwt(sdJwt);
+  if (p === null) {
+    add(sdJwt, "unparsed");
+    return out;
+  }
+  const jwt = decodeJws(p.issuerJwt);
+  if (jwt === null) add(p.issuerJwt, "issuer");
+  else {
+    walk(jwt.header, "issuer.header");
+    walk(jwt.payload, "issuer.payload");
+    add(jwt.signatureB64u, "issuer.signature");
+  }
+  for (const [i, d] of p.disclosures.entries()) {
+    const dd = await decodeDisclosure(d);
+    if (dd === null) {
+      add(d, `disclosure[${i}]`);
+      continue;
+    }
+    add(dd.salt, `disclosure[${i}].salt`);
+    if (dd.name !== null) add(dd.name, `disclosure[${i}].name`);
+    walk(dd.value, `disclosure[${i}].value`);
+  }
+  if (p.kbJwt !== null) {
+    const kb = decodeJws(p.kbJwt);
+    if (kb === null) add(p.kbJwt, "kb");
+    else {
+      walk(kb.header, "kb.header");
+      walk(kb.payload, "kb.payload");
+      add(kb.signatureB64u, "kb.signature");
+    }
+  }
+  return out;
+}
+
+/**
+ * Every string two SD-JWTs share, wherever it sits — headers, payload values, every digest, each disclosure's
+ * salt, name and value, the key binding. The dumb diagnostic beside {@link linkabilityBetween}, which knows
+ * what a correlator is: this knows nothing, and a caller subtracts the class — what every copy of a kind
+ * shows by construction (RW-15; `specs/attestation/README.md` §3 G1). Numbers and booleans are compared as
+ * their decimal and `true`/`false` spellings. Sorted by value.
+ */
+export async function sharedValues(a: string, b: string): Promise<readonly SharedValue[]> {
+  const [va, vb] = await Promise.all([valuesOf(a), valuesOf(b)]);
+  const out: SharedValue[] = [];
+  for (const [value, inA] of [...va.entries()].sort(([x], [y]) => (x < y ? -1 : x > y ? 1 : 0))) {
+    const inB = vb.get(value);
+    if (inB !== undefined) out.push({ value, inA, inB });
   }
   return out;
 }

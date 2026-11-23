@@ -1,15 +1,17 @@
 # The attestation — six types, one profile, and what it keeps private
 
-**`specs/attestation/README.md` — v1 · 2026-11-19 · RW-14 · `kash.attestation@1.0.0` and `kash.mandate@1.0.0` (`@kashscript/attest/attestation`), `kash.decision@1.2.0` (`@kashscript/predicate/decision`) — Apache-2.0.**
+**`specs/attestation/README.md` — v1.2 · 2026-11-23 · RW-14, RW-15 · `kash.attestation@1.0.0` and `kash.mandate@1.0.0` (`@kashscript/attest/attestation`), `kash.decision@1.2.0` (`@kashscript/predicate/decision`); the copies of the records already in use, and the page (`@kashscript/attest/attestation`, §2.4a–§2.4b) — Apache-2.0.**
 Decisions: ECOSYSTEM d26, d27, d28, d41, d43, d49, d59, d62(d), d84 (P3, P4), d85(f), d88, d91(a)–(f), d93(e), d97(h)–(i) · companions: [holder contract](../holder-contract.md) · [presentation](../presentation.md) · [countersign](../countersign.md) · [rule](../rule.md) · [decision](../decision.md) · [adoption](../adoption.md) · [public records](../public-records.md) · [trust log](../trust-log.md) · schemas: [`attestation`](../schemas/attestation.schema.json) · [`mandate`](../schemas/mandate.schema.json) · [`attestation-vc`](../schemas/attestation-vc.schema.json) · [`decision`](../schemas/decision.schema.json) · decision record: [ADR-0031](../../docs/adr/0031-the-attestation-profile.md).
 
 > **Reviewed on Opus 5.5; re-read when Fable is available.** RW-14 is tagged for the deeper model because it touches the record model. It ran on Opus 5.5, so, as its block requires, each part was followed by a fresh-session adversarial review against d41, d43, d62(d) and d91. Part one's review found two critical and six high problems; part two's, one critical (the copies' `_sd` length and dates joined them) and five high. Each is fixed below, or named as open in §4 (marked †).
 >
-> **What exists, and what does not.** The two new shapes, their rules, the stranger's check of a record of truth (`verifyAttestationRecord`), the copy's and the projection's mappings, the registry rows, `kash.decision@1.2.0`, node rule 10 for the new type, the worked examples and the conformance cases are built in source with tests (attest `0.3.0-alpha.1`, predicate `0.3.0-alpha.4`) and **not published** — the founder publishes under `alpha`. No engine issues this record yet: Oreoasis still issues its work record and countersign bundle, which §1.9 maps. No ceremony produces it (§2.3), no chain of mandates is checked, and no proof page shows it. Nothing here has run with a person.
+> **What exists, and what does not.** The two new shapes, their rules, the stranger's check of a record of truth (`verifyAttestationRecord`), the copy's and the projection's mappings, the registry rows, `kash.decision@1.2.0`, node rule 10 for the new type, the worked examples and the conformance cases are built in source with tests (attest `0.3.0-alpha.1`, predicate `0.3.0-alpha.4`) and **not published** — the founder publishes under `alpha`. No engine issues this record yet: the engine — Duedale since d99, Oreoasis when this was first written — still issues its work record and countersign bundle, which §1.9 maps — **and, since RW-15 (2026-11-23), those records have the same copy** (§2.4a, `copyClaimsOfCountersigned`), the checker opens its salted reference (`openRecordCommitment`, `attest verify --artifact`), and the page's rule and its seal exist in the kernel (§2.4b: `shownOnPage`, `pageOf`, `openPage`), built with tests (attest `0.3.0-alpha.2`, predicate `0.3.0-alpha.5`) and **not published**. No ceremony produces the new record (§2.3), no chain of mandates is checked, and no engine serves a page on §2.4b yet. Nothing here has run with a person.
 >
 > **Two places this reads a decision differently — ruled by the founder on 2026-11-20** (ECOSYSTEM d91's dated note, which also confirms the rulings marked so below):
 > - **d93(e)1** names `whiffin` as the host's mandate to the app. **Ruled:** it is read as `kash.mandate`, and whiffin keeps value mandates (§1.4).
 > - **d91(e)** calls attest's envelope *an internal convenience*. **Ruled:** the DSSE envelope stays the record of truth — the one form that carries the two signatures d41 requires (§2.3) — until a standard form carries two signatures. The standard forms are the copy and the projection.
+>
+> **Names (ECOSYSTEM d99, 2026-11-20).** The receipts engine — books, receipts, proof pages, the desk — is **Duedale** since d99, and Oreoasis is the operations system, with no repository yet. Where text here written before 2026-11-20 says *Oreoasis* for the engine, read *Duedale* (its code is `Duedale 2.0`). Identifiers inside signed records keep their names: `application/vnd.oreoasis.work-record+json`, `oreoasis-milestone/2` and the rest (d99).
 
 ## 0. What this is
 
@@ -72,7 +74,7 @@ It is written so that **a stranger can implement it**: Duedale must accept a rec
 - `kind` is one of `agreement · purpose · artefact · attestation · rule · standard`.
 - `sha256` is the SHA-256 of the bytes the reference's own signer signed, or, for something unsigned, of its RFC 8785 canonical form. One algorithm, named in the field (Oreoasis's keccak reference is mapped in §1.9; digest agility is §4).
 - **Public kinds** (`rule`, `standard`) carry their library `id` and `version` and are visible in every form: everyone answering to the same rule shares them, so showing one links nobody. The `id` is read for a person's contact like a statement (§2.2).
-- **Private kinds** carry their hash, and their version when they have one — **never a book's own id**, which would be a second string to join on and a key to look up by (d41) — and are **always selectively disclosable** in a copy. That disclosure is the per-copy salted commitment §3 needs: each copy commits to the reference under its own fresh salt, and only the holder can open it (§2.4).
+- **Private kinds** carry their hash, and their version when they have one — **never a book's own id**, which would be a second string to join on and a key to look up by (d41) — and are **always selectively disclosable** in a copy. That disclosure is the per-copy salted commitment §3 needs: each copy commits to the reference under its own fresh salt, and only the holder can open it (§2.4). **RW-15 gives the records already in use the same commitment (§2.4a):** a countersigned record's copy commits to its subject's digest — the reference its acceptance bound — under a salt fresh in every copy.
 
 ### 1.3 Attestation
 
@@ -165,6 +167,8 @@ Nothing already signed is re-signed or re-wrapped ([holder contract](../holder-c
 | predicate credential (`vct …/predicate/1`) | the establishment | assurance · accepted | the rule `{id, version, hash}` | the issuer's on each copy |
 | decision (`vct …/decision/1`) | the deciding organisation | decision | the rule, the adoption | the organisation's on the copy; a seat's over the body |
 | booking mandate (an RFC 9068 token) | the Org | — a mandate no record carries | scopes | the Org's |
+
+**Since RW-15, the countersigned records in this table have a copy** — the attestation's second form, read as *receipt · accepted* (§2.4a). The booking mandate has none: it is not a record.
 
 ## 2. The profile — one record, three forms
 
@@ -270,7 +274,7 @@ An **SD-JWT VC** (`typ: dc+sd-jwt`), **`vct https://kashscript.com/vct/attestati
 | `iat` | visible — **the day the copy is issued** | so two copies issued apart share no second |
 | `exp` | visible — **the copy's own**: `iat` plus its lifetime (90 days, `COPY_LIFETIME_DAYS`, the same for every copy of a kind) | so no copy carries anything of its record's dates, which for a small issuer would join every copy of one record. A record that ends before a copy's lifetime would gets no copy: a shorter one would carry the record's end |
 | `_sd` | visible — **always eight digests**, real or decoy | so its length says nothing about which claims a record carries |
-| `cnf.jwk` | visible | this copy's key, for this verifier only |
+| `cnf.jwk` | visible | this copy's key, for this verifier only — absent on a page copy, which nobody can present (§2.4a) |
 | `credentialStatus` | **none, by recommendation** | a bit on a copy can be set only by an issuer that keeps which index belongs to which record — copy material §3 asks it not to keep — and a verifier fetching the list tells the issuer who checked, and when. Never the record's own entry, which every copy would share |
 | `attestation` | visible | `{kind, outcome, profile?, grade?, practice?}` |
 | `reference` | visible if **public** | a rule or standard everyone answering to it shares |
@@ -279,6 +283,34 @@ An **SD-JWT VC** (`typ: dc+sd-jwt`), **`vct https://kashscript.com/vct/attestati
 | `counterparty`, `counterpartyMandate` | **never** | `cnf` stands in their place |
 
 **What disclosing costs:** any value disclosed to two verifiers links the two presentations — the record id above all — which is the holder's choice ([presentation.md](../presentation.md) §4). Against the issuer's database, one disclosed value is enough to name the record. **What a copy without status costs:** a copy of a record that is later superseded or withdrawn stays readable until it ends — at most 90 days. A verifier that needs current status asks for the record of truth, and links (§3 G1, §4).
+
+### 2.4a The copies of the records already in use (RW-15)
+
+The engines' countersigned records (§1.9) — a work record under Client Sign-off, a `booking.delivered/1`, a chain consent — get the same copy, under the same `vct`, so a door written for one reads the other (d59(e): no new tag). `copyClaimsOfCountersigned(bundle, {issuer, holderKey?, iatUnix, profile?, grade?, practice?})` returns `copyClaimsOf`'s `CopyClaims` for attest's `issueSdJwt`.
+
+| | |
+|---|---|
+| **made only from a record that checks** | the bundle's two-signature proof (`verifyCountersignBundle`), or no copy — a one-signature claim is never copied as accepted; a withdrawn request, a stopped record (d43 §4.6: a halt is never shown for or against anyone) and a record that ends before the copy's lifetime get none |
+| **issued by a party to the record, never the counterparty** | a verified subject signer that is not an independent countersigner, or the requester whose signature checks (an organisation asks on its doer's record); the counterparty's key issuing a copy would put the other side's identifier in `iss` (d41) |
+| **the class** | `iss` · the copy's own `iat` day and `exp` (90 days) · `vct` · `cnf` when there is a holder key · `attestation: {kind: "receipt", outcome: "accepted", profile?, grade?, practice?}` — the profile from the issuer or the record's `meta.profile`, the grade as the issuer states it (the kernel bundle carries the key's custody, not a grade), practice from the record or the issuer; grade 0 is practice only |
+| **selectively disclosable, each under its own fresh salt** | **`record` — the artefact reference: the SHA-256 of the subject's payload bytes, the very `subjectDigestSha256` the acceptance bound;** `reference` as `{kind: "agreement", sha256}` when the record's `meta.reference` is a SHA-256 (the engine's keccak reference cannot be carried, §4.5); `statement` — the record's own `action.summary`, else the request's statement, when plain (§2.2's rule); `claimedAt` — the earliest verifying acceptance's own time. `_sd` padded to eight |
+| **never in a copy** | the counterparty, its key, its custody, its acceptance; the record's own dates |
+
+**A page copy has no key.** `holderKey` is optional on both copies; a copy without `cnf` can never be presented at a door — there is no key to bind a nonce to — so it is only ever shown (§2.4b). **What a copy of an old record is worth** is what §2.4 says of every copy: the issuer's word. A host's copy of a delivered booking is what a review door relies on; an agency's copy of its own sign-off is self-attestation, and a door that needs the client's acceptance reads the record of truth through `kash-artifact` and accepts that it links (§4.23).
+
+**The checker opens the commitment.** `recordHashOf(artefact)` names a bundle by its subject's payload and an envelope by its payload. `openRecordCommitment({sd, disclosures, artefactSha256?})` is the arithmetic: a disclosure's digest — `b64u(SHA-256(ASCII(disclosure)))`, SD-JWT's own rule — is in the copy's `_sd` or it is not this copy's; a committed `record` opens to its hash; the hash names the artefact or it does not. `attest verify <copy> [--artifact <file>]` prints a copy's class and what its holder disclosed, and with the artefact applies the page's rule. The conformance file is §2.8's `attestation-copy@1`.
+
+**Two verifiers' copies share nothing to join on.** `sharedValues(a, b)` (`@kashscript/attest/sd-jwt`) lists every string two presentations share — headers, payload values, digests, salts, the key binding — with its path; read with the class, the list for two copies of one record presented to two verifiers is the class and nothing else (§3 G1's test). The old forms keep verifying: a `kash-artifact` packet, a raw bundle, the predicate and decision copies are read as before. **A rule that reads a record's own dates reads the old form** (§4.41).
+
+### 2.4b The page — the artefact only to the holder of the disclosure (RW-15)
+
+A proof page is a copy shown to one viewer, and §3 G1 says what a page must not do: show anything behind a disclosure to anyone but its holder. The kernel's page profile:
+
+- **The host stores two things:** the copy's issuer JWT alone, `<jwt>~` — the commitments, and nothing that joins — and **the artefact sealed under the `record` disclosure**: a JWE in compact serialization (RFC 7516), `alg: dir`, `enc: A256GCM` (RFC 7518), its key HKDF-SHA-256 (RFC 5869) over the disclosure's bytes with the info `kash-page-artefact-v1`, a random 96-bit IV, the protected header as the additional data (`pageOf`, `sealArtefact`). The disclosure's salt is 128 random bits.
+- **The link's fragment carries the disclosures,** which never reach the host. The viewer's browser puts them back on the copy (`viewerCopyOf`), opens the seal with the `record` disclosure (`openArtefact`) and applies the rule (`shownOnPage`): the copy checks as held; with no `record` disclosed nothing is shown; with one, the one artefact whose hash the record names, whose issuer side is the copy's issuer, and which itself checks — the bundle's two-signature proof, or the attestation record of truth. The bare subject of a bundle is refused: one signature is a request, not a record (d41). `openPage` does the three steps.
+- **So the host serves the same bytes to anyone, and learns from a view which record it opened from nothing;** a leaked store holds commitments and ciphertext; two pages of one record share nothing beyond the class, and their seals differ. The record of truth, once opened, is shown whole — with the counterparty's key — because that is the proof (d41); it is the viewer the page was made for who sees it.
+
+**What this does not do.** The host still maps a token to a page and sees that a page was opened, and when; the issuer's own bookkeeping may still name the records a page shows; a leaked link is a holder. A record another organisation issued — a house's hop on an agency's page — is copied only by that issuer, so the agency asks the house for a copy per page, as a holder asks at handoff. Moving the engine's page onto this profile is the engine's own run (Duedale, `Duedale 2.0`), on the re-pinned kernel (§4.24).
 
 ### 2.5 Form 3 — the W3C VC 2.0 projection
 
@@ -303,7 +335,7 @@ The decision keeps its record and its copy (§1.6): the body, signed by a seat w
 
 ### 2.7 The worked examples — `examples/`
 
-Generated once (`packages/attest/scripts/attestation-examples.ts`, `packages/predicate/scripts/decision-example.ts`) and **never regenerated** — with one recorded exception: the attestation examples were regenerated on 2026-11-19, inside RW-14 and before anything was exported, when part two's review found the first copies' `_sd` length and dates could join them (§3 G1). Keys were made fresh and thrown away: the files hold public identifiers and signed bytes, no key material. Every party is SAMPLE and every record `practice: true`. Each record's folder holds `body.json`, `record.dsse.json` and `context.json`; a record shown in all three forms adds `copy.sd-jwt.txt` (every disclosure), `presentation.sd-jwt.txt` (to a SAMPLE verifier, disclosing what `context.json` lists) and `projection.vc.json`.
+Generated once (`packages/attest/scripts/attestation-examples.ts`, `packages/predicate/scripts/decision-example.ts`, and for RW-15's example `packages/attest/scripts/countersigned-copy-example.ts`) and **never regenerated** — with one recorded exception: the attestation examples were regenerated on 2026-11-19, inside RW-14 and before anything was exported, when part two's review found the first copies' `_sd` length and dates could join them (§3 G1). Keys were made fresh and thrown away: the files hold public identifiers and signed bytes, no key material. Every party is SAMPLE and every record `practice: true`. Each record's folder holds `body.json`, `record.dsse.json` and `context.json`; a record shown in all three forms adds `copy.sd-jwt.txt` (every disclosure), `presentation.sd-jwt.txt` (to a SAMPLE verifier, disclosing what `context.json` lists) and `projection.vc.json`.
 
 | Example | Shows |
 |---|---|
@@ -314,6 +346,7 @@ Generated once (`packages/attest/scripts/attestation-examples.ts`, `packages/pre
 | [`mandate-seat/`](examples/mandate-seat/) | an assessor's mandate to one seat: findings only, until 2027-10-31, revocable |
 | [`finding-under-mandate/`](examples/finding-under-mandate/) | the seat signs a finding under that mandate; the doer countersigns, keeps it, and shows an employer a copy the assessor issued |
 | [`decision-person-mandate/`](examples/decision-person-mandate/) | a credit officer's seat decides under the lender's mandate (`kash.decision@1.2.0`), with the rule, the mandate and the person's copy |
+| [`receipt-booking-countersigned/`](examples/receipt-booking-countersigned/) | **RW-15:** the record of truth as the engines sign it today — the host's `booking.delivered/1` work record, asked for by the host and countersigned by the guest (`record.countersign.json`) — with two copies and their presentations to two verifiers disclosing nothing, the projection of what the first saw, and a page: the stored copy with no key, the fragment the viewer holds, the artefact sealed under the `record` disclosure (§2.4b) |
 
 **What the tests check** (`attest/test/attestation.test.ts`, `predicate/test/decision-mandate.test.ts`, `predicate/test/attestation-rule.test.ts`):
 - each body passes its checks and is the canonical payload under the registered tag;
@@ -325,15 +358,18 @@ Generated once (`packages/attest/scripts/attestation-examples.ts`, `packages/pre
 - two fresh copies of one record, presented to two verifiers disclosing nothing private, share no correlator under attest's `linkabilityBetween`, and disclosing the record id links them; copies of two records of one class — one plain, one with a supersession, one with reasons — differ only in their keys, digests and signatures; copies of one record issued on two days carry different `exp`, and copies of two records issued on one day the same; a record that ends before a copy's lifetime would gets no copy;
 - the decision example validates with its mandate presented and checked whole; a presented mandate to another seat, of another kind, not covering the outcome, out of its dates, or signed by another key is refused; a standing decision citing a mandate is refused;
 - a rule reading an attestation not pinned to `accepted` is refused;
-- the mandates carry status entries and are signed by their principals alone; the published schemas equal the definitions; no example file carries key material.
+- the mandates carry status entries and are signed by their principals alone; the published schemas equal the definitions; no example file carries key material;
+- **RW-15** (`attest/test/copies.test.ts`, `attest/test/copies-cli.test.ts`, `predicate/test/copies.test.ts`): a countersigned record's copy shows the class and hides the rest behind eight digests, the counterparty nowhere; a one-signature claim, a withdrawn request, a stopped record and a record that ends sooner get no copy; the counterparty cannot issue one, and a copy signed by another key is refused; two presentations of one receipt to two verifiers share no string beyond the class, and the checker accepts each at its own verifier and refuses it at the other's; disclosing the record links them; `openRecordCommitment` opens the right artefact and not another; a page shows nothing without the fragment and the artefact with it, and refuses the bare subject, a forged record and another issuer's copy; the seal opens only under its own disclosure; two pages of one record share nothing beyond the class; a host's copies check at two desks, and the old form still answers the KS-Q11 fixture; a decision copy's `_sd` is eight for a yes and a no; `restsOn` is padded to a multiple of eight; the CLI applies the page's rule under plain Node with the network off; the example's files are what this section says, and the conformance cases reach their results.
 
 ### 2.8 The conformance cases — `tck/`
 
 One file per new version — [`kash.attestation@1.0.0`](tck/kash.attestation@1.0.0/cases.json), [`kash.mandate@1.0.0`](tck/kash.mandate@1.0.0/cases.json), [`kash.decision@1.2.0`](tck/kash.decision@1.2.0/cases.json) — each a list of `{name, body, valid, faults}`. A conforming reader runs the shape (the JSON Schema, or the definition) and then the rules of §2.2, and reaches `valid` with exactly the listed fault codes. **Every attestation and mandate fault code is exercised at least once.** The decision's cases are shapes only, run against both 1.1.0 and 1.2.0; its checks against a signed rule — the seat's signature, `MANDATE_MISMATCH` — run in predicate's tests. These sit beside predicate's DMN TCK, the upstream suite for the condition language, extracted unchanged, which cannot take cases of ours.
 
+**RW-15 adds [`attestation-copy@1`](tck/attestation-copy@1/cases.json):** the salted reference as pure arithmetic. Each case gives a copy's `_sd`, the disclosures a holder presents and, where one is offered, an artefact's hash; a reader must report which disclosures are committed (their digest is in `_sd`) and which are not, the record a committed `record` disclosure opens to (64 lowercase hex characters, else nothing), and whether it names the artefact — `opens`, null when no record was opened or no artefact was offered. Every salt and every decoy preimage is written in, so every digest is recomputable, and the file's pair shows two copies of one record sharing no digest while each opens the artefact. Nothing in it is signed, and nothing is a key. Reference: `openRecordCommitment`; run in `attest/test/copies.test.ts`.
+
 ### 2.9 What this does not do
 
-Make the record in a ceremony, issue copies at scale, serve proof pages, check a chain of mandates, or re-sign anything already signed · move an engine onto the record (RW-24) · salt the references of the record kinds already in use (RW-15) · publish anything · invent a format where a standard speaks (d71).
+Make the record in a ceremony, issue copies at scale, serve a page (the kernel holds the page's rule and seal, §2.4b; an engine serves it), check a chain of mandates, or re-sign anything already signed · move an engine onto the record (RW-24) · publish anything · invent a format where a standard speaks (d71). ~~Salt the references of the record kinds already in use (RW-15)~~ — done on 2026-11-23 (§2.4a).
 
 ## 3. The privacy games
 
@@ -376,7 +412,7 @@ A game is the claim's acceptance test. A design that loses one says so here, not
   **The property:** the adversary does no better than the class's make-up allows. With *n* records of the class from *n* different counterparties, that means guessing. With a class of one, it always wins.
 - **What the property rests on:**
   1. **Nothing visible differs within a class.** By construction, a copy shows its class and nothing else. Its dates are its own and not its record's; its `_sd` is padded to eight digests; and everything else is behind a disclosure under a fresh salt (§2.4).
-  2. **A page shows nothing behind a disclosure to anyone but its holder.** That is the per-copy salted commitment. RW-15 builds it for the record kinds already in use; this record has it from the start.
+  2. **A page shows nothing behind a disclosure to anyone but its holder.** That is the per-copy salted commitment. This record has it from the start; **RW-15 built it for the record kinds already in use (§2.4a), and the page's rule and seal that keep it (§2.4b).**
   3. **The issuer keeps nothing that ties a copy, a view or a person to a record:**
      - no copy's salts, digests, key or status index;
      - no map from link to page;
@@ -387,7 +423,7 @@ A game is the claim's acceptance test. A design that loses one says so here, not
 - **The bound, said plainly.**
   - **Within a class only.** The adversary learns each class's size from the issuer's database, and anyone can learn it from the trust log (below). Copies issued in a batch at handover make a class small: *records of this kind handed over that day*. Coarser dates widen it, at a cost in staleness (§4).
   - **Rule 3 rests on the issuer's conduct, not on cryptography.** The issuer mints every SD-JWT copy, and sees every salt and key as it signs. Only a presentation the holder derives — the ZK tier — removes that trust (G2).
-  - **A proof page made for each viewer and served from the issuer's origin cannot pass G1 at all.** The server needs a stored map from each link to its page, and it sees every view. Only a page that carries the copy in the link's fragment, and checks it in the viewer's browser, keeps no state. Oreoasis's approval page (`openApproval`) already works that way for approvals.
+  - **A proof page made for each viewer and served from the issuer's origin cannot pass G1 at all.** The server needs a stored map from each link to its page, and it sees every view. Only a page that carries the copy in the link's fragment, and checks it in the viewer's browser, keeps no state. Oreoasis's approval page (`openApproval`) already works that way for approvals. **§2.4b narrows what the server holds:** the stored copy is the commitments alone, the artefact is sealed under the disclosure the fragment carries, and the host learns from a view which record it opened from nothing; the token's map to a page, and the issuer's own bookkeeping of which records a page shows, remain.
   - **The printed receipt** (d91(c)) is one artefact shown to every viewer, so it links by construction.
   - **The trust log publishes a series.** It holds one entry per attestation logged — the issuer, a salted hash, and the claimed time to the second (trust-log.md §1). d91(a) asks for every attestation's hash there, so each issuer's event series, and every class's size, would be public. **The founder ruled on 2026-11-20 that attestations are entered per period, behind a padded root** (d91's dated note); KS-Q7 designs it, and until then none is entered one by one. §4.
   - **Contact channels in clear.** Oreoasis keeps a grade-1 reviewer's channel address in its tables. Under hosted custody, one address links a person's relationships across every organisation the operator hosts, whatever their keys. That is the strongest attack on d41, and G1 does not hold against an operator's database while it stands. §4.
@@ -399,20 +435,22 @@ A game is the claim's acceptance test. A design that loses one says so here, not
     - *two copies of one attestation, shown to two verifiers, share nothing to join on*;
     - *copies of two records of one class differ only in their keys, digests and signatures*;
     - *no copy carries its record's dates*;
+  - `attest/test/copies.test.ts` (RW-15): *two presentations of one receipt to two verifiers share no common string beyond the issuer's key and the profile name*, read with the class — every string two presentations share (`sharedValues`) is in the class; a page's stored copy shows nothing without the fragment; two pages of one record share nothing beyond the class; the worked example's and the conformance file's cases;
+  - `predicate/test/copies.test.ts` (RW-15): a host's copies at two desks check, and share nothing beyond the class;
   - `attest/test/sd-jwt.test.ts`;
   - `attest/test/exchange.test.ts` (*A and B — two copies to two verifiers — share nothing that links them*);
   - `predicate/test/hiring.test.ts`, where the one value two viewers share is the level every holder of that level discloses alike.
 
   These tests check conditions the game needs, not the game itself.
 - **Fails today:**
-  - **Proof pages as built.** Oreoasis's proof page carries `recordIdOf` of each countersign bundle, the same for every viewer, and the bundle names the counterparty's key (DD C6; d62(d)3's honest line). Pages served per viewer cannot pass in any case (above).
+  - **Proof pages as built in the engine.** The engine's proof page carries `recordIdOf` of each countersign bundle, the same for every viewer, and the bundle names the counterparty's key (DD C6; d62(d)3's honest line). **The kernel's page profile (§2.4b) is built; the engine moves its page onto it in its own run, on the re-pinned kernel.** The token's map to a page remains (above).
   - **The trust log's series** and **the operator's contact channels**, above.
   - **A `kash-artifact` packet** carries the raw record, which links by its own bytes, and the record's id in its binding (`predicate/src/packet.ts`). That is d62(d)3's honest line until the ZK tier. Both kinds of binding also carry the presentation's time to the second. Freshness needs it, and it belongs to that one presentation; timing at the network is G2's.
 - **Not yet checked:**
   - the game itself, run end to end;
   - the issuer's retention, which is conduct;
   - class sizes in practice.
-- **RW-15's test** says *two presentations of one receipt to two verifiers share no common string beyond the issuer's key and the profile name*. This spec reads it with the class: what every copy of a class shows — kind, outcome, grade, the copy's dates, the key type — is the class, not strings to remove. **The founder confirmed that reading on 2026-11-20** (d91's dated note); the prompt's words are unchanged.
+- **RW-15's test** says *two presentations of one receipt to two verifiers share no common string beyond the issuer's key and the profile name*. This spec reads it with the class: what every copy of a class shows — kind, outcome, grade, the copy's dates, the key type — is the class, not strings to remove. **The founder confirmed that reading on 2026-11-20** (d91's dated note); the prompt's words are unchanged. **Run on 2026-11-23 (RW-15):** `sharedValues` lists every string two presentations share, and every one is in the class — `attest/test/copies.test.ts`, `predicate/test/copies.test.ts`, and the worked example `receipt-booking-countersigned/`. A binding's time belongs to its one presentation and is not in the class: two doors visited in the same second would share it.
 
 ### 3.2 G2 — what verifiers who collude can and cannot learn, without the ZK tier
 
@@ -433,7 +471,7 @@ A game is the claim's acceptance test. A design that loses one says so here, not
 
   identity-zkp's circuit today proves membership in a list (d59). It does none of these.
 - **Checked today:**
-  - `linkabilityBetween` reports the correlators it knows: the same issued copy, the same holder key, the same digests or salts, the same status index, a second-precise `iat`, a `jti`, a disclosed value (`attest/test/sd-jwt.test.ts`). It does not look at `exp`, the `_sd` count, the header, the key type or the key binding; this profile fixes the first three by construction (`attest/test/attestation.test.ts`), and §4 lists the key type;
+  - `linkabilityBetween` reports the correlators it knows: the same issued copy, the same holder key, the same digests or salts, the same status index, a second-precise `iat`, a `jti`, a disclosed value (`attest/test/sd-jwt.test.ts`). It does not look at `exp`, the `_sd` count, the header, the key type or the key binding; this profile fixes the first three by construction (`attest/test/attestation.test.ts`), and §4 lists the key type. **`sharedValues` (RW-15) looks at everything** — every string two presentations share, with its path — and knows nothing, so a caller subtracts the class;
   - the holder's log flags a copy or a key shown to a second verifier (`validatePresentationLog`, `attest/test/exchange.test.ts`);
   - the wallet refuses to send another relationship's identifier (`wallet/test/transport.test.ts`: *another relationship's key — or the root — stops it before sending*).
 - **Not yet checked:**
@@ -538,7 +576,7 @@ Each problem says where it would be settled. † marks the items a review raised
 
 **Copies and presentation**
 
-12. † **Who holds a copy.** A copy's key is fresh by design, so the format cannot refuse a copy to its own issuer. An issuer copying its own sign-off is self-attestation (§2.4).
+12. † **Who holds a copy.** A copy's key is fresh by design, so the format cannot refuse a copy to its own issuer. An issuer copying its own sign-off is self-attestation (§2.4). A page copy has no key at all (§2.4a), so it is never presented; the question stays for the copies with keys.
 13. † **Small classes.** A copy dated to the day hides only in its class, and copies issued in a batch at handover make it small (G1). Coarser dates widen it, at a cost in staleness.
 14. † **The holder's key type** splits every class by device (G1). A wallet could use one key type for all its copies of a kind.
 15. † **Free text that every copy shows.** A `profile` and a public reference's `id` are the issuer's choice, and visible in every copy. A profile or a rule minted for one person makes a class of one, or puts a name in clear. A door or a trust list that accepts only registered profiles and library rules would close it (KS-Q8's library).
@@ -550,7 +588,7 @@ Each problem says where it would be settled. † marks the items a review raised
 21. **Correlators the holder chooses:** the record id that counting requires, `reliedOn`, a seat's `decidedBy` and mandate, a distinctive statement. The wallet's warning (presentation.md §4) is the only guard.
 22. † **One use per record without the record id.** A door counting receipts needs each one's record id (rule.md §2.1), which links. A pseudonym per door, derived from the record, would let a door count each record once without seeing its id.
 23. † **The `kash-artifact` packet's raw record**, and the record id in its binding (`predicate/src/packet.ts`; G1). The raw record links by its own bytes, and its binding is signed by the key the record names, so RW-15's salting cannot fix it. It is d62(d)3's honest line until the ZK tier.
-24. † **Proof pages and the printed receipt.** A page made per viewer and served from the issuer's origin cannot pass G1. Only a page that carries the copy in the link's fragment and checks it in the browser can (G1). The printed receipt (d91(c)) is one artefact shown to everyone, so it links by construction. This is Oreoasis's, with RW-15.
+24. † **Proof pages and the printed receipt.** A page made per viewer and served from the issuer's origin cannot pass G1. **RW-15 built the kernel's page profile (§2.4b):** the stored copy is the commitments, the artefact is sealed under the `record` disclosure, the fragment carries the disclosures, and the viewer's browser opens and checks it. The engine's page moves onto it in the engine's own run (Duedale, `Duedale 2.0`); the token's map to a page and the issuer's own bookkeeping remain. The printed receipt (d91(c)) is one artefact shown to everyone, so it links by construction.
 25. † **Securing the projection** — with VC-JOSE-COSE, or with Data Integrity proof sets. Proof sets could carry both parties' proofs over one credential, and so carry d41's two signatures in a standard form, which would let a standard form be the record of truth — the condition the founder's 2026-11-20 ruling on d91(e) names.
 26. † **What a statement can still carry:** a name, or a judgement in words (§2.2).
 
@@ -578,12 +616,14 @@ Each problem says where it would be settled. † marks the items a review raised
 37. **Recognition between rules**, and **adoption over recognitions** (d91(c), (f)). `givens.relations.recognises` is context the evaluator never reads.
 38. **The withdrawal window's number** (d84 P4.4) is the founder's. Verifiers pass it as `withdrawalWindowSec`.
 39. **Naming:** what a self-certifying key is called (RW-19, branch B), and when a `did:web` organisation's key enters a trust list, so a stranger can check it offline.
-40. ~~**The reading of RW-15's test** (G1).~~ **Confirmed by the founder on 2026-11-20.**
+40. ~~**The reading of RW-15's test** (G1).~~ **Confirmed by the founder on 2026-11-20.** Run on 2026-11-23 (§2.4a).
+41. **A rule that reads a record's own dates reads the old form** (RW-15). The booking review fixture's writing window is `meta.window.end`, which a copy does not carry: a copy shows the day it was issued and, disclosed, the exact time of acceptance — which links. A disclosed day, or a window counted from the copy's issue, is the door's choice (Indusland's review door, OA-V3); the fixture is unchanged.
 
 ## Changelog
 
 | Version | Date | |
 |---|---|---|
+| **v1.2** | 2026-11-23 | RW-15, salted references. The records already in use get the attestation copy (§2.4a: `copyClaimsOfCountersigned` — the artefact reference is the digest the acceptance bound, behind a fresh salt; only from a bundle whose two-signature proof checks, only by a party to it, never the counterparty; a stopped record gets none); a page copy has no key; the checker opens the commitment (`openRecordCommitment`, `recordHashOf`, `attest verify --artifact`); the page's rule and seal (§2.4b: `shownOnPage`, `pageOf`, `openPage` — JWE `dir`/A256GCM under HKDF of the `record` disclosure); `restsOn` and a decision copy's `_sd` padded to fixed counts; `sharedValues`; the example `receipt-booking-countersigned/` and the conformance file `attestation-copy@1`; §4.41. attest `0.3.0-alpha.2`, predicate `0.3.0-alpha.5`, **not published.** |
 | **v1.1** | 2026-11-20 | The founder's rulings on the open points, recorded (ECOSYSTEM d91's dated note): `kash.mandate` for the authority to sign; DSSE as the record of truth; the four rulings confirmed; small counts noised first with *k* = 5 as display; the trust log by period behind a padded root. No format change. |
 | **v1 (§3–§4)** | 2026-11-19 | RW-14, part two. The four privacy games — unlinkability across verifiers who do not collude, what colluding verifiers learn without the ZK tier, non-re-identification from published series, a decline that leaves no trace — each with its adversary, its game, its bound and what checks it today; forty open problems. Part two's review found the first copies losing G1: `copyClaimsOf` now pads `_sd` to eight digests and gives a copy `iat` plus 90 days, refusing a record that ends sooner; copies carry no status entry; the attestation examples were regenerated before any export. Found: Indusland's visits counter reveals a suppressed month by subtraction and each acceptance to a poller; the trust log publishes each issuer's event series; Oreoasis keeps contact channels in clear (G1, G3). attest `0.3.0-alpha.1`, **not published.** |
 | **v1 (§1–§2)** | 2026-11-19 | RW-14, part one. The algebra; `kash.attestation@1.0.0` and `kash.mandate@1.0.0` with `verifyAttestationRecord` (`@kashscript/attest/attestation`, attest `0.3.0-alpha.1`), three registry rows; `kash.decision@1.2.0` and node rule 10 for the attestation (predicate `0.3.0-alpha.4`); the three forms; seven worked examples; three conformance files. The adversarial review's fixes: the ceremony order, copies only from a record that checks, the copy's own dates, the contest against the rule, mandates of one link with a status entry, the counterparty's mandate, the machine floor widened to organisations and agents limited to receipts. **Not published.** |

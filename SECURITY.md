@@ -1,7 +1,7 @@
 # Security policy
 
 This is the security policy of all five repositories of the Indorania ecosystem — Indorania,
-KashScript, Oreoasis, Duedale and Indusland. The text is the same in each. What is specific to a
+KashScript, Duedale, Oreoasis and Indusland. The text is the same in each. What is specific to a
 repository (its scope notes and its stamped security baseline) is in that repository's
 [docs/security/baseline.md](docs/security/baseline.md).
 
@@ -46,9 +46,10 @@ anyone doing good-faith research within this policy:
   Chakor), and indorania.org.
 - **KashScript** — `@kashscript/*` on npm, the registry service, and kashscript.com with its
   subdomains.
-- **Oreoasis** — the API at `api.oreoasis.com`, the proof and approval pages, `@oreoasis/sdk`, and
-  oreoasis.com.
-- **Duedale** — the desk and the book, and duedale.com.
+- **Duedale** — the API at `api.duedale.com`, the proof and approval pages, the desk and the
+  book, `@duedale/sdk`, and duedale.com.
+- **Oreoasis** — the operations system and its agents, and oreoasis.com (nothing is served there
+  yet).
 - **Indusland** — the web and mobile apps, their workers, and indusland.xyz.
 
 Not in scope: demo and preview deployments, practice-mode assertions and seeded keys that are

@@ -79,6 +79,8 @@ The `packetCheck` it reads is `checkPacket`'s ([rule.md](rule.md) §8). Since AU
   - **selectively disclosable:** `reasons`, `rows`, `reliedOn`, `decidedBy`, `decidedAt`, `contestUntil`, `refusal`.
 
   So the next door can read *"yes, under rule X version 3"* and nothing more.
+
+  **2026-11-23 (RW-15):** the copy's `_sd` is padded to eight digests (`DECISION_SD_SLOTS`) whatever the outcome, so a refusal's one hidden claim more (`refusal`) does not show in the array's length ([attestation](attestation/README.md) §3 G1). A caller's own `decoys` still overrides it. predicate `0.3.0-alpha.5`, **not published.**
 - **`readDecision(sdJwt, {nowSec, presentedTo?})`** reads one offline: held, or as presented to a viewer.
 
 ## 4. What it does not do
@@ -92,5 +94,6 @@ The `packetCheck` it reads is `checkPacket`'s ([rule.md](rule.md) §8). Since AU
 | Version | Date | |
 |---|---|---|
 | **v1** | 2026-10-28 | KS-Q1. The receipt, its validation, the routing, the seat's signature, SD-JWT VC issuance. **Published under `alpha`, 2026-10-28.** |
+| **v3.1** | 2026-11-23 | RW-15. `issueDecision` pads a copy's `_sd` to eight (`DECISION_SD_SLOTS`); the receipt's shape is unchanged. predicate `0.3.0-alpha.5`, **not published.** |
 | **v3** | 2026-11-19 | RW-14. `kash.decision@1.2.0`: a person's `decidedBy` may cite the mandate its seat signed under, and the seat signs the citation; `validateDecision` checks a presented mandate whole and says when none was presented (`MANDATE_MISMATCH`, `notChecked`). `specs/schemas/decision.schema.json` now follows 1.2.0. predicate `0.3.0-alpha.4`, **not published.** |
 | **v2** | 2026-10-29 | KS-Q1b. `kash.decision@1.1.0`: the optional `adoption`; an automatic outcome under an adoption is the anchor's standing decision, issued by the anchor (d85(d)); the shape moves from lexicons to predicate (d59); an automatic not yet on every rule (d85(e)). **Published under `alpha`, 2026-10-28 (21:19 UTC).** |

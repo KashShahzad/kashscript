@@ -31,6 +31,14 @@ export interface PredicateClaim {
   readonly window: { readonly from: string; readonly to: string };
 }
 
+/**
+ * `restsOn` is padded to a multiple of this many entries (RW-15; `specs/attestation/README.md` §3 G1): two
+ * copies of one yes have the same length, and a yes over three records looks like a yes over seven.
+ */
+export const RESTS_ON_SLOTS = 8;
+/** The decoys that pad `restsOn` with `n` records to the next multiple of {@link RESTS_ON_SLOTS} — always at least one. */
+export const restsOnDecoys = (n: number): number => RESTS_ON_SLOTS * Math.ceil((n + 1) / RESTS_ON_SLOTS) - n;
+
 export interface IssuePredicateInput {
   /** The issuing establishment; its `did:kash` is `iss`. */
   readonly issuer: JwsSigner & { readonly did: string };
@@ -45,7 +53,7 @@ export interface IssuePredicateInput {
   /** Rounded down to the day here, so copies do not carry a unique time. */
   readonly iatUnix: number;
   readonly expUnix: number;
-  /** Decoys padding `restsOn`, so how many records there are does not show. Default 4. */
+  /** Decoys padding `restsOn`, so how many records there are does not show. Default: to the next multiple of {@link RESTS_ON_SLOTS} ({@link restsOnDecoys}). */
   readonly decoys?: number;
 }
 
@@ -65,7 +73,9 @@ export async function issuePredicateCredential(input: IssuePredicateInput): Prom
       predicate: input.predicate,
     },
     sdArrays: { restsOn: input.restsOn },
-    decoys: input.decoys ?? 4,
+    decoys: input.decoys ?? restsOnDecoys(input.restsOn.length),
+    // The credential hides nothing but array elements, so `_sd` carries no decoys: constant across copies (RW-15).
+    sdDecoys: 0,
     signer: input.issuer,
   });
 }

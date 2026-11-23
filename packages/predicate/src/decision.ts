@@ -108,6 +108,12 @@ async function mandateProblems(envelope: DsseEnvelope, d: DecisionBody, decider:
 
 export const SEAT_JWS_TYP = "kash-decision-seat+jwt" as const;
 
+/**
+ * Every decision copy's `_sd` holds this many digests, real or decoy (RW-15; `specs/attestation/README.md` §3
+ * G1): a refusal hides one claim more than a yes (`refusal`), and the array's length must not say which.
+ */
+export const DECISION_SD_SLOTS = 8;
+
 /** The bytes a seat signs: the body, with the signature itself left out, in JCS. A cited mandate (1.2.0) is signed with it; without one the bytes are 1.1.0's. */
 function seatPayload(body: DecisionBody): Record<string, unknown> {
   const db = body.decidedBy;
@@ -275,6 +281,7 @@ export async function issueDecision(input: {
   readonly holderPublicKey: VerifyKey;
   readonly iatUnix: number;
   readonly expUnix: number;
+  /** Default: `_sd` padded to {@link DECISION_SD_SLOTS} digests, so a yes and a no have one shape (RW-15). */
   readonly decoys?: number;
 }): Promise<string> {
   const v = await validateDecision(input.body, input.rule, input.adoption);
@@ -284,6 +291,15 @@ export async function issueDecision(input: {
     throw new DecisionError(input.adoption === undefined ? "a decision is signed by the organisation whose rule it applies" : "a decision under an adoption is signed by the anchor that adopted the rule");
   }
   const b = input.body;
+  const sdProperties = {
+    reasons: b.reasons,
+    rows: b.rows,
+    reliedOn: b.reliedOn,
+    decidedBy: b.decidedBy,
+    decidedAt: b.decidedAt,
+    contestUntil: b.contestUntil,
+    ...(b.refusal !== undefined ? { refusal: b.refusal } : {}),
+  };
   return issueSdJwt({
     header: { kid: input.issuer.did },
     claims: {
@@ -294,16 +310,8 @@ export async function issueDecision(input: {
       cnf: { jwk: jwkOf(input.holderPublicKey) },
       decision: { rule: b.rule, ...(b.adoption !== undefined ? { adoption: b.adoption } : {}), outcome: b.outcome, automatic: b.automatic, ...(b.practice === true ? { practice: true } : {}) },
     },
-    sdProperties: {
-      reasons: b.reasons,
-      rows: b.rows,
-      reliedOn: b.reliedOn,
-      decidedBy: b.decidedBy,
-      decidedAt: b.decidedAt,
-      contestUntil: b.contestUntil,
-      ...(b.refusal !== undefined ? { refusal: b.refusal } : {}),
-    },
-    decoys: input.decoys ?? 2,
+    sdProperties,
+    decoys: input.decoys ?? Math.max(1, DECISION_SD_SLOTS - Object.keys(sdProperties).length),
     signer: input.issuer,
   });
 }

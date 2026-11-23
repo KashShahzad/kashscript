@@ -63,6 +63,8 @@ An SD-JWT VC issued to the holder through the handoff ([holder contract §1](hol
 
 Oreoasis's existing DSSE predicate (`application/vnd.oreoasis.predicate+json`) is unchanged. The credential carries the same answer to the holder, without the DSSE form's visible `justificationHash`, which would correlate.
 
+**2026-11-23 (RW-15):** `restsOn` is padded to the next multiple of eight entries (`RESTS_ON_SLOTS`, at least one decoy; `restsOnDecoys`), and the credential's `_sd` carries no decoys (`issueSdJwt`'s `sdDecoys`), so two copies of one yes have one length and a yes over three records looks like a yes over seven ([attestation](attestation/README.md) §3 G1: the count was a split in the class). Verification is unchanged, and the frozen vectors are unchanged. `sharedValues(a, b)` joins `linkabilityBetween` as the diagnostic that knows nothing: every string two SD-JWTs share, with its path, for a caller to subtract the class from.
+
 ## 3. The presentation
 
 The holder answers with an OID4VP `vp_token` holding one SD-JWT presentation per need: the issuer JWT, the disclosures the holder chose, and a **KB-JWT** (`typ: kb+jwt`) signed by the key in `cnf.jwk` over `aud` (= `client_id`), `nonce`, `iat` and `sd_hash` (the digest of everything before it).
@@ -101,6 +103,7 @@ Invent a presentation protocol · carry a raw record the holder did not attach �
 
 | Version | Date | Change |
 |---|---|---|
+| **v1.3** | 2026-11-23 | RW-15: `restsOn` padded to a multiple of eight and `_sd` without decoys, so a copy's counts say nothing; `sharedValues` beside `linkabilityBetween`. Issued bytes change, verified ones do not. attest `0.3.0-alpha.2`, **not published.** |
 | **v1.2** | 2026-11-18 | KS-Q4: audience and nonce required on every presentation (`AUDIENCE_NOT_SUPPLIED`, `NONCE_NOT_SUPPLIED`); a 600-second default for the binding's age; the algorithm allow-list checked before any key, and `crit` refused; the nonce registry. Breaking at alpha. attest `0.3.0-alpha.0`, **not published.** |
 | **v1.1** | 2026-10-01 | Additive (PL-2): the credential and its KB-JWT may be ES256 — the issuer's key and the holder's `cnf.jwk` decide, never the header; an EC P-256 holder key is a relationship key in a phone's secure chip. Verification in attest `0.2.0-alpha.2`, with vectors (`test/vectors/es256`). |
 | **v1** | 2026-09-25 | The ask (schema, the eight rules, the forbidden needs, the OID4VP mapping), the predicate credential and its holder-bound presentation, unlinkability, the presentation log, and no format for a decline. Verification in attest `0.2.0-alpha.1`, with vectors — **unpublished**. |
