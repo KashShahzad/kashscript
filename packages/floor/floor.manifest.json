@@ -1,0 +1,14 @@
+{
+  "floor": 1,
+  "repository": "@kashscript/floor",
+  "serves": "none",
+  "oracles": [],
+  "routes": {},
+  "sources": ["src/**/*.ts"],
+  "counts": {
+    "src/selftest.ts#runSelftest": {
+      "kind": "internal",
+      "why": "the detector's own test cases, written as strings of SQL and TypeScript; nothing is counted and nothing leaves"
+    }
+  }
+}

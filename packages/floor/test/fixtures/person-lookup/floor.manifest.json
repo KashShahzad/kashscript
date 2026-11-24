@@ -1,0 +1,16 @@
+{
+  "floor": 1,
+  "repository": "person-lookup",
+  "oracles": [{ "kind": "boot-log" }],
+  "routes": {
+    "GET /api/v1/users": { "subject": "person", "shape": "list" },
+    "GET /api/v1/people/search": { "subject": "person", "shape": "search" },
+    "GET /api/v1/receipts": { "subject": "record", "shape": "list", "query": ["holderEmail", "month"] },
+    "GET /api/v1/me/:userId": { "subject": "person", "shape": "self" },
+    "GET /api/v1/members/:id": { "subject": "record", "shape": "one" },
+    "POST /api/v1/nudges": { "subject": "record", "shape": "push" },
+    "GET /api/v1/dump": { "subject": "record", "shape": "export", "to": "partner" },
+    "GET /api/v1/find": { "subject": "record", "shape": "lookup" },
+    "GET /api/v1/seats": { "subject": "mandate", "shape": "list" }
+  }
+}

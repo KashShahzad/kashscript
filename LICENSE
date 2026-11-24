@@ -6,6 +6,7 @@ THE PACKAGES. Each package under packages/ carries its own LICENSE file and is l
 that file, and only that file. Each is the Apache License, Version 2.0:
 
   packages/attest           @kashscript/attest
+  packages/floor            @kashscript/floor
   packages/identity-core    @kashscript/identity-core
   packages/identity-sdk     @kashscript/identity-sdk
   packages/identity-server  @kashscript/identity-server

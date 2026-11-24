@@ -1,0 +1,36 @@
+// The clean fixture's engine schema: a person's account, a decision naming its rule version, a receipt with its
+// signing grade (a property of the signature, d91), and an organisation's plan.
+
+model Account {
+  id          String @id
+  email       String @unique
+  displayName String
+}
+
+model DoorDecision {
+  id          String   @id
+  ruleId      String
+  ruleVersion Int
+  outcome     String
+  decidedAt   DateTime
+}
+
+model Receipt {
+  id        String @id
+  holderDid String
+  grade     Int    @default(0)
+
+  @@map("receipts")
+}
+
+model Org {
+  id   String   @id
+  name String
+  plan PlanTier
+}
+
+enum PlanTier {
+  FREE
+  PRO
+  TEAM
+}

@@ -1,0 +1,15 @@
+{
+  "floor": 1,
+  "repository": "undeclared-route",
+  "sources": ["app/**/*.{ts,tsx}"],
+  "oracles": [
+    { "kind": "boot-log" },
+    { "kind": "next-app", "app": "app" },
+    { "kind": "supabase", "dir": "supabase" }
+  ],
+  "routes": {
+    "GET /a": { "subject": "public", "shape": "one" },
+    "GET /c": { "subject": "public", "shape": "one" },
+    "PAGE /": { "subject": "public", "shape": "one" }
+  }
+}

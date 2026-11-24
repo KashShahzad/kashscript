@@ -1,6 +1,6 @@
 # KashScript — the open protocol
 
-Twelve packages for issuing, holding and checking signed records: identity keys, evidence bundles,
+Thirteen packages for issuing, holding and checking signed records: identity keys, evidence bundles,
 the holder's wallet, countersigning, rules and agreements. Each is published to npm under
 `@kashscript/*` and licensed under Apache-2.0.
 
@@ -23,6 +23,7 @@ machine. Nothing here searches for people, scores them or moves money.
 | [`@kashscript/wallet`](packages/wallet) | The holder's wallet component: keys first, no account; receives, holds, presents and exports records |
 | [`@kashscript/whiffin`](packages/whiffin) | Purpose-bound mandates. It never moves money |
 | [`@kashscript/kash`](packages/kash) | The `kash` CLI: a station's own keys, issuing and countersigning records as files, checking them |
+| [`@kashscript/floor`](packages/floor) | The floor as tests: a scanner (`kash-floor`) that checks a repository against the manifest it keeps — no person lookups, no scores of persons, no price per record, every exported count suppressed at *k* = 5 — and the `suppress` it requires. It also runs under Node 20 |
 
 The specifications are in [`specs/`](specs), the decision records in [`docs/adr/`](docs/adr), and
 open rulebooks in [`docs/rulebooks/`](docs/rulebooks).

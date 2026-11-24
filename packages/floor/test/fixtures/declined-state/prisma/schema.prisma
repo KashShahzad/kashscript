@@ -1,0 +1,37 @@
+// A person's decline of an invite, kept (d49: none may be); an organisation's rejection (not in scope); and a desk's
+// decision, whose "no" is a named person's and names its rule version (d84 P3).
+
+model Invite {
+  id     String       @id
+  userId String
+  status InviteStatus
+}
+
+enum InviteStatus {
+  SENT
+  ACCEPTED
+  DECLINED
+}
+
+model VenueApplication {
+  id     String    @id
+  status AppStatus
+}
+
+enum AppStatus {
+  PENDING
+  REJECTED
+}
+
+model DeskDecision {
+  id      String  @id
+  ruleId  String
+  version Int
+  outcome Outcome
+}
+
+enum Outcome {
+  YES
+  NOT_YET
+  NO
+}

@@ -1,0 +1,27 @@
+// Scores, ratings and counts kept on persons — and two that are not: a report's severity, keyed only to who wrote
+// it, and a receipt's signing grade.
+
+model User {
+  id         String @id
+  email      String
+  trustScore Float
+  loginCount Int
+}
+
+model Rating {
+  id     String @id
+  userId String
+  value  Int
+}
+
+model Report {
+  id            String @id
+  reporterId    String
+  severityScore Int
+}
+
+model Receipt {
+  id        String @id
+  holderDid String
+  grade     Int
+}

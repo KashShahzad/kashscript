@@ -1,0 +1,17 @@
+{
+  "floor": 1,
+  "repository": "declined-state",
+  "oracles": [{ "kind": "boot-log" }],
+  "routes": {
+    "GET /api/v1/decisions": { "subject": "record", "shape": "list", "states": ["yes", "not-yet", "no"] },
+    "GET /api/v1/bookings": { "subject": "record", "shape": "list", "states": ["delivered", "not_come"] },
+    "GET /api/v1/packets": { "subject": "record", "shape": "list", "query": ["outcome"] },
+    "GET /api/v1/asks/:id": { "subject": "record", "shape": "one", "states": ["sent", "declined"] },
+    "GET /api/v1/decisions/:id": { "subject": "record", "shape": "one", "states": ["yes", "no"] },
+    "GET /api/v1/agreements/:id": { "subject": "record", "shape": "one", "states": ["declined", "came"] }
+  },
+  "schemas": {
+    "prisma": ["prisma/schema.prisma"],
+    "sql": ["sql/*.sql"]
+  }
+}

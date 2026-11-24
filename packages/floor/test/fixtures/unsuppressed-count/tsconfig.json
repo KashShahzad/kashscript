@@ -1,0 +1,6 @@
+{
+  // A path alias that would swap the floor for a file of the repository's own.
+  "compilerOptions": {
+    "paths": { "@kashscript/floor": ["./src/fake-floor.ts"] },
+  },
+}

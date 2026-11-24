@@ -1,0 +1,16 @@
+{
+  "floor": 1,
+  "repository": "waivers",
+  "serves": "none",
+  "routes": {
+    "GET /api/v1/users": { "subject": "person", "shape": "list", "outsideOracle": "a fixture with no oracle" }
+  },
+  "schemas": { "prisma": ["prisma/schema.prisma"] },
+  "waivers": [
+    { "rule": "person-score", "at": "prisma:User.karma", "reason": "the fixture's one good waiver", "decision": "d64(g)" },
+    { "rule": "person-score", "at": "prisma:User.nothing", "reason": "matches nothing", "decision": "d64(g)" },
+    { "rule": "person-score", "at": "prisma:User.streak", "reason": "cites only the rule's own decision", "decision": "d43" },
+    { "rule": "person-lookup", "at": "route:GET /api/v1/users", "reason": "a person directory, waived", "decision": "d64(g)" },
+    { "rule": "person-score", "at": "prisma:User.karma", "reason": "cites no decision", "decision": "because" }
+  ]
+}

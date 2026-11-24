@@ -24,6 +24,23 @@
         "typescript": "^5.6.3",
       },
     },
+    "packages/floor": {
+      "name": "@kashscript/floor",
+      "version": "0.1.0-alpha.0",
+      "bin": {
+        "kash-floor": "./src/bin/floor.ts",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.2.5",
+        "typescript": "^5.6.3",
+      },
+      "peerDependencies": {
+        "typescript": ">=5.0.0 <7",
+      },
+      "optionalPeers": [
+        "typescript",
+      ],
+    },
     "packages/identity-core": {
       "name": "@kashscript/identity-core",
       "version": "0.4.0-alpha.3",
@@ -181,6 +198,8 @@
   },
   "packages": {
     "@kashscript/attest": ["@kashscript/attest@workspace:packages/attest"],
+
+    "@kashscript/floor": ["@kashscript/floor@workspace:packages/floor"],
 
     "@kashscript/identity-core": ["@kashscript/identity-core@workspace:packages/identity-core"],
 

@@ -1,0 +1,1 @@
+{"event":"host.boot","level":"INFO","phase":"SERVING","routes":{"paths":9,"endpoints":9,"list":["GET /api/v1/dump","GET /api/v1/find","GET /api/v1/me/:userId","GET /api/v1/members/:id","GET /api/v1/people/search","GET /api/v1/receipts","GET /api/v1/seats","GET /api/v1/users","POST /api/v1/nudges"]}}

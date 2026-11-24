@@ -1,0 +1,19 @@
+{
+  "floor": 1,
+  "repository": "price-per-record",
+  "serves": "none",
+  "sources": ["src/**/*.{ts,tsx}"],
+  "prices": {
+    "files": ["src/prices.ts"],
+    "fields": {
+      "PRICES.perCheck": "flat",
+      "PRICES.outcome.*.price": "outcome",
+      "PRICES.outcome.*.priceAfter100": "outcome",
+      "PRICES.outcome.*.freeEachMonth": "allowance",
+      "PRICES.tiers[].upTo": "structure",
+      "PRICES.tiers[].price": "outcome",
+      "PRICES.commissionPct": "flat",
+      "PRICES.legacy": "flat"
+    }
+  }
+}

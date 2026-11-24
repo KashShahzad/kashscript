@@ -66,7 +66,7 @@ touches.
 ## What carries which licence (decision 87)
 
 Everything in this repository is open. The test that put it here: if checking a record, or the
-person's wallet, needs a package, it is Apache-2.0. Each of the twelve packages carries its own
+person's wallet, needs a package, it is Apache-2.0. Each of the thirteen packages carries its own
 Apache-2.0 `LICENSE`. The specification text and the rulebooks are CC BY 4.0, and the rest is
 Apache-2.0, as the root [LICENSE](LICENSE) says. `scripts/check-boundary.ts` fails the build when a
 package's `license`, `publishConfig`, `repository` or `LICENSE` file is wrong, and

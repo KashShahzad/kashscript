@@ -1,0 +1,3 @@
+{"event":"host.boot","level":"INFO","phase":"STARTING"}
+not a JSON line: the boot log carries other lines too
+{"event":"host.boot","level":"INFO","phase":"SERVING","routes":{"paths":4,"endpoints":5,"list":["GET /api/v1/me","GET /api/v1/north-star","GET /api/v1/receipts/:receiptNo","GET /api/v1/seats","POST /api/v1/receipts"]},"legacyRoutes":false}

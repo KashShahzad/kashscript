@@ -1,0 +1,1 @@
+{"routes":{"endpoints":6,"list":["GET /api/v1/agreements/:id","GET /api/v1/asks/:id","GET /api/v1/bookings","GET /api/v1/decisions","GET /api/v1/decisions/:id","GET /api/v1/packets"]}}

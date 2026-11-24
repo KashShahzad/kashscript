@@ -1,0 +1,1 @@
+{"event":"host.boot","level":"INFO","phase":"SERVING","routes":{"paths":2,"endpoints":3,"list":["GET /a","GET /b"]}}

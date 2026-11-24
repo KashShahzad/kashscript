@@ -1,0 +1,9 @@
+{
+  "$id": "https://example.org/lexicons/kash.decision@0.9.0",
+  "type": "object",
+  "required": ["outcome"],
+  "properties": {
+    "outcome": { "enum": ["yes", "not-yet", "no"] },
+    "rule": { "type": "object", "properties": { "id": { "type": "string" }, "version": { "type": "integer" } } }
+  }
+}

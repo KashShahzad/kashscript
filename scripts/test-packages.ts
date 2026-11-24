@@ -14,7 +14,7 @@
  * packages/attest/dist/bin/attest.js and spawn node and a browser; run in
  * parallel (as `bun run --filter` does) they time each other out.
  *
- *   bun scripts/test-packages.ts                 # the twelve open packages
+ *   bun scripts/test-packages.ts                 # every open package
  *   bun scripts/test-packages.ts --only attest predicate
  *   bun scripts/test-packages.ts --list
  *

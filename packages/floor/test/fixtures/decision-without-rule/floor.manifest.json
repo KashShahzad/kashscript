@@ -1,0 +1,12 @@
+{
+  "floor": 1,
+  "repository": "decision-without-rule",
+  "serves": "none",
+  "sources": ["lexicons/*.ts"],
+  "schemas": {
+    "prisma": ["prisma/schema.prisma"],
+    "sql": ["sql/*.sql"],
+    "lexicons": ["lexicons/*"],
+    "decisions": { "ExceptionClassification": "sopVersion" }
+  }
+}

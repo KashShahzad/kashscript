@@ -1,0 +1,26 @@
+// A decision with no rule version; one whose version may be null; one that names it under its own name (declared in
+// the manifest); and a deviation classified against a rule version (d43).
+
+model DoorDecision {
+  id      String @id
+  outcome String
+}
+
+model Ruling {
+  id      String @id
+  ruleId  String
+  version Int?
+  verdict String
+}
+
+model ExceptionClassification {
+  id             String @id
+  classification String
+  sopVersion     Int
+}
+
+model Deviation {
+  id             String @id
+  classification String
+  ruleVersion    Int
+}

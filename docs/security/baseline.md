@@ -5,7 +5,7 @@ one text for all five repositories of the ecosystem. This file holds what is spe
 
 ## Scope
 
-In scope here: the twelve `@kashscript/*` packages in this repository and their published versions.
+In scope here: the thirteen `@kashscript/*` packages in this repository and their published versions.
 We most want to hear about anything that lets a record **pass a check it should fail**: a forged or
 re-bound signature, an issuer not bound to its key, a countersignature counted twice, a disclosure
 proof that verifies without the commitment, a rule that grants what its criteria refuse, a

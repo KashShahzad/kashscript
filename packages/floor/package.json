@@ -1,0 +1,52 @@
+{
+  "name": "@kashscript/floor",
+  "version": "0.1.0-alpha.0",
+  "description": "The floor as tests: a scanner and a small runtime that check a repository against the floor.manifest.json it keeps — no route lists, searches or looks up persons; no score, rank, rating or count of a person; no price for issuing, holding, presenting or checking a record, and no percentage; no per-person declined state; every exported count through suppress at k = 5; every decision naming its rule version; every mounted route declared. Each failure names the decision it enforces. Apache-2.0.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./check": "./src/check.ts"
+  },
+  "bin": {
+    "kash-floor": "./src/bin/floor.ts"
+  },
+  "files": [
+    "dist",
+    "src",
+    "sql",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "typecheck:test": "tsc --noEmit -p tsconfig.test.json",
+    "test": "bun run typecheck:test && bun test && bun run build && node test/node-smoke.mjs",
+    "floor": "bun src/bin/floor.ts check",
+    "clean": "rm -rf dist .turbo"
+  },
+  "peerDependencies": {
+    "typescript": ">=5.0.0 <7"
+  },
+  "peerDependenciesMeta": {
+    "typescript": { "optional": true }
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "@types/bun": "^1.2.5"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "Apache-2.0",
+  "repository": { "type": "git", "url": "git+https://github.com/KashShahzad/kashscript.git", "directory": "packages/floor" },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/",
+    "bin": {
+      "kash-floor": "./dist/bin/floor.js"
+    }
+  }
+}

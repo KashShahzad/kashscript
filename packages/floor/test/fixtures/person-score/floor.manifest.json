@@ -1,0 +1,11 @@
+{
+  "floor": 1,
+  "repository": "person-score",
+  "serves": "none",
+  "sources": ["lexicons/*.ts"],
+  "schemas": {
+    "prisma": ["prisma/schema.prisma"],
+    "sql": ["sql/*.sql"],
+    "lexicons": ["lexicons/*"]
+  }
+}

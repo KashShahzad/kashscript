@@ -1,0 +1,53 @@
+{
+  "floor": 1,
+  "repository": "clean",
+  "oracles": [
+    { "kind": "boot-log" },
+    { "kind": "next-app", "app": "web/app", "host": "web" },
+    { "kind": "supabase", "dir": "supabase" },
+    { "kind": "ts-table", "file": "src/tools.ts", "export": "TOOLS", "key": "name" }
+  ],
+  "routes": {
+    "GET /api/v1/me": { "subject": "person", "shape": "self" },
+    "GET /api/v1/north-star": { "subject": "organisation", "shape": "aggregate", "aggregates": ["north-star"] },
+    "POST /api/v1/receipts": { "subject": "record", "shape": "action" },
+    "GET /api/v1/receipts/:receiptNo": { "subject": "record", "shape": "one", "states": ["sent", "opened", "accepted", "not-yet", "closed"] },
+    "GET /api/v1/seats": { "subject": "mandate", "shape": "list" },
+    "PAGE web:/**": { "subject": "public", "shape": "one" },
+    "GET web:/api/health": { "subject": "public", "shape": "one" },
+    "ACTION web/actions.ts#subscribe": { "subject": "record", "shape": "action" },
+    "ANY /functions/v1/hello": { "subject": "public", "shape": "action" },
+    "REST /rest/v1/profiles": { "subject": "person", "shape": "self" },
+    "REST /rest/v1/listings": { "subject": "place", "shape": "list" },
+    "RPC /rest/v1/rpc/listing_count": { "subject": "place", "shape": "aggregate", "aggregates": ["listing-count"] },
+    "RPC /rest/v1/rpc/floor_suppress": { "subject": "public", "shape": "action" },
+    "TOOL find_listings": { "subject": "place", "shape": "search", "query": ["near", "dates"] },
+    "TOOL host.read_queue": { "subject": "record", "shape": "list" },
+    "GET /api/streams/events": { "subject": "record", "shape": "self", "outsideOracle": "the WebSocket upgrade is handled in fetch, not in the routes table" }
+  },
+  "aggregates": {
+    "north-star": { "file": "src/north-star.ts", "export": "orgWeeks", "raw": { "[].receiptsSignedByOthers": "the Org's own receipts, each one in its own book" } },
+    "listing-count": { "sql": "listing_count" }
+  },
+  "counts": {
+    "src/stores.ts#liveKeys": { "kind": "internal", "why": "a plan's limit on live keys, checked on the server and never shown" }
+  },
+  "schemas": {
+    "prisma": ["prisma/schema.prisma"],
+    "sql": ["supabase/migrations/*.sql"],
+    "lexicons": ["specs/*.schema.json", "src/lexicons.ts"]
+  },
+  "sources": ["src/**/*.ts", "web/**/*.{ts,tsx}", "supabase/functions/**/*.ts"],
+  "prices": {
+    "files": ["src/prices.ts"],
+    "fields": {
+      "Amount.*": "band",
+      "*.asOf": "structure",
+      "*.yes.*.*": "outcome",
+      "*.allowance.*": "allowance",
+      "*.plans.*.*": "flat",
+      "*.packs[].name": "structure",
+      "*.packs[].price.*": "flat"
+    }
+  }
+}

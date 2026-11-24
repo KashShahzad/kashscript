@@ -19,7 +19,7 @@ RW-2 (2026-11-09), carrying out P6 (ECOSYSTEM d84(f)): *revoke the old npm token
 
 Every run, dry or real, uploads `release/` (tarballs, SBOMs, `published.json`) as the workflow artifact `npm-release-<run id>`, kept 30 days.
 
-`scripts/trusted-publishing.json` lists all twelve open packages, so the token path in `publish-to-npmjs.ts` refuses every one of them from this commit.
+`scripts/trusted-publishing.json` lists every open package — twelve at RW-2, thirteen since RW-17 added `floor` — so the token path in `publish-to-npmjs.ts` refuses every one of them.
 
 ## 2. The founder's steps on npmjs.com — one trusted publisher per package
 
@@ -32,7 +32,23 @@ Each of the twelve exists on npm `[v 11-09, npm view]`, so each can take a trust
 | Workflow filename | `publish.yml` |
 | Environment name | `npm-publish` |
 
-The twelve, in dependency order: `@kashscript/identity-core` · `@kashscript/lexicons` · `@kashscript/attest` · `@kashscript/identity-sdk` · `@kashscript/identity-zkp` · `@kashscript/identity-server` · `@kashscript/muffler` · `@kashscript/terms` · `@kashscript/predicate` · `@kashscript/wallet` · `@kashscript/whiffin` · `@kashscript/kash`.
+The twelve, in dependency order: `@kashscript/identity-core` · `@kashscript/lexicons` · `@kashscript/attest` · `@kashscript/identity-sdk` · `@kashscript/identity-zkp` · `@kashscript/identity-server` · `@kashscript/muffler` · `@kashscript/terms` · `@kashscript/predicate` · `@kashscript/wallet` · `@kashscript/whiffin` · `@kashscript/kash`. The thirteenth, `@kashscript/floor` (RW-17), depends on none of them and does not exist on npm yet: §2a.
+
+## 2a. A brand-new package — `@kashscript/floor`
+
+npmjs.com takes a trusted publisher in a package's settings, so the package must exist first. The token path refuses every listed package, and the tree check (`scripts/check-public-tree.ts`) refuses an open package that is not listed, so a new package cannot simply go out the old way. The route that keeps *no code without provenance* true:
+
+1. **Try the trusted publisher first.** If npmjs.com lets you register one for `@kashscript/floor` before it exists, do that and go to step 3.
+2. **Otherwise reserve the name with a placeholder that holds no code.** From a fresh `npm login` (two-factor), in an empty folder with no `.npmrc`, run the commands below. That placeholder is the one version without provenance, and it carries nothing that runs.
+   ```
+   npm init -y --scope=@kashscript
+   # set "name": "@kashscript/floor", "version": "0.0.0-reserve.0", "license": "Apache-2.0",
+   # "repository": { "type": "git", "url": "git+https://github.com/KashShahzad/kashscript.git", "directory": "packages/floor" }
+   npm publish --access public --tag reserve
+   ```
+   Then register the trusted publisher (§2's fields).
+3. **Publish the real version from the Publish workflow:** `packages` = `floor`, dry run first, then real. `0.1.0-alpha.0` is a prerelease, so it goes out under `alpha` with provenance.
+4. If npm made the placeholder `latest`, point `latest` at the real version once you want it there: `npm dist-tag add @kashscript/floor@0.1.0-alpha.0 latest`.
 
 ## 3. The canary dry run — `terms`
 
@@ -95,7 +111,7 @@ The one release published by hand, without provenance, is AU-3's (identity-core 
 
 ## 6. Then: revoke the tokens
 
-When each package has its trusted publisher (§2) and a dry run of all twelve passes the exchange:
+When each package has its trusted publisher (§2, §2a) and a dry run of all of them passes the exchange:
 
 1. npmjs.com → **Access Tokens**: revoke all eight granular tokens (each made for one job: hudhud, wallet, predicate …).
 2. Delete the `_authToken` line from the local, gitignored `Kashscript 2.0/.npmrc`, and from `~/.npmrc` if it has one. The workflow refuses a run when either is present on a runner. Locally they only block a `--trusted` rehearsal, which needs CI anyway.

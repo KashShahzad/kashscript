@@ -56,6 +56,7 @@ const PERMISSIVE_PUBLIC = new Set<string>([
   "@kashscript/whiffin", // KS-R4 the mandate protocol — it never moves money, so the Commercial reason is gone; Apache-2.0 from 0.2.1
   "@kashscript/predicate", // KS-Q1 the wallet's rule engine — checking needs it (d59); Apache-2.0
   "@kashscript/identity-zkp", // d87 — checking and the wallet need it and the open whiffin depends on it; Apache-2.0 from 0.2.4 (0.2.1–0.2.3 stay SSLA)
+  "@kashscript/floor", // RW-17 the floor as tests — Apache-2.0 by its prompt: anyone checks a system against the floor, free and without us (d85(b)11)
 ]);
 
 const COMMERCIAL_RESTRICTED = new Set<string>([

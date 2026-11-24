@@ -2,7 +2,7 @@
 /**
  * scripts/check-public-tree.ts — the open protocol's tree holds nothing closed (AU-11, A10-04; ADR-0028).
  *
- * The public repository (KashShahzad/kashscript) holds the open protocol only: the twelve packages
+ * The public repository (KashShahzad/kashscript) holds the open protocol only: the thirteen packages
  * that ecosystem decision 87's test opens — checking a record or the person's wallet needs them —
  * with their specs and the tools that test and publish them. The sites, the services, the internal
  * packages and the closed code that left on 2026-11-02 (hudhud, neuron, the Policy to door kit) stay

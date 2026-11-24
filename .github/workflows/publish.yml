@@ -8,7 +8,7 @@
 # package's trusted publisher names on npmjs.com.
 #
 # RW-2 (2026-11-09; docs/publishing.md):
-#   - every one of the twelve open packages is listed in
+#   - every one of the open packages (thirteen since RW-17) is listed in
 #     scripts/trusted-publishing.json, so the token path refuses them all;
 #   - any npm credential in the environment or an .npmrc refuses the run,
 #     dry runs included;
@@ -89,7 +89,7 @@ jobs:
 
       - name: Every open package's tests
         run: bun scripts/test-packages.ts
-        # A10-03: the twelve open packages' own suites, sequentially — the same
+        # A10-03: the open packages' own suites, sequentially — the same
         # gate ci.yml runs on every push. The publish job cannot start without it.
 
   publish:

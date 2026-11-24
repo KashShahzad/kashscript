@@ -1,0 +1,15 @@
+{
+  "floor": 1,
+  "repository": "unsuppressed-count",
+  "serves": "none",
+  "routes": {
+    "GET /api/v1/stats": { "subject": "organisation", "shape": "aggregate", "outsideOracle": "a fixture with no oracle" }
+  },
+  "aggregates": {
+    "north-star": { "file": "src/north-star.ts", "export": "orgWeeks" },
+    "untyped": { "file": "src/north-star.ts", "export": "untyped" },
+    "region": { "sql": "region_stats" }
+  },
+  "schemas": { "sql": ["sql/*.sql"] },
+  "sources": ["src/**/*.ts"]
+}

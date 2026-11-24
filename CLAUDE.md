@@ -1,6 +1,6 @@
 # KashScript open protocol — working notes for coding agents
 
-Bun monorepo; the workspaces are `packages/*`, the twelve open `@kashscript/*` packages. Read
+Bun monorepo; the workspaces are `packages/*`, the thirteen open `@kashscript/*` packages. Read
 [README.md](README.md) first.
 
 - **What may enter:** only what checking a record or the person's wallet needs (ecosystem decision 87).
