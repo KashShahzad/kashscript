@@ -176,15 +176,16 @@ const ENTRIES: DstEntry[] = [
   { tag: "application/vnd.kash.attestation+json", owner: "@kashscript/attest", family: "dsse-type", kind: "DSSE attestation — the record of truth: kash.attestation@1.0.0, canonical, signed by its issuer or by a delegate under a cited mandate" },
   { tag: "application/vnd.kash.mandate+json", owner: "@kashscript/attest", family: "dsse-type", kind: "DSSE mandate — kash.mandate@1.0.0: a principal grants one key the authority to sign within a scope until a date; signed by the principal" },
   { tag: "https://kashscript.com/vct/attestation/1", owner: "@kashscript/attest", family: "sd-jwt-vct", kind: "SD-JWT VC attestation copy — one per verifier, issued by the attestation's issuer; what could join two copies (a private reference, the exact time, the record id, a mandate) is selectively disclosable" },
-  // An establishment's book (Oreoasis's OS-3 and OS-3b; ECOSYSTEM d99, d100; its packages/core/src/book/format.ts).
-  // An entry is one act of a seat — or of the host — in an establishment's own book: a DSSE envelope the seat's device
+  // An establishment's ledger (Oreoasis's OS-3 and OS-3b; ECOSYSTEM d99, d100; its packages/core/src/ledger/format.ts).
+  // An entry is one act of a seat — or of the host — in an establishment's own ledger: a DSSE envelope the seat's device
   // key signs, carried inside an oreoasis-ledger-v1 row the host signs for that one establishment. The row's tag is
-  // unchanged: the book adds a body, never a tag (d99(d)). The versions live inside these types — book-entry/1,
-  // work-mandate/1, seat-register/1, seat-sign-in/1, audit-line/1, book-export-request/1, seat-export/1 — and no prefix
-  // names a product. Registered at the founder's "do the others yourself", 2026-11-24.
-  { tag: "application/vnd.kash.book-entry+json", owner: "oreoasis", family: "dsse-type", kind: "DSSE book entry — one act in an establishment's book (book-entry/1): the act and its version, the actor (a seat's passkey key and this sign-in's device key, or the host), the organisation as principal, the work mandate cited; signed by the device key, inside an oreoasis-ledger-v1 row the host signs" },
-  { tag: "application/vnd.kash.book-export-request+json", owner: "oreoasis", family: "dsse-type", kind: "DSSE book export request — a seat asks its establishment's host for the book, the audit trail or its own export (book-export-request/1); signed by the seat's device key, carrying its sign-in" },
-  { tag: "application/vnd.kash.seat-export+json", owner: "oreoasis", family: "dsse-type", kind: "DSSE seat export — everything an establishment holds about one seat: the seat as kept and every row of the book naming it (seat-export/1); signed by the establishment's host key" },
+  // unchanged: the ledger adds a body, never a tag (d99(d)). The versions live inside these types — ledger-entry/1,
+  // work-mandate/1, seat-register/1, seat-sign-in/1, audit-line/1, ledger-export-request/1, seat-export/1 — and no prefix
+  // names a product. Registered at the founder's "do the others yourself", 2026-11-24, as book-*, and renamed ledger-*
+  // the same day at his word, before any publish: *book* is the engine's word for an organisation's book (d91(f)).
+  { tag: "application/vnd.kash.ledger-entry+json", owner: "oreoasis", family: "dsse-type", kind: "DSSE ledger entry — one act in an establishment's ledger (ledger-entry/1): the act and its version, the actor (a seat's passkey key and this sign-in's device key, or the host), the organisation as principal, the work mandate cited; signed by the device key, inside an oreoasis-ledger-v1 row the host signs" },
+  { tag: "application/vnd.kash.ledger-export-request+json", owner: "oreoasis", family: "dsse-type", kind: "DSSE ledger export request — a seat asks its establishment's host for the ledger, the audit trail or its own export (ledger-export-request/1); signed by the seat's device key, carrying its sign-in" },
+  { tag: "application/vnd.kash.seat-export+json", owner: "oreoasis", family: "dsse-type", kind: "DSSE seat export — everything an establishment holds about one seat: the seat as kept and every row of the ledger naming it (seat-export/1); signed by the establishment's host key" },
   // reserved — protocol-layer slots (ROADMAP)
   { tag: "hudhud-action-ledger-v1\n", owner: "@kashscript/hudhud", family: "kash-event", kind: "reserved: hudhud action ledger", reserved: true },
   { tag: "kash-identity-event-v1\n", owner: "@kashscript/identity-server", family: "kash-event", kind: "reserved: identity server event", reserved: true },
