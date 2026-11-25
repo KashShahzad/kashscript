@@ -14,6 +14,7 @@
 
 import { afterAll, beforeAll, describe, expect, it, setDefaultTimeout } from "bun:test";
 import { spawn, type ChildProcess } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createServer } from "node:net";
 import { join, resolve } from "node:path";
@@ -59,6 +60,9 @@ const RUNNERS: ReadonlyArray<readonly [string, Runner]> = [
 
 const SAMPLE_STATEMENT =
   "I accept this milestone as delivered against the scope we agreed. Signing records my acceptance of this milestone only; it does not approve any other milestone, invoice, or payment.";
+
+/** A throwaway practice setting for the engine's e2e server (32 random bytes, hex), made at run time. */
+const practiceValue = (): string => randomBytes(32).toString("hex");
 
 /** Why a pack's floor manifest declares a route no oracle of the pack sees: the engine serves it, the pack mounts nothing. */
 const ENGINE_ROUTE = "served by Duedale's API; a pack mounts no route";
@@ -684,7 +688,7 @@ describe("PY-8 set-up packs — one-command practice install and first approval"
       async fetch(req: Request): Promise<Response> {
         const url = new URL(req.url);
         if (req.method === "POST" && url.pathname === "/api/v1/auth/request-link") {
-          return Response.json({ ok: true, devToken: "practice-token-1" }, { status: 202 });
+          return Response.json({ ok: true, devToken: "dev-1" }, { status: 202 });
         }
         if (req.method === "POST" && url.pathname === "/api/v1/auth/redeem") {
           return new Response(JSON.stringify({ ok: true }), {
@@ -836,9 +840,11 @@ if (HAS_ARCHIVE_PACKS && HAS_DUEDALE_HOST) {
             DUEDALE_AUTH_DEV_ECHO: "1",
             DUEDALE_E2E_PRACTICE_WITNESS: "0",
             DUEDALE_PUBLIC_APP_BASE: hostOrigin,
-            DUEDALE_JWT_SECRET: "practice-jwt-secret-py8-simulation-only-000000",
-            DUEDALE_SESSION_SECRET: "practice-session-secret-py8-simulation-only-00",
-            DUEDALE_KEY_ENCRYPTION_SECRET: "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+            // Made fresh for each run, so no secret-like value is ever committed (the public repository's gitleaks
+            // scan flagged the fixed practice values on 2026-11-26).
+            DUEDALE_JWT_SECRET: practiceValue(),
+            DUEDALE_SESSION_SECRET: practiceValue(),
+            DUEDALE_KEY_ENCRYPTION_SECRET: practiceValue(),
           },
           stdio: ["ignore", "pipe", "pipe"],
           windowsHide: true,
