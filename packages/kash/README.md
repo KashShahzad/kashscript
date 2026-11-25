@@ -18,6 +18,8 @@ kash verify <file>                    Check a record, bundle, trust list or stat
 kash trust sign <file>                Sign a trust list or status list with the publisher key.
 kash log init|add|checkpoint|proof    Keep the trust log: a folder any host serves and mirrors. Offline.
 kash log witness|upgrade              Send a head's hash to OpenTimestamps or an RFC 3161 authority. Online.
+kash pack build|list                  Check a set-up pack folder against the open-rule validator and floor. Offline.
+kash pack install <dir> --host <url>  Install a pack on a clean practice organisation and complete its first approval. Online.
 kash status                           The keystore, and whether each key file is still private to you.
 kash doctor | add | rollback          The project-integration commands (unchanged, apart from losing their login).
 ```
@@ -107,7 +109,7 @@ A cohort record says three things: a cohort was finished, under a syllabus at a 
 ## Where things are
 
 - **Keystore:** `--keystore <dir>`, else `$KASH_KEYSTORE`, else `~/.kash/keys`. One `<name>.key.json` per key. `--key <name|path>` picks one; `issue` defaults to `teacher`, `countersign` to `station`, `trust sign` and `log` to `publisher`.
-- **Nothing leaves the machine but a hash, and only when you ask.** `kash log witness` sends a checkpoint's 32-byte hash to public witnesses, and `kash log upgrade` asks a calendar for its own commitment; each says so before it goes online. No other command opens a socket, and the tests run the bundled binary with every route to the network switched off.
+- **Nothing leaves the machine unless you run an online command.** `kash log witness` sends a checkpoint's 32-byte hash to public witnesses, `kash log upgrade` asks a calendar for its own commitment, and `kash pack install` talks only to the practice `--host` you pass (refusing any host not running practice mode); each says `ONLINE` first. No other command opens a socket, and the tests run the bundled binary with every route to the network switched off.
 
 ## Older commands
 

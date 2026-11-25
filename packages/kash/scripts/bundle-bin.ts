@@ -26,7 +26,7 @@ const result = await Bun.build({
   outdir: OUT_DIR,
   target: "node",
   format: "esm",
-  external: ["enquirer"],
+  external: ["enquirer", "typescript"],
 });
 
 if (!result.success) {

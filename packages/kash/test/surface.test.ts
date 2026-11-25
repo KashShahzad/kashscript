@@ -17,7 +17,7 @@ describe("the command surface", () => {
     const help = bunSrc(["--help"]);
     expect(help.status).toBe(0);
     const names = [...help.stdout.matchAll(/^ {2}([a-z]+)\b/gm)].map((m) => m[1]);
-    for (const kept of ["station", "issue", "countersign", "verify", "trust", "log", "status", "doctor", "add", "rollback"]) {
+    for (const kept of ["station", "issue", "countersign", "verify", "trust", "log", "pack", "status", "doctor", "add", "rollback"]) {
       expect(names).toContain(kept);
     }
     for (const gone of ["trade", "neuron", "login", "logout", "sync", "browse"]) {
@@ -42,10 +42,10 @@ describe("the command surface", () => {
 });
 
 describe("the package", () => {
-  it("writes its version once: src/version.ts equals package.json, and is 0.6.0-alpha.0", () => {
+  it("writes its version once: src/version.ts equals package.json, and is 0.6.0-alpha.1", () => {
     expect(VERSION).toBe(pkg.version);
-    expect(pkg.version).toBe("0.6.0-alpha.0");
-    expect(bunSrc(["--version"]).stdout.trim()).toBe("0.6.0-alpha.0");
+    expect(pkg.version).toBe("0.6.0-alpha.1");
+    expect(bunSrc(["--version"]).stdout.trim()).toBe("0.6.0-alpha.1");
   });
 
   it("no longer depends on the packages behind the removed commands, and exports no auth or paywall", () => {

@@ -1,7 +1,7 @@
 {
   "name": "@kashscript/kash",
-  "version": "0.6.0-alpha.0",
-  "description": "@kashscript/kash — the `kash` CLI, the station kit. Makes a station's own keys, issues a cohort record as a file, countersigns it as the station, checks any record offline, and signs a trust list with the publisher key. Local files only: no server, no upload, no wallet delivery. Node 20+, Bun 1+.",
+  "version": "0.6.0-alpha.1",
+  "description": "@kashscript/kash — the `kash` CLI, the station kit. Makes a station's own keys, issues a cohort record as a file, countersigns it as the station, checks any record offline, signs a trust list with the publisher key, keeps the trust log, and checks or practice-installs set-up packs. Node 20+, Bun 1+.",
   "type": "module",
   "keywords": ["kashscript", "kash", "cli", "station", "did", "attest", "countersign", "trust-list", "offline", "npx"],
   "homepage": "https://www.kashscript.com",
@@ -34,9 +34,12 @@
     "clean":          "rm -rf dist .turbo"
   },
   "dependencies": {
-    "@kashscript/attest": "workspace:*",
-    "commander":          "^12.1.0",
-    "enquirer":           "^2.4.1"
+    "@kashscript/attest":    "workspace:*",
+    "@kashscript/floor":     "workspace:*",
+    "@kashscript/predicate": "workspace:*",
+    "commander":             "^12.1.0",
+    "enquirer":              "^2.4.1",
+    "typescript":            "^5.6.3"
   },
   "devDependencies": {
     "@kashscript/identity-core":   "workspace:*",

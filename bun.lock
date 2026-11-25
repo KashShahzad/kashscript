@@ -98,14 +98,17 @@
     },
     "packages/kash": {
       "name": "@kashscript/kash",
-      "version": "0.6.0-alpha.0",
+      "version": "0.6.0-alpha.1",
       "bin": {
         "kash": "./src/bin/kash.ts",
       },
       "dependencies": {
         "@kashscript/attest": "workspace:*",
+        "@kashscript/floor": "workspace:*",
+        "@kashscript/predicate": "workspace:*",
         "commander": "^12.1.0",
         "enquirer": "^2.4.1",
+        "typescript": "^5.6.3",
       },
       "devDependencies": {
         "@kashscript/identity-core": "workspace:*",

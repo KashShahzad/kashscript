@@ -28,6 +28,7 @@ import { runCountersign } from "../commands/countersign";
 import { runDoctor }   from "../commands/doctor";
 import { runIssueCohort } from "../commands/issue";
 import { runLogAdd, runLogCheckpoint, runLogInit, runLogProof, runLogUpgrade, runLogWitness } from "../commands/log";
+import { runPackBuild, runPackInstall, runPackList } from "../commands/pack";
 import { runRollback } from "../commands/rollback";
 import { runStationInit } from "../commands/station";
 import { runStatus }   from "../commands/status";
@@ -227,6 +228,54 @@ async function main(): Promise<void> {
       await runLogProof(dir, index, {
         ...(opts.size !== undefined ? { size: opts.size } : {}),
         ...(opts.out !== undefined ? { out: opts.out } : {}),
+      });
+    });
+
+  /* ── pack ─────────────────────────────────────────────────────── */
+
+  const pack = program
+    .command("pack")
+    .description("Set-up packs: check a pack folder against the floor offline, list checked packs, or install one on a practice host.");
+  pack
+    .command("build <dir>")
+    .description("Check a set-up pack folder against the open-rule validator, customer-copy rules, zero-price rule and @kashscript/floor. Offline.")
+    .option("--out <file>", "write the built pack manifest JSON here")
+    .option("--json", "print the built pack manifest as JSON")
+    .action(async (dir: string, opts: { out?: string; json?: boolean }) => {
+      await runPackBuild({
+        dir,
+        ...(opts.out !== undefined ? { out: opts.out } : {}),
+        ...(opts.json === true ? { json: true } : {}),
+      });
+    });
+  pack
+    .command("list <dir>")
+    .description("Check and list every set-up pack folder under <dir>. Offline.")
+    .option("--json", "print the checked packs as JSON")
+    .action(async (dir: string, opts: { json?: boolean }) => {
+      await runPackList({
+        dir,
+        ...(opts.json === true ? { json: true } : {}),
+      });
+    });
+  pack
+    .command("install <dir>")
+    .description("GOES ONLINE (practice host only): check the pack, create a clean practice organisation on --host, configure the pack and complete its first approval.")
+    .requiredOption("--host <url>", "base URL of a local Duedale practice host running with DUEDALE_AUTH_DEV_ECHO=1")
+    .option("--org-name <name>", "practice organisation name (prefixed with Practice if omitted)")
+    .option("--org-slug <slug>", "practice organisation slug (lowercase letters, digits and hyphens)")
+    .option("--email <email>", "practice sign-in email address")
+    .option("--out <file>", "write the verified two-signature approval artifact here (checkable with `kash verify`)")
+    .option("--json", "print the install report as JSON (the record itself goes to --out)")
+    .action(async (dir: string, opts: { host: string; orgName?: string; orgSlug?: string; email?: string; out?: string; json?: boolean }) => {
+      await runPackInstall({
+        dir,
+        host: opts.host,
+        ...(opts.orgName !== undefined ? { orgName: opts.orgName } : {}),
+        ...(opts.orgSlug !== undefined ? { orgSlug: opts.orgSlug } : {}),
+        ...(opts.email !== undefined ? { email: opts.email } : {}),
+        ...(opts.out !== undefined ? { out: opts.out } : {}),
+        ...(opts.json === true ? { json: true } : {}),
       });
     });
 
