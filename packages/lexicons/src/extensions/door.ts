@@ -24,6 +24,12 @@
  *     Optional, so every 1.1.0 body is a 1.2.0 body; a 1.1.0 reader refuses a
  *     rule that names it, rather than binding it to the requester.
  *
+ *   kash.rule@1.3.0 · kash.adoption@1.1.0 (RW-19 B; ECOSYSTEM d97(h))
+ *     The author's and the anchor's DID is a standard method — `did:web` for
+ *     an organisation on its own domain (d91(e)), `did:key` for a
+ *     self-certifying key — with `did:kash`, the house spelling, readable for
+ *     ever. Every earlier body is a later body.
+ *
  *   kash.adoption@1.0.0
  *     An anchor — an organisation — adopts one version of a rule with its own
  *     values for the parameters the rule bounds. Public, signed by the anchor
@@ -45,7 +51,7 @@
 
 import type { LexiconDef } from "../registry";
 import { S, type ObjectSchema } from "../schema";
-import { DID, HEX64, ISO, PLACE_REF, RULE_REF, SLUG, TEXT } from "./refs";
+import { ADOPTION_REF, HEX64, ISO, PLACE_REF, PUBLISHER, RULE_REF, SLUG, TEXT } from "./refs";
 
 /* ── shared pieces (the ids and the common strings are `./refs`, shared with the place and list records) ── */
 
@@ -273,7 +279,7 @@ export const CRITERION_SCHEMA: ObjectSchema = S.object(
     predicate: S.optional(
       S.object(
         {
-          issuers: S.array(S.object({ id: DID, name: TEXT(120) }, ["id", "name"]), { minItems: 1, maxItems: 16 }),
+          issuers: S.array(S.object({ id: PUBLISHER, name: TEXT(120) }, ["id", "name"]), { minItems: 1, maxItems: 16 }),
           freshDays: S.number({ integer: true, min: 1, max: 366 }),
         },
         ["issuers", "freshDays"],
@@ -299,7 +305,7 @@ export const KASH_RULE_BODY_SCHEMA: ObjectSchema = S.object(
   {
     id: RULE_REF,
     version: S.number({ integer: true, min: 1 }),
-    author: DID,
+    author: PUBLISHER,
     title: TEXT(160),
     purpose: TEXT(1000),
     visibility: S.enum("public", "private"),
@@ -510,6 +516,20 @@ export const KASH_RULE_1_2_LEXICON: LexiconDef = {
     "kash.rule@1.1.0 plus meta.holder on a kash-artifact query: \"countersigner\" binds the presentation to the one key whose acceptance in the countersign bundle verifies. A 1.1.0 body is a 1.2.0 body.",
 };
 
+/* ── kash.rule@1.3.0 — the author under a standard method (RW-19 B) ── */
+
+export const KASH_RULE_1_3_ID = "kash.rule@1.3.0" as const;
+
+export const KASH_RULE_1_3_LEXICON: LexiconDef = {
+  id: KASH_RULE_1_3_ID,
+  nsid: KASH_RULE_NSID,
+  semver: { major: 1, minor: 3, patch: 0 },
+  bodySchema: KASH_RULE_1_2_BODY_SCHEMA,
+  title: "A door's rule, its author under a standard method",
+  description:
+    "kash.rule@1.2.0 with the author's DID a standard method (RW-19 B, d97(h)): did:web for an organisation on its own domain, did:key for a self-certifying key; the did:kash house spelling stays readable. A 1.2.0 body is a 1.3.0 body.",
+};
+
 /* ── kash.adoption@1.0.0 ───────────────────────────────────────────── */
 
 export const KASH_ADOPTION_NSID = "kash.adoption" as const;
@@ -530,8 +550,8 @@ export interface AdoptionBody {
 
 export const KASH_ADOPTION_BODY_SCHEMA: ObjectSchema = S.object(
   {
-    id: S.string({ pattern: /^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\/adoption\/[a-z0-9][a-z0-9-]{0,62}$/ }),
-    anchor: DID,
+    id: ADOPTION_REF,
+    anchor: PUBLISHER,
     rule: S.object({ id: RULE_ID, version: S.number({ integer: true, min: 1 }), hash: HEX64 }, ["id", "version", "hash"]),
     parameters: S.record(VALUE, S.string({ pattern: /^[A-Za-z_][A-Za-z0-9_]{0,63}$/ })),
     dates: S.object({ adopted: ISO, renewBy: ISO, endsAt: ISO }, ["adopted", "renewBy", "endsAt"]),
@@ -549,7 +569,26 @@ export const KASH_ADOPTION_LEXICON: LexiconDef = {
   description: "An organisation adopts one version of a rule with its own values for the parameters the rule bounds. Public, signed by the anchor.",
 };
 
+export const KASH_ADOPTION_1_1_ID = "kash.adoption@1.1.0" as const;
+
+export const KASH_ADOPTION_1_1_LEXICON: LexiconDef = {
+  id: KASH_ADOPTION_1_1_ID,
+  nsid: KASH_ADOPTION_NSID,
+  semver: { major: 1, minor: 1, patch: 0 },
+  bodySchema: KASH_ADOPTION_BODY_SCHEMA,
+  title: "An anchor's adoption of a rule",
+  description:
+    "kash.adoption@1.0.0 with the anchor's DID a standard method (RW-19 B, d97(h)). A 1.0.0 body is a 1.1.0 body.",
+};
+
 /* ── bundles ───────────────────────────────────────────────────────── */
 
-/** Every door lexicon: the rule at 1.0.0, 1.1.0 and 1.2.0, and the adoption. All public and organisation-authored (d59). */
-export const DOOR_LEXICONS: readonly LexiconDef[] = [KASH_RULE_LEXICON, KASH_RULE_1_1_LEXICON, KASH_RULE_1_2_LEXICON, KASH_ADOPTION_LEXICON];
+/** Every door lexicon: the rule at 1.0.0 to 1.3.0, and the adoption at 1.0.0 and 1.1.0. All public and organisation-authored (d59). */
+export const DOOR_LEXICONS: readonly LexiconDef[] = [
+  KASH_RULE_LEXICON,
+  KASH_RULE_1_1_LEXICON,
+  KASH_RULE_1_2_LEXICON,
+  KASH_RULE_1_3_LEXICON,
+  KASH_ADOPTION_LEXICON,
+  KASH_ADOPTION_1_1_LEXICON,
+];

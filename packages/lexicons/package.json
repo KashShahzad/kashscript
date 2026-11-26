@@ -1,6 +1,6 @@
 {
   "name": "@kashscript/lexicons",
-  "version": "0.6.0-alpha.0",
+  "version": "0.7.0-alpha.0",
   "description": "Zero-dependency lexicon framework — envelope, schema DSL, registry, validator — and the public, organisation-authored records of the open protocol (a door's rule and adoption; places, listings and guides; trust and status lists), as opt-in extensions.",
   "type": "module",
   "main": "./src/index.ts",
@@ -39,7 +39,8 @@
   },
   "devDependencies": {
     "typescript": "^5.6.3",
-    "@types/bun": "^1.2.5"
+    "@types/bun": "^1.2.5",
+    "@kashscript/identity-core": "workspace:*"
   },
   "license": "Apache-2.0",
   "repository": { "type": "git", "url": "git+https://github.com/KashShahzad/kashscript.git", "directory": "packages/lexicons" },

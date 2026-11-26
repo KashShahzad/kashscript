@@ -12,6 +12,7 @@
  * The cross-field rules a shape cannot write are `./faults`. The three forms are `./forms`.
  */
 
+import { DID_WEB_SOURCE } from "@kashscript/identity-core";
 import type { LexiconDef } from "@kashscript/lexicons/registry";
 import { S, type ObjectSchema, type Schema } from "@kashscript/lexicons/schema";
 import { STATUS_PURPOSES, type StatusListEntry } from "../holder/status-list";
@@ -51,8 +52,9 @@ export type DelegateKind = (typeof DELEGATE_KINDS)[number];
 /* ── the pieces ────────────────────────────────────────────────────── */
 
 const B58 = "[1-9A-HJ-NP-Za-km-z]{32,48}";
-/** A `did:web` (W3C CCG): a host, an optional port written `%3A<port>`, and optional path segments. */
-const WEB = "did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8}";
+/** A `did:web` (W3C CCG): a host, an optional port written `%3A<port>`, and optional path segments.
+ *  The one grammar, identity-core's, shared with the published schemas (RW-19 B). */
+const WEB: string = DID_WEB_SOURCE;
 const SLUG_SOURCE = "[a-z0-9][a-z0-9-]{0,62}";
 
 /**

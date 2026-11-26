@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kashscript.com/lexicons/kash.trust-list@1.0.0",
+  "$id": "https://kashscript.com/lexicons/kash.trust-list@1.1.0",
   "title": "A trust list",
-  "description": "A publisher's versioned list of issuers — attest's kashscript-trust-list/1 payload in clear — with d91's three assertions: identity (the key, its class and grade), standing (listed, suspended, removed) and scope (the exact tags and the references it may attest against), each entry bound to a floor version. Signed by its publisher as DSSE; any host may mirror it.",
+  "description": "kash.trust-list@1.0.0 with the publisher's self-certifying key written in either spelling (RW-19 B, d97(h)): did:kash or did:key — never a did:web, so the list's own signature checks from the identifier alone. A 1.0.0 body is a 1.1.0 body.",
   "type": "object",
   "properties": {
     "format": {
@@ -19,8 +19,7 @@
     },
     "publisher": {
       "type": "string",
-      "format": "did-ks",
-      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}$"
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60})$"
     },
     "issuedAtUnix": {
       "type": "integer",

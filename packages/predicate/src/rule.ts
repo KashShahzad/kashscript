@@ -26,7 +26,7 @@ import { canonicalize, canonicalizeBytes } from "@kashscript/identity-core";
 import { sha256Hex } from "@kashscript/attest/chain";
 import { signEnvelope, verifyEnvelope, type DsseEnvelope, type DsseSigner } from "@kashscript/attest/dsse";
 import { base64ToBytes } from "@kashscript/attest/ed25519";
-import { resolveVerificationKey } from "@kashscript/attest/signing";
+import { canonicalSignerOf, resolveVerificationKey, type KashPublicKey } from "@kashscript/attest/signing";
 import { validate } from "@kashscript/lexicons/schema";
 import { KASH_RULE_1_2_BODY_SCHEMA, type Criterion1_1 as Criterion, type RuleBody1_1 as RuleBody, type Subject } from "@kashscript/lexicons/extensions/door";
 import { addressTexts, checkAddress, completeness, type Completeness } from "./address";
@@ -410,7 +410,11 @@ export class RuleError extends Error {
 export async function signRule(body: RuleBody, signer: DsseSigner): Promise<DsseEnvelope> {
   const v = validateRule(body);
   if (!v.ok) throw new RuleError("RULE_INVALID", `the rule does not validate: ${v.refusals.map((r) => r.code).join(", ")}`, v.refusals);
-  if (signer.keyid.split("#")[0] !== body.author) throw new RuleError("RULE_SIGNER", "a rule is signed by its author's own key");
+  const signerRoot = signer.keyid.split("#")[0]!;
+  const canonicalAuthor = canonicalSignerOf(body.author);
+  // The author's exact identifier, or the same self-certifying key under its other spelling (RW-19 B).
+  const asAuthor = signerRoot === body.author || (canonicalAuthor !== null && canonicalSignerOf(signerRoot) === canonicalAuthor);
+  if (!asAuthor) throw new RuleError("RULE_SIGNER", "a rule is signed by its author's own key");
   return signEnvelope(body, RULE_PAYLOAD_TYPE, signer, { canonical: true });
 }
 
@@ -421,19 +425,43 @@ export interface ReadRule {
   readonly validation: RuleValidation;
 }
 
-/** Read a signed rule offline: its author's signature (the key is in its DID), its shape, its floor. Throws `RuleError`. */
-export async function readRule(envelope: DsseEnvelope): Promise<ReadRule> {
+export interface ReadRuleOptions {
+  /**
+   * Keys by keyid, for an author whose identifier is not self-certifying — a
+   * `did:web` organisation on its own domain (d91(e)). Its key comes from a
+   * pinned trust list or a held key, handed to the check as attest hands a
+   * resolver; **nothing is fetched** (RW-14 §1.1; RW-19 B). Without it, a
+   * self-certifying author — `did:kash` or `did:key`, two spellings of one
+   * key — still reads from the identifier alone.
+   */
+  readonly resolveKey?: (keyid: string) => KashPublicKey | null;
+}
+
+/** Read a signed rule offline: its author's signature (the key is in its DID, or handed in for a `did:web` author), its shape, its floor. Throws `RuleError`. */
+export async function readRule(envelope: DsseEnvelope, opts: ReadRuleOptions = {}): Promise<ReadRule> {
   if (envelope?.payloadType !== RULE_PAYLOAD_TYPE) throw new RuleError("RULE_SIGNATURE", "not a door rule");
   let result;
   try {
-    result = await verifyEnvelope(envelope, (keyid) => resolveVerificationKey(keyid));
+    result = await verifyEnvelope(envelope, (keyid) => resolveVerificationKey(keyid) ?? opts.resolveKey?.(keyid) ?? null);
   } catch {
     throw new RuleError("RULE_SIGNATURE", "the envelope does not read");
   }
   if (result.payloadJson === undefined) throw new RuleError("RULE_SIGNATURE", "the envelope does not read");
   const body = result.payloadJson as RuleBody;
   const author = typeof body?.author === "string" ? body.author : null;
-  if (!result.ok || author === null || !result.verifiedKeyids.some((k) => k.split("#")[0] === author)) {
+  const canonicalAuthor = author === null ? null : canonicalSignerOf(author);
+  const byAuthor = result.verifiedKeyids.some((k) => {
+    const kid = k.split("#")[0]!;
+    // The exact identifier, or the same self-certifying key under its other spelling (RW-19 B; A7-02's rule).
+    return kid === author || (canonicalAuthor !== null && canonicalSignerOf(kid) === canonicalAuthor);
+  });
+  if (!result.ok || author === null || !byAuthor) {
+    if (author !== null && author.startsWith("did:web:") && opts.resolveKey === undefined) {
+      throw new RuleError(
+        "RULE_SIGNATURE",
+        "the author is a did:web organisation: its key is not in the identifier, and none was handed in — pass resolveKey with the key a pinned trust list or a held record binds to it (nothing is fetched)",
+      );
+    }
     throw new RuleError("RULE_SIGNATURE", "the rule is not signed by its author");
   }
   const bytes = base64ToBytes(envelope.payload);

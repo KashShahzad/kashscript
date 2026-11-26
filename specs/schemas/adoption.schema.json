@@ -1,25 +1,24 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kashscript.com/lexicons/kash.adoption@1.0.0",
+  "$id": "https://kashscript.com/lexicons/kash.adoption@1.1.0",
   "title": "An anchor's adoption of a rule",
-  "description": "An organisation adopts one version of a rule with its own values for the parameters the rule bounds. Public, signed by the anchor.",
+  "description": "kash.adoption@1.0.0 with the anchor's DID a standard method (RW-19 B, d97(h)). A 1.0.0 body is a 1.1.0 body.",
   "type": "object",
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/adoption\\/[a-z0-9][a-z0-9-]{0,62}$"
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/adoption\\/[a-z0-9][a-z0-9-]{0,62}$"
     },
     "anchor": {
       "type": "string",
-      "format": "did-ks",
-      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}$"
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})$"
     },
     "rule": {
       "type": "object",
       "properties": {
         "id": {
           "type": "string",
-          "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/rule\\/[a-z0-9][a-z0-9-]{0,62}$"
+          "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/rule\\/[a-z0-9][a-z0-9-]{0,62}$"
         },
         "version": {
           "type": "integer",

@@ -7,8 +7,9 @@
  * and Indus tokens by JWKS `kid`. So a wallet resolves a signing key in this
  * order, and every report says which step answered:
  *
- *   1. **self-certifying** — the key is inside the identifier (`parseDidKey`),
- *      and so is its type: Ed25519 or P-256 (PL-2).
+ *   1. **self-certifying** — the key is inside the identifier, and so is its
+ *      type: Ed25519 or P-256 (PL-2). Two spellings, one key: `did:kash`, and
+ *      `did:key`, the standard name RW-19 B gives a self-certifying key.
  *   2. **trust-list** — a key named by a verified trust list whose publisher
  *      the verifier pinned. From an unpinned list it is reported as
  *      `unpinned-trust-list`: the binding is only that publisher's word.
@@ -21,7 +22,7 @@
 
 import { compressP256PublicKey, parseDid, type KashKeyType, type KashPublicKey } from "@kashscript/identity-core";
 import { hexToBytes } from "../chain";
-import { resolveDidKey } from "../signing";
+import { resolveVerificationKey } from "../signing";
 
 export type KeySource = "self-certifying" | "trust-list" | "unpinned-trust-list" | "held-key";
 
@@ -62,9 +63,11 @@ export function selfCertifyingKey(keyid: string): Uint8Array | null {
   }
 }
 
-/** The key, with its declared type, inside a self-certifying `did:kash`. Never throws. */
+/** The key, with its declared type, inside a self-certifying identifier of
+ *  either spelling — `did:kash`, or `did:key`, the standard name RW-19 B gives
+ *  a self-certifying key (d97(h)). Never throws. */
 export function selfCertifyingTypedKey(keyid: string): KashPublicKey | null {
-  return resolveDidKey(keyid);
+  return resolveVerificationKey(keyid);
 }
 
 /** Decode a well-formed Ed25519 entry; null for anything else (including ES256). Pre-PL-2 shape. */

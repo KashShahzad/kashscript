@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { deriveDid } from "@kashscript/identity-core";
+import { deriveDid, deriveDidKey } from "@kashscript/identity-core";
 import { decodeJws, signJws, verifyJws } from "@kashscript/attest/sd-jwt";
 import { MemoryStore } from "../src/adapters/memory-store";
 import { newAgreementKeyPair, softwareRoot } from "../src/adapters/software-root";
@@ -131,6 +131,17 @@ describe("the root and the keys", () => {
     const pub = await ed25519PublicKeyOf(seed);
     expect((await keys.restore(deriveDid(pub), seed)).purpose).toBe("restored");
     const wrong = await keys.restore(deriveDid(await ed25519PublicKeyOf(new Uint8Array(32).fill(4))), seed).catch((e) => e);
+    expect(isWalletError(wrong, "BACKUP_INVALID")).toBe(true);
+  });
+
+  test("and a did:key id the same way — two spellings, one rule (RW-19 B)", async () => {
+    const { vault, root } = await fresh();
+    const keys = new KeyRegistry(vault, root, systemRandom, () => 1);
+    const seed = new Uint8Array(32).fill(3);
+    const pub = await ed25519PublicKeyOf(seed);
+    expect((await keys.restore(deriveDidKey({ type: "Ed25519", publicKey: pub }), seed)).purpose).toBe("restored");
+    const other = await ed25519PublicKeyOf(new Uint8Array(32).fill(4));
+    const wrong = await keys.restore(deriveDidKey({ type: "Ed25519", publicKey: other }), seed).catch((e) => e);
     expect(isWalletError(wrong, "BACKUP_INVALID")).toBe(true);
   });
 });

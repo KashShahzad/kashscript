@@ -1,18 +1,17 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kashscript.com/lexicons/kash.place@1.0.0",
+  "$id": "https://kashscript.com/lexicons/kash.place@1.1.0",
   "title": "A place",
-  "description": "A place by its publisher's DID and a slug (d60): its name, kind, the hub and places it sits in, its region as a label, and the public source its name is pinned to. No coordinate, point or polygon — positions live in the template that draws them. Public, organisation-authored.",
+  "description": "kash.place@1.0.0 with the publisher's DID a standard method (RW-19 B, d97(h)): did:web for an organisation on its own domain, did:key for a self-certifying key; the did:kash house spelling stays readable. A 1.0.0 body is a 1.1.0 body.",
   "type": "object",
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
     },
     "publisher": {
       "type": "string",
-      "format": "did-ks",
-      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}$"
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})$"
     },
     "name": {
       "type": "string",
@@ -42,13 +41,13 @@
     },
     "cluster": {
       "type": "string",
-      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
     },
     "within": {
       "type": "array",
       "items": {
         "type": "string",
-        "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
+        "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
       },
       "minItems": 1,
       "maxItems": 8

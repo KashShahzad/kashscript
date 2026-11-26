@@ -1,13 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kashscript.com/lexicons/kash.rule@1.2.0",
-  "title": "A door's rule, with its address and the countersigner as holder",
-  "description": "kash.rule@1.1.0 plus meta.holder on a kash-artifact query: \"countersigner\" binds the presentation to the one key whose acceptance in the countersign bundle verifies. A 1.1.0 body is a 1.2.0 body.",
+  "$id": "https://kashscript.com/lexicons/kash.rule@1.3.0",
+  "title": "A door's rule, its author under a standard method",
+  "description": "kash.rule@1.2.0 with the author's DID a standard method (RW-19 B, d97(h)): did:web for an organisation on its own domain, did:key for a self-certifying key; the did:kash house spelling stays readable. A 1.2.0 body is a 1.3.0 body.",
   "type": "object",
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/rule\\/[a-z0-9][a-z0-9-]{0,62}$"
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/rule\\/[a-z0-9][a-z0-9-]{0,62}$"
     },
     "version": {
       "type": "integer",
@@ -15,8 +15,7 @@
     },
     "author": {
       "type": "string",
-      "format": "did-ks",
-      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}$"
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})$"
     },
     "title": {
       "type": "string",
@@ -577,8 +576,7 @@
                   "properties": {
                     "id": {
                       "type": "string",
-                      "format": "did-ks",
-                      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}$"
+                      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})$"
                     },
                     "name": {
                       "type": "string",
@@ -826,7 +824,7 @@
                   "type": "array",
                   "items": {
                     "type": "string",
-                    "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
+                    "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
                   },
                   "minItems": 1,
                   "maxItems": 64
@@ -866,7 +864,7 @@
                   "type": "array",
                   "items": {
                     "type": "string",
-                    "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
+                    "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
                   },
                   "minItems": 1,
                   "maxItems": 64
@@ -1027,7 +1025,7 @@
                     "properties": {
                       "rule": {
                         "type": "string",
-                        "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/rule\\/[a-z0-9][a-z0-9-]{0,62}$"
+                        "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/rule\\/[a-z0-9][a-z0-9-]{0,62}$"
                       },
                       "version": {
                         "type": "integer",

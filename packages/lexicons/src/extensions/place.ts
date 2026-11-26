@@ -2,6 +2,12 @@
  * Place Extension — the public records about places and what is offered at them (ECOSYSTEM d59(a), d60,
  * d62(d)4, d69(c), d83(c), d93(e)2; KS-N1, folding in KS-R5).
  *
+ * **1.1.0 of each (RW-19 B; d97(h)):** the publisher's DID is a standard method — `did:web` for an
+ * organisation on its own domain, `did:key` for a publisher signing with a self-certifying key — and
+ * `did:kash`, the house spelling, stays readable, so every 1.0.0 body is a 1.1.0 body. d60(a)'s shape,
+ * *the publisher's DID plus a path*, is unchanged; moving a record to a new identifier is what the
+ * pointer has always recorded.
+ *
  *   kash.place@1.0.0
  *     A place: `did:kash:<publisher>/place/<slug>` (d60) — an island, a kasbah, a landmark, a landscape, a
  *     business's own premises or a meeting place. Indusland publishes landmarks and landscapes; a business
@@ -33,7 +39,7 @@
 
 import type { LexiconDef } from "../registry";
 import { S, type ObjectSchema, type StringSchema } from "../schema";
-import { DID, GUIDE_REF, HEX64, ISO, LISTING_REF, PLACE_REF, RECORD_REF, TEXT, didOf, fault, type RecordFault } from "./refs";
+import { GUIDE_REF, HEX64, ISO, LISTING_REF, PLACE_REF, PUBLISHER, RECORD_REF, TEXT, didOf, fault, type RecordFault } from "./refs";
 
 /* ── shared pieces ─────────────────────────────────────────────────── */
 
@@ -94,7 +100,7 @@ export interface PlaceBody {
 export const KASH_PLACE_BODY_SCHEMA: ObjectSchema = S.object(
   {
     id: PLACE_REF,
-    publisher: DID,
+    publisher: PUBLISHER,
     name: TEXT(120),
     names: S.optional(NAMES),
     kind: S.enum(...PLACE_KINDS),
@@ -118,6 +124,18 @@ export const KASH_PLACE_LEXICON: LexiconDef = {
   title: "A place",
   description:
     "A place by its publisher's DID and a slug (d60): its name, kind, the hub and places it sits in, its region as a label, and the public source its name is pinned to. No coordinate, point or polygon — positions live in the template that draws them. Public, organisation-authored.",
+};
+
+export const KASH_PLACE_1_1_ID = "kash.place@1.1.0" as const;
+
+export const KASH_PLACE_1_1_LEXICON: LexiconDef = {
+  id: KASH_PLACE_1_1_ID,
+  nsid: KASH_PLACE_NSID,
+  semver: { major: 1, minor: 1, patch: 0 },
+  bodySchema: KASH_PLACE_BODY_SCHEMA,
+  title: "A place",
+  description:
+    "kash.place@1.0.0 with the publisher's DID a standard method (RW-19 B, d97(h)): did:web for an organisation on its own domain, did:key for a self-certifying key; the did:kash house spelling stays readable. A 1.0.0 body is a 1.1.0 body.",
 };
 
 /** The rules the shape cannot write. Call after the body has the shape. */
@@ -151,7 +169,7 @@ export interface PlacePointerBody {
 }
 
 export const KASH_PLACE_POINTER_BODY_SCHEMA: ObjectSchema = S.object(
-  { from: PLACE_REF, publisher: DID, to: PLACE_REF, movedAt: ISO, note: S.optional(TEXT(400)) },
+  { from: PLACE_REF, publisher: PUBLISHER, to: PLACE_REF, movedAt: ISO, note: S.optional(TEXT(400)) },
   ["from", "publisher", "to", "movedAt"],
 );
 
@@ -162,6 +180,18 @@ export const KASH_PLACE_POINTER_LEXICON: LexiconDef = {
   bodySchema: KASH_PLACE_POINTER_BODY_SCHEMA,
   title: "A place has a new publisher",
   description: "The old publisher's signed pointer from a place's old id to its new one under another publisher (d60(a)). The old record is never rewritten.",
+};
+
+export const KASH_PLACE_POINTER_1_1_ID = "kash.place.pointer@1.1.0" as const;
+
+export const KASH_PLACE_POINTER_1_1_LEXICON: LexiconDef = {
+  id: KASH_PLACE_POINTER_1_1_ID,
+  nsid: KASH_PLACE_POINTER_NSID,
+  semver: { major: 1, minor: 1, patch: 0 },
+  bodySchema: KASH_PLACE_POINTER_BODY_SCHEMA,
+  title: "A place has a new publisher, or a new identifier",
+  description:
+    "kash.place.pointer@1.0.0 with the publisher's DID a standard method (RW-19 B): the same signed pointer also records a publisher re-issuing its own place under its did:web — a new identifier, the old record never rewritten (d60(a)). A 1.0.0 body is a 1.1.0 body.",
 };
 
 export function placePointerFaults(body: PlacePointerBody): readonly RecordFault[] {
@@ -219,7 +249,7 @@ export interface ListingBody {
 export const KASH_LISTING_BODY_SCHEMA: ObjectSchema = S.object(
   {
     id: LISTING_REF,
-    host: DID,
+    host: PUBLISHER,
     hostName: S.optional(TEXT(120)),
     title: S.string({ minLength: 3, maxLength: 120 }),
     summary: S.string({ minLength: 10, maxLength: 1200 }),
@@ -247,6 +277,18 @@ export const KASH_LISTING_LEXICON: LexiconDef = {
   title: "A listing",
   description:
     "An offering at one or more places, by its host's DID and a slug: title, summary, places, an ISIC sector, the published price, the terms it is booked under, media and the host's own channel. No rating, review or count. Public, organisation-authored.",
+};
+
+export const KASH_LISTING_1_1_ID = "kash.listing@1.1.0" as const;
+
+export const KASH_LISTING_1_1_LEXICON: LexiconDef = {
+  id: KASH_LISTING_1_1_ID,
+  nsid: KASH_LISTING_NSID,
+  semver: { major: 1, minor: 1, patch: 0 },
+  bodySchema: KASH_LISTING_BODY_SCHEMA,
+  title: "A listing",
+  description:
+    "kash.listing@1.0.0 with the host's DID a standard method (RW-19 B, d97(h)): did:web for a host on its own domain, did:key for a host signing with a self-certifying key. A 1.0.0 body is a 1.1.0 body.",
 };
 
 export function listingFaults(body: ListingBody): readonly RecordFault[] {
@@ -306,7 +348,7 @@ const SECTION = S.object(
 export const KASH_GUIDE_BODY_SCHEMA: ObjectSchema = S.object(
   {
     id: GUIDE_REF,
-    publisher: DID,
+    publisher: PUBLISHER,
     title: TEXT(160),
     summary: S.optional(TEXT(1200)),
     languages: S.array(LANG, { minItems: 1, maxItems: 16 }),
@@ -331,6 +373,18 @@ export const KASH_GUIDE_LEXICON: LexiconDef = {
     "A publisher's text about places, in sections, with the places and public records it cites and chosen bylines for its makers. Public, organisation-authored; never a person's identifier.",
 };
 
+export const KASH_GUIDE_1_1_ID = "kash.guide@1.1.0" as const;
+
+export const KASH_GUIDE_1_1_LEXICON: LexiconDef = {
+  id: KASH_GUIDE_1_1_ID,
+  nsid: KASH_GUIDE_NSID,
+  semver: { major: 1, minor: 1, patch: 0 },
+  bodySchema: KASH_GUIDE_BODY_SCHEMA,
+  title: "A guide",
+  description:
+    "kash.guide@1.0.0 with the publisher's DID a standard method (RW-19 B, d97(h)). A 1.0.0 body is a 1.1.0 body.",
+};
+
 export function guideFaults(body: GuideBody): readonly RecordFault[] {
   const out: RecordFault[] = [];
   if (didOf(body.id) !== body.publisher) out.push(fault("ID_PUBLISHER", ["id"], "a guide's id is under its publisher's DID"));
@@ -342,5 +396,14 @@ export function guideFaults(body: GuideBody): readonly RecordFault[] {
 
 /* ── bundle ────────────────────────────────────────────────────────── */
 
-/** Every place lexicon. All public and organisation-authored (d59). */
-export const PLACE_LEXICONS: readonly LexiconDef[] = [KASH_PLACE_LEXICON, KASH_PLACE_POINTER_LEXICON, KASH_LISTING_LEXICON, KASH_GUIDE_LEXICON];
+/** Every place lexicon, each at 1.0.0 and 1.1.0 (RW-19 B). All public and organisation-authored (d59). */
+export const PLACE_LEXICONS: readonly LexiconDef[] = [
+  KASH_PLACE_LEXICON,
+  KASH_PLACE_1_1_LEXICON,
+  KASH_PLACE_POINTER_LEXICON,
+  KASH_PLACE_POINTER_1_1_LEXICON,
+  KASH_LISTING_LEXICON,
+  KASH_LISTING_1_1_LEXICON,
+  KASH_GUIDE_LEXICON,
+  KASH_GUIDE_1_1_LEXICON,
+];

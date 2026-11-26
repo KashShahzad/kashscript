@@ -1,6 +1,6 @@
 {
   "name": "@kashscript/attest",
-  "version": "0.3.0-alpha.3",
+  "version": "0.3.0-alpha.4",
   "description": "The Evidence Commons — JCS + Ed25519/ES256, DSSE/PAE envelopes, a canonical DST registry, the trust log (an RFC 9162 Merkle log with signed checkpoints, inclusion and consistency proofs, OpenTimestamps and RFC 3161 witnesses), hash-chains, a standalone verifier CLI, and offline compat verifiers for the KashScript ecosystem's signed artifacts. Apache-2.0 — verification is free.",
   "type": "module",
   "main": "./src/index.ts",

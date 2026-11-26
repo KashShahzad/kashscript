@@ -2,7 +2,9 @@
  * The trust list — which issuers a wallet admits (specs/holder-contract.md §3).
  *
  * A DSSE envelope, `payloadType` = {@link DST_TRUST_LIST}, signed by its
- * publisher's self-certifying `did:kash`. It is **a policy, not the format**
+ * publisher's self-certifying key — spelled `did:kash` or `did:key` (RW-19 B;
+ * two spellings of one key are one publisher wherever this file compares,
+ * A7-02's rule). It is **a policy, not the format**
  * (ECOSYSTEM d47(e)): the record format stays holdable by any wallet, a holder
  * may keep a record from an unlisted issuer by explicit choice, and nothing
  * here can make a record fail to verify. It can only say who is listed.
@@ -21,7 +23,11 @@ import { base64ToBytes } from "../ed25519";
 import { signEnvelope, verifyEnvelope, type DsseEnvelope, type DsseSigner } from "../dsse";
 import { isRegisteredDst } from "../dst";
 import { isAlgorithmUnsupported } from "@kashscript/identity-core";
+import { canonicalSignerOf } from "../signing";
 import { selfCertifyingTypedKey, stripFragment, typedKeyOf, type ListedKey, type PublicKeyEntry } from "./keys";
+
+/** One name for a self-certifying identifier of either spelling; anything else stays itself. */
+const canonicalOrSelf = (id: string): string => canonicalSignerOf(id) ?? id;
 
 export const DST_TRUST_LIST = "application/vnd.kash.trust-list+json" as const;
 export const TRUST_LIST_FORMAT = "kashscript-trust-list/1" as const;
@@ -192,7 +198,8 @@ function failed(reason: TrustListFailureReason, note: string, partial: Partial<T
 
 /**
  * Verify a trust list offline. Structurally junk input returns a report, never
- * a throw. The publisher's key comes out of its `did:kash`; nothing is fetched.
+ * a throw. The publisher's key comes out of its self-certifying identifier —
+ * `did:kash` or `did:key` — and nothing is fetched.
  */
 export async function verifyTrustList(
   envelope: DsseEnvelope,
@@ -226,18 +233,19 @@ export async function verifyTrustList(
     validUntilUnix: p.validUntilUnix,
   };
   const publisherKey = selfCertifyingTypedKey(p.publisher);
-  if (publisherKey === null) {
-    return failed("TRUST_LIST_PUBLISHER_NOT_SELF_CERTIFYING", "the publisher must be a self-certifying did:kash", partial);
+  const canonicalPublisher = canonicalSignerOf(p.publisher);
+  if (publisherKey === null || canonicalPublisher === null) {
+    return failed("TRUST_LIST_PUBLISHER_NOT_SELF_CERTIFYING", "the publisher must be a self-certifying key (did:kash or did:key)", partial);
   }
   let verified: readonly string[];
   try {
-    const res = await verifyEnvelope(envelope, (kid) => (kid === p.publisher ? publisherKey : null));
+    const res = await verifyEnvelope(envelope, (kid) => (canonicalSignerOf(kid) === canonicalPublisher ? publisherKey : null));
     verified = res.verifiedKeyids;
   } catch (err) {
     if (isAlgorithmUnsupported(err)) throw err;
     return failed("MALFORMED_TRUST_LIST", "envelope does not parse", partial);
   }
-  if (!verified.includes(p.publisher as string)) {
+  if (!verified.some((kid) => canonicalSignerOf(kid) === canonicalPublisher)) {
     return failed("TRUST_LIST_SIGNATURE_INVALID", "not signed by its named publisher", partial);
   }
   for (const e of p.issuers) {
@@ -248,7 +256,8 @@ export async function verifyTrustList(
   if (p.practice !== undefined && typeof p.practice !== "boolean") return failed("MALFORMED_TRUST_LIST", "practice is true or false", partial);
 
   const now = opts.nowSec ?? Math.floor(Date.now() / 1000);
-  const pinned = (opts.pinnedPublishers ?? []).includes(p.publisher);
+  // Two spellings of one key are one publisher: a pin matches whichever spelling the list was signed under.
+  const pinned = (opts.pinnedPublishers ?? []).some((pin) => canonicalOrSelf(pin) === canonicalPublisher);
   const current = p.validFromUnix <= now && now <= p.validUntilUnix;
   const notes: string[] = [];
   if (!pinned) notes.push(`publisher ${p.publisher} is not pinned — this list is its word only and lists nobody`);
@@ -276,7 +285,7 @@ export function currentTrustLists(reports: readonly TrustListReport[]): readonly
   const best = new Map<string, TrustListReport>();
   for (const r of reports) {
     if (!r.ok || !r.current || r.listId === null || r.version === null || r.publisher === null) continue;
-    const key = `${r.publisher}:${r.listId}`;
+    const key = `${canonicalOrSelf(r.publisher)}:${r.listId}`;
     const prev = best.get(key);
     if (prev === undefined) {
       best.set(key, r);
@@ -364,7 +373,7 @@ export function lookupListing(
   for (const list of currentTrustLists(lists)) {
     for (const e of list.issuers) {
       if (!e.dsts.includes(tag)) continue;
-      const bySelf = stripFragment(signer) === e.issuerId && selfCertifyingTypedKey(signer) !== null;
+      const bySelf = selfCertifyingTypedKey(signer) !== null && canonicalOrSelf(stripFragment(signer)) === canonicalOrSelf(e.issuerId);
       const byKey = e.keys.some((k) => k.keyid === signer);
       if (!bySelf && !byKey) continue;
       const standing: Standing = e.standing ?? "listed";

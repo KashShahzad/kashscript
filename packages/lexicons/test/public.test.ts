@@ -8,8 +8,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { getSchemaDefinition } from "../src/engine";
 import { LexiconRegistry } from "../src/registry";
-import { KASH_GUIDE_ID, KASH_LISTING_ID, KASH_PLACE_ID, KASH_PLACE_POINTER_ID } from "../src/extensions/place";
-import { KASH_STATUS_LIST_1_1_ID, KASH_TRUST_LIST_ID } from "../src/extensions/lists";
+import { KASH_GUIDE_1_1_ID, KASH_LISTING_1_1_ID, KASH_PLACE_1_1_ID, KASH_PLACE_POINTER_1_1_ID } from "../src/extensions/place";
+import { KASH_STATUS_LIST_1_1_ID, KASH_TRUST_LIST_1_1_ID } from "../src/extensions/lists";
 import { PUBLIC_RECORD_LEXICONS, PUBLIC_RECORD_NSIDS, findPersonIdentity, isPublicRecordNsid, publicRecordFaults } from "../src/extensions/public";
 import { STANDARD_LIBRARY } from "../src/lexicons";
 import { SOCIAL_EXTENSION } from "../src/extensions/social";
@@ -61,12 +61,12 @@ describe("findPersonIdentity — an email, a phone number or a DID in words", ()
 
 describe("the published JSON Schemas stay in step with the lexicons", () => {
   for (const [id, file] of [
-    [KASH_PLACE_ID, "place.schema.json"],
-    [KASH_PLACE_POINTER_ID, "place-pointer.schema.json"],
-    [KASH_LISTING_ID, "listing.schema.json"],
-    [KASH_GUIDE_ID, "guide.schema.json"],
-    [KASH_TRUST_LIST_ID, "trust-list.schema.json"],
-    // The published schema is the newest version's, as rule.schema.json is (KS-Q4: 1.1.0 adds supersession and withdrawal).
+    // The published schema is each kind's newest version — since RW-19 B, the 1.1.0s whose publisher is a standard method.
+    [KASH_PLACE_1_1_ID, "place.schema.json"],
+    [KASH_PLACE_POINTER_1_1_ID, "place-pointer.schema.json"],
+    [KASH_LISTING_1_1_ID, "listing.schema.json"],
+    [KASH_GUIDE_1_1_ID, "guide.schema.json"],
+    [KASH_TRUST_LIST_1_1_ID, "trust-list.schema.json"],
     [KASH_STATUS_LIST_1_1_ID, "status-list.schema.json"],
   ] as const) {
     test(file, () => {

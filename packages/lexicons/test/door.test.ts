@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { getSchemaDefinition, validateBody } from "../src/engine";
 import { LexiconRegistry } from "../src/registry";
 import { validate } from "../src/schema";
-import { DOOR_LEXICONS, KASH_ADOPTION_ID, KASH_RULE_1_1_BODY_SCHEMA, KASH_RULE_1_1_ID, KASH_RULE_1_2_ID, KASH_RULE_BODY_SCHEMA, KASH_RULE_ID } from "../src/extensions/door";
+import { DOOR_LEXICONS, KASH_ADOPTION_1_1_ID, KASH_ADOPTION_ID, KASH_RULE_1_1_BODY_SCHEMA, KASH_RULE_1_1_ID, KASH_RULE_1_2_ID, KASH_RULE_1_3_ID, KASH_RULE_BODY_SCHEMA, KASH_RULE_ID } from "../src/extensions/door";
 
 const registry = new LexiconRegistry().registerAll(DOOR_LEXICONS);
 const SPECS = join(import.meta.dir, "..", "..", "..", "specs", "schemas");
@@ -142,7 +142,8 @@ describe("kash.adoption@1.0.0", () => {
 });
 
 describe("the published JSON Schemas stay in step with the lexicons", () => {
-  for (const [id, file] of [[KASH_RULE_1_2_ID, "rule.schema.json"], [KASH_ADOPTION_ID, "adoption.schema.json"]] as const) {
+  // The published schema is each kind's newest version — since RW-19 B, the versions whose author is a standard method.
+  for (const [id, file] of [[KASH_RULE_1_3_ID, "rule.schema.json"], [KASH_ADOPTION_1_1_ID, "adoption.schema.json"]] as const) {
     test(file, () => {
       const generated = getSchemaDefinition(id, registry);
       const published = JSON.parse(readFileSync(join(SPECS, file), "utf8"));

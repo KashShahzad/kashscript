@@ -1,22 +1,21 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kashscript.com/lexicons/kash.place.pointer@1.0.0",
-  "title": "A place has a new publisher",
-  "description": "The old publisher's signed pointer from a place's old id to its new one under another publisher (d60(a)). The old record is never rewritten.",
+  "$id": "https://kashscript.com/lexicons/kash.place.pointer@1.1.0",
+  "title": "A place has a new publisher, or a new identifier",
+  "description": "kash.place.pointer@1.0.0 with the publisher's DID a standard method (RW-19 B): the same signed pointer also records a publisher re-issuing its own place under its did:web — a new identifier, the old record never rewritten (d60(a)). A 1.0.0 body is a 1.1.0 body.",
   "type": "object",
   "properties": {
     "from": {
       "type": "string",
-      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
     },
     "publisher": {
       "type": "string",
-      "format": "did-ks",
-      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}$"
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})$"
     },
     "to": {
       "type": "string",
-      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
     },
     "movedAt": {
       "type": "string",

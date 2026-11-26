@@ -30,7 +30,7 @@
 
 import type { LexiconDef } from "../registry";
 import { S, type ObjectSchema } from "../schema";
-import { DID, HEX64, TEXT, fault, type RecordFault } from "./refs";
+import { HEX64, SELF_CERTIFYING, TEXT, fault, type RecordFault } from "./refs";
 
 /* ── shared pieces ─────────────────────────────────────────────────── */
 
@@ -103,7 +103,7 @@ export interface TrustListBody {
   readonly listId: string;
   /** Monotonic. A verifier holding several versions of one list uses the highest. */
   readonly version: number;
-  /** The self-certifying `did:kash` that signs the envelope. */
+  /** The self-certifying key that signs the envelope — spelled `did:kash` or `did:key` (RW-19 B); never a `did:web`, so the list's own signature checks from the identifier alone. */
   readonly publisher: string;
   readonly issuedAtUnix: number;
   readonly validFromUnix: number;
@@ -136,7 +136,7 @@ export const KASH_TRUST_LIST_BODY_SCHEMA: ObjectSchema = S.object(
     format: S.literal(TRUST_LIST_FORMAT),
     listId: TEXT(128),
     version: S.number({ integer: true, min: 1 }),
-    publisher: DID,
+    publisher: SELF_CERTIFYING,
     issuedAtUnix: UNIX,
     validFromUnix: UNIX,
     validUntilUnix: UNIX,
@@ -155,6 +155,18 @@ export const KASH_TRUST_LIST_LEXICON: LexiconDef = {
   title: "A trust list",
   description:
     "A publisher's versioned list of issuers — attest's kashscript-trust-list/1 payload in clear — with d91's three assertions: identity (the key, its class and grade), standing (listed, suspended, removed) and scope (the exact tags and the references it may attest against), each entry bound to a floor version. Signed by its publisher as DSSE; any host may mirror it.",
+};
+
+export const KASH_TRUST_LIST_1_1_ID = "kash.trust-list@1.1.0" as const;
+
+export const KASH_TRUST_LIST_1_1_LEXICON: LexiconDef = {
+  id: KASH_TRUST_LIST_1_1_ID,
+  nsid: KASH_TRUST_LIST_NSID,
+  semver: { major: 1, minor: 1, patch: 0 },
+  bodySchema: KASH_TRUST_LIST_BODY_SCHEMA,
+  title: "A trust list",
+  description:
+    "kash.trust-list@1.0.0 with the publisher's self-certifying key written in either spelling (RW-19 B, d97(h)): did:kash or did:key — never a did:web, so the list's own signature checks from the identifier alone. A 1.0.0 body is a 1.1.0 body.",
 };
 
 /** The rules the shape cannot write. Call after the body has the shape. */
@@ -273,4 +285,4 @@ export function statusListFaults(body: StatusListBody): readonly RecordFault[] {
 /* ── bundle ────────────────────────────────────────────────────────── */
 
 /** The two lists — the status list at both versions. Public, organisation-authored, mirrorable (d62(d)5). */
-export const LIST_LEXICONS: readonly LexiconDef[] = [KASH_TRUST_LIST_LEXICON, KASH_STATUS_LIST_LEXICON, KASH_STATUS_LIST_1_1_LEXICON];
+export const LIST_LEXICONS: readonly LexiconDef[] = [KASH_TRUST_LIST_LEXICON, KASH_TRUST_LIST_1_1_LEXICON, KASH_STATUS_LIST_LEXICON, KASH_STATUS_LIST_1_1_LEXICON];

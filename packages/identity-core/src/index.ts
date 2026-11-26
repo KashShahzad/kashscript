@@ -15,6 +15,8 @@ export * from "./keys";
 export * from "./p256";
 export * from "./runtime";
 export * from "./did";
+export * from "./did-key";
+export * from "./did-web";
 export * from "./document";
 export * from "./signatures";
 export * from "./signer";
@@ -23,4 +25,4 @@ export * from "./ed25519-strict";
 /** Public version constant — bumped whenever the wire-level output of any
  *  formatter changes (DID format, DID Document shape, canonical encoding,
  *  signature payload composition). */
-export const IDENTITY_CORE_VERSION = "0.4.0-alpha.3" as const;
+export const IDENTITY_CORE_VERSION = "0.5.0-alpha.0" as const;

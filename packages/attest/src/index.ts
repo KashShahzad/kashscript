@@ -28,4 +28,4 @@ export * from "./profiles";
 export * from "./log";
 
 /** Bumped whenever a wire-level verification behaviour changes. KS-Q4: a presentation needs its audience and nonce; the trust list's standing, class and scope are read; status verdicts carry a cache time; the trust log. RW-14: the attestation and mandate tags, and `./attestation`. */
-export const ATTEST_VERSION = "0.3.0-alpha.3" as const;
+export const ATTEST_VERSION = "0.3.0-alpha.4" as const;

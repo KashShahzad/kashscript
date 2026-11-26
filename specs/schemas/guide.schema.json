@@ -1,18 +1,17 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kashscript.com/lexicons/kash.guide@1.0.0",
+  "$id": "https://kashscript.com/lexicons/kash.guide@1.1.0",
   "title": "A guide",
-  "description": "A publisher's text about places, in sections, with the places and public records it cites and chosen bylines for its makers. Public, organisation-authored; never a person's identifier.",
+  "description": "kash.guide@1.0.0 with the publisher's DID a standard method (RW-19 B, d97(h)). A 1.0.0 body is a 1.1.0 body.",
   "type": "object",
   "properties": {
     "id": {
       "type": "string",
-      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/guide\\/[a-z0-9][a-z0-9-]{0,62}$"
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/guide\\/[a-z0-9][a-z0-9-]{0,62}$"
     },
     "publisher": {
       "type": "string",
-      "format": "did-ks",
-      "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}$"
+      "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})$"
     },
     "title": {
       "type": "string",
@@ -38,7 +37,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
+        "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
       },
       "minItems": 1,
       "maxItems": 64
@@ -50,7 +49,7 @@
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/(?:place|listing|guide|rule|adoption)\\/[a-z0-9][a-z0-9-]{0,62}$"
+            "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/(?:place|listing|guide|rule|adoption)\\/[a-z0-9][a-z0-9-]{0,62}$"
           },
           "hash": {
             "type": "string",
@@ -112,7 +111,7 @@
             "type": "array",
             "items": {
               "type": "string",
-              "pattern": "^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
+              "pattern": "^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60}|did:web:[a-z0-9](?:[a-z0-9.-]{0,251}[a-z0-9])?(?:%3A[0-9]{1,5})?(?::[A-Za-z0-9._-]{1,64}){0,8})\\/place\\/[a-z0-9][a-z0-9-]{0,62}$"
             },
             "minItems": 1,
             "maxItems": 16

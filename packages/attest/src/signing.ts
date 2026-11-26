@@ -19,11 +19,11 @@
 
 import {
   compressP256PublicKey,
-  decodeBase58,
   deriveDidForKey,
   ecdsaDerToRaw,
   ecdsaRawToDer,
   es256RawSignature,
+  parseAnyKeyDid,
   parseDidKey,
   signP256,
   verifyP256,
@@ -227,32 +227,11 @@ export function resolveDidKey(keyid: string): KashPublicKey | null {
   }
 }
 
-const DID_KEY_PREFIX = "did:key:z";
-/** Multicodec varints: `ed25519-pub` (0xed) and `p256-pub` (0x1200). */
-const MULTICODEC_ED25519 = [0xed, 0x01] as const;
-const MULTICODEC_P256 = [0x80, 0x24] as const;
-
-/** The key a `did:key:z…` (base58btc multibase) declares — Ed25519 or compressed P-256 — or null. */
-function resolveDidKeyMethod(did: string): KashPublicKey | null {
-  let bytes: Uint8Array;
-  try {
-    bytes = decodeBase58(did.slice(DID_KEY_PREFIX.length));
-  } catch {
-    return null;
-  }
-  const hasPrefix = (p: readonly number[]): boolean => p.every((b, n) => bytes[n] === b);
-  try {
-    if (bytes.length === 2 + 32 && hasPrefix(MULTICODEC_ED25519)) return { type: "Ed25519", publicKey: bytes.slice(2) };
-    if (bytes.length === 2 + 33 && hasPrefix(MULTICODEC_P256)) return { type: "P-256", publicKey: compressP256PublicKey(bytes.slice(2)) };
-  } catch {
-    return null; // a point that is not on the curve names no key
-  }
-  return null;
-}
-
 /**
  * The key any DSSE `keyid` this ecosystem accepts declares: a `did:kash` of
- * either type, or a `did:key` of either type (with or without a `#fragment`).
+ * either type, or a `did:key` of either type (with or without a `#fragment`) —
+ * two spellings of one self-certifying key, parsed by the one implementation,
+ * identity-core's `parseAnyKeyDid` (RW-19 B; d97(h)).
  * Hand it to {@link verifyBytes}' callers as the resolver — it returns a *typed*
  * key, so an ES256 signature is judged as ES256. A resolver that returns a bare
  * 32-byte key can only ever verify Ed25519. Never throws; null for anything else.
@@ -261,8 +240,11 @@ function resolveDidKeyMethod(did: string): KashPublicKey | null {
 export function resolveVerificationKey(keyid: string): KashPublicKey | null {
   if (typeof keyid !== "string") return null;
   const i = keyid.indexOf("#");
-  const did = i === -1 ? keyid : keyid.slice(0, i);
-  return did.startsWith(DID_KEY_PREFIX) ? resolveDidKeyMethod(did) : resolveDidKey(did);
+  try {
+    return parseAnyKeyDid(i === -1 ? keyid : keyid.slice(0, i));
+  } catch {
+    return null;
+  }
 }
 
 /**

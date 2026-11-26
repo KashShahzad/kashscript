@@ -13,6 +13,7 @@
  */
 
 import { findListing, type TrustListReport } from "@kashscript/attest/holder";
+import { canonicalSignerOf } from "@kashscript/attest/signing";
 import { PREDICATE_VCT } from "@kashscript/attest/exchange";
 import type { ClaimPathElement, Criterion, DcqlClaimsQuery, DcqlCredentialQuery, RuleBody } from "@kashscript/lexicons/extensions/door";
 import { KASH_ARTIFACT_FORMAT, OWN_WORD_VCT, READABLE_FORMATS, SD_JWT_FORMAT, TA_ISSUER, TA_TRUST_LIST } from "./constants";
@@ -80,7 +81,15 @@ export function issuerAccepted(query: DcqlCredentialQuery, issuer: string | null
   if (tas === undefined) return true;
   if (issuer === null) return false;
   return tas.some((ta) => {
-    if (ta.type === TA_ISSUER) return ta.values.some((v) => stripFragment(v) === stripFragment(issuer));
+    // Two spellings of one self-certifying key are one issuer (RW-19 B; A7-02's rule).
+    if (ta.type === TA_ISSUER) {
+      const named = stripFragment(issuer);
+      const canonical = canonicalSignerOf(named);
+      return ta.values.some((v) => {
+        const value = stripFragment(v);
+        return value === named || (canonical !== null && canonicalSignerOf(value) === canonical);
+      });
+    }
     if (ta.type === TA_TRUST_LIST) {
       if (type === null) return false;
       const hit = findListing(issuer, type, ctx.trustLists ?? [], ctx.nowSec);
@@ -209,7 +218,8 @@ export interface DcqlProblem {
   readonly message: string;
 }
 
-const TL_VALUE = /^did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}#[A-Za-z0-9._:-]{1,128}$/;
+/** `<publisher DID>#<list id>` — the publisher self-certifying, in either spelling (RW-19 B). */
+const TL_VALUE = /^(?:did:kash:[1-9A-HJ-NP-Za-km-z]{32,48}|did:key:z[1-9A-HJ-NP-Za-km-z]{40,60})#[A-Za-z0-9._:-]{1,128}$/;
 
 export function checkCriterionQueries(c: Criterion, at: string): DcqlProblem[] {
   const out: DcqlProblem[] = [];
@@ -247,7 +257,7 @@ export function checkCriterionQueries(c: Criterion, at: string): DcqlProblem[] {
     for (const [j, ta] of (q.trusted_authorities ?? []).entries()) {
       if (ta.type !== TA_ISSUER && ta.type !== TA_TRUST_LIST) add("DCQL_MALFORMED", `trusted_authorities type ${ta.type} is not readable — use ${TA_ISSUER} or ${TA_TRUST_LIST}`, `.trusted_authorities[${j}]`);
       if (ta.type === TA_TRUST_LIST && !ta.values.every((v) => TL_VALUE.test(v))) add("DCQL_MALFORMED", `a ${TA_TRUST_LIST} value is <publisher DID>#<list id>`, `.trusted_authorities[${j}]`);
-      if (ta.type === TA_ISSUER && !ta.values.every((v) => /^did:(kash|key):/.test(v))) add("DCQL_MALFORMED", `a ${TA_ISSUER} value is an issuer's DID`, `.trusted_authorities[${j}]`);
+      if (ta.type === TA_ISSUER && !ta.values.every((v) => /^did:(kash|key|web):/.test(v))) add("DCQL_MALFORMED", `a ${TA_ISSUER} value is an issuer's DID`, `.trusted_authorities[${j}]`);
     }
     const claimIds = new Set<string>();
     for (const [j, cl] of (q.claims ?? []).entries()) {

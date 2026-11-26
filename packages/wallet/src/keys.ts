@@ -26,7 +26,7 @@
  * never copied (d47(g)(4)).
  */
 
-import { compressP256PublicKey, deriveDid, deriveDidP256, isKashDid, type EventSigner } from "@kashscript/identity-core";
+import { compressP256PublicKey, deriveDid, deriveDidKey, deriveDidP256, isKashDid, type EventSigner } from "@kashscript/identity-core";
 import type { RawSigner } from "@kashscript/attest/signing";
 import type { BackedUpKey } from "./crypto/jwe";
 import { bytesToBase64Url, bytesToHex, base64UrlToBytes, equalBytes, hexToBytes, utf8, utf8Decode, wipe } from "./crypto/bytes";
@@ -109,10 +109,13 @@ export class KeyRegistry {
     return entry;
   }
 
-  /** Bring a key back from a backup. A `did:kash` id must name the key it came with. */
+  /** Bring a key back from a backup. A self-certifying id — `did:kash` or `did:key` (RW-19 B) — must name the key it came with. */
   async restore(keyid: string, seed: Uint8Array): Promise<KeyEntry> {
     const publicKey = await ed25519PublicKeyOf(seed);
     if (isKashDid(keyid) && deriveDid(publicKey) !== keyid) {
+      throw new WalletError("BACKUP_INVALID", `key ${keyid} does not match its seed`);
+    }
+    if (keyid.startsWith("did:key:") && deriveDidKey({ type: "Ed25519", publicKey }) !== keyid) {
       throw new WalletError("BACKUP_INVALID", `key ${keyid} does not match its seed`);
     }
     const existing = await this.find(keyid);

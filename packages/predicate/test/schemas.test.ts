@@ -16,6 +16,13 @@ describe("the decision's published JSON Schema stays in step with predicate (its
   test("the decision is not a public record — lexicons no longer carries it (d59)", async () => {
     const door = await import("@kashscript/lexicons/extensions/door");
     expect(Object.keys(door).filter((k) => k.includes("DECISION_BODY") || k.includes("DECISION_LEXICON") || k === "PERSONAL_LEXICONS")).toEqual([]);
-    expect(door.DOOR_LEXICONS.map((l) => l.id)).toEqual(["kash.rule@1.0.0", "kash.rule@1.1.0", "kash.rule@1.2.0", "kash.adoption@1.0.0"]);
+    expect(door.DOOR_LEXICONS.map((l) => l.id)).toEqual([
+      "kash.rule@1.0.0",
+      "kash.rule@1.1.0",
+      "kash.rule@1.2.0",
+      "kash.rule@1.3.0",
+      "kash.adoption@1.0.0",
+      "kash.adoption@1.1.0",
+    ]);
   });
 });
