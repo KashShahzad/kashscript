@@ -1,0 +1,40 @@
+{
+  "$comment": "The floor as tests over the open protocol's repository (RW-18; docs/adr/0037). packages/floor keeps its own manifest and checks itself in its suite.",
+  "floor": 1,
+  "repository": "kashscript",
+  "serves": "none",
+  "excluded": {
+    "packages/floor/**": "checked by its own manifest, in its own suite (packages/floor/floor.manifest.json)",
+    "packages/lexicons/{package,tsconfig}.json": "the package's own files, in a folder named lexicons; neither is a lexicon"
+  },
+  "schemas": {
+    "lexicons": ["specs/schemas/*.schema.json", "packages/lexicons/src/**/*.ts"]
+  },
+  "sources": ["**/*.{ts,tsx,js,jsx,mjs,cjs,mts,cts}", "!packages/floor/**"],
+  "counts": {
+    "packages/attest/src/batch/seal.ts#<module>": {
+      "kind": "internal",
+      "why": "count() here is a schema helper that declares an integer field of a batch's seal; nothing is counted"
+    }
+  },
+  "waivers": [
+    {
+      "rule": "person-score",
+      "at": "lexicon:packages/lexicons/src/extensions/education.ts#KASH_EDU_TRANSCRIPT_BODY_SCHEMA.grade",
+      "reason": "the institution's signed assessment of one course; the student holds it, and it crosses only as a predicate",
+      "decision": "d27, d91(a)"
+    },
+    {
+      "rule": "person-score",
+      "at": "lexicon:packages/lexicons/src/extensions/education.ts#KASH_EDU_PEER_REVIEW_BODY_SCHEMA.score",
+      "reason": "kash.education.peer-review@1.0.0 is kept so that a record signed under it still validates; 2.0.0 has no score and is the one written",
+      "decision": "d59"
+    },
+    {
+      "rule": "person-score",
+      "at": "lexicon:specs/schemas/attestation.schema.json#/properties/batch/properties/seal/properties/plan/properties/alpha/properties/num",
+      "reason": "false positive: the numerator of a sampling plan's chance on a batch of items; no person has it",
+      "decision": "d97(d)"
+    }
+  ]
+}

@@ -120,7 +120,7 @@
     },
     "packages/lexicons": {
       "name": "@kashscript/lexicons",
-      "version": "0.7.0-alpha.0",
+      "version": "0.8.0-alpha.0",
       "devDependencies": {
         "@kashscript/identity-core": "workspace:*",
         "@types/bun": "^1.2.5",

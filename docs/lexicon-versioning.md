@@ -134,6 +134,10 @@ kash.community.aid-claim@1.0.0   kash.trade.*@1.0.0
 kash.zkp.*@1.0.0
 ```
 
+Since then: `kash.education.peer-review@2.0.0` (2026-11-27, RW-18) is `1.0.0` without `score` — nothing on the
+floor scores a person (d27, d43). `1.0.0` stays registered so records signed under it still validate; it is
+written no more. No migrator is shipped: a migrated record would need its signer again.
+
 When the first migrator ships, it goes under
 `packages/lexicons/src/migrators/<lexicon-name>.ts` with the convention
 above and a one-line addition to this doc.

@@ -9,7 +9,8 @@
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "test": "bun scripts/test-packages.ts",
-    "check": "bun scripts/check-boundary.ts && bun scripts/check-public-tree.ts ."
+    "check": "bun scripts/check-boundary.ts && bun scripts/check-public-tree.ts .",
+    "check:kash-floor": "bun packages/floor/src/bin/floor.ts check"
   },
   "devDependencies": {
     "turbo": "^2.3.0",

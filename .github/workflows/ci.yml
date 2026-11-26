@@ -97,6 +97,11 @@ jobs:
         # AU-11: no closed or private path, every relative link resolves, and
         # scripts/trusted-publishing.json lists exactly the open packages.
 
+      - name: The floor as tests (RW-18)
+        run: bun run check:kash-floor
+        # floor.manifest.json: no route is served here, and every lexicon and source file is read, each finding
+        # fixed or waived with its decision (docs/adr/0037). The package checks itself in its own suite.
+
       - name: Publish-script tests
         run: bun test scripts/publish-checks.test.ts scripts/sbom.test.ts scripts/confirm-landing.test.ts scripts/check-public-tree.test.ts
         # The token refusal, the OIDC and provenance checks, the SBOM generator and the
