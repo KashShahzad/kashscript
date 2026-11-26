@@ -50,6 +50,8 @@ npmjs.com takes a trusted publisher in a package's settings, so the package must
 3. **Publish the real version from the Publish workflow:** `packages` = `floor`, dry run first, then real. `0.1.0-alpha.0` is a prerelease, so it goes out under `alpha` with provenance.
 4. If npm made the placeholder `latest`, point `latest` at the real version once you want it there: `npm dist-tag add @kashscript/floor@0.1.0-alpha.0 latest`.
 
+*Dated note, 2026-11-26, from floor's first publish:* `npm trust github …` refuses a package that does not exist yet (npm's own `npm trust` page), so step 1 cannot work for a new package — go straight to step 2. **A new trusted-publisher configuration must complete its first publish within 2 days, or it expires** and must be deleted and made again (npm's trusted-publishers page): run step 3 the same day as the registration. npm made the placeholder `latest` despite `--tag reserve`, so step 4 is needed. A second version, `0.0.0-stage` ("Temporary package placeholder for staged publishing", no code), appeared beside the placeholder; how it was made is not recorded.
+
 ## 3. The canary dry run — `terms`
 
 A dry run publishes nothing. It builds and packs `terms`, writes its SBOM, makes npm's OIDC exchange for it, and checks the repository's visibility.
