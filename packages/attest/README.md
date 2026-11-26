@@ -49,6 +49,16 @@ code that seeds it (Oreoasis, Duedale, Indusland), never invented.
   (`verifyAttestationRecord`, with the mandates it cites presented beside it), and the copy's and the projection's mappings — `copyClaimsOf`, which copies only a record that checks, and `projectVc`.
   **RW-15:** the records already in use get the same copy — `copyClaimsOfCountersigned` reads a countersign bundle as *receipt · accepted*, its artefact reference (the digest the acceptance bound) behind its own fresh salt, issued only by a party to the record — so two verifiers' copies share nothing to join on; `openRecordCommitment` and `recordHashOf` open the commitment; `shownOnPage` is the page's rule (the artefact only to the holder of the disclosure) and `pageOf` / `openPage` seal the artefact under the `record` disclosure (JWE `dir`/A256GCM, HKDF). A copy without a holder key is a page copy, which nobody can present. Pure;
   the one subpath that reads `@kashscript/lexicons`, so the root export stays as light as it was.
+  **PY-5:** `kash.attestation@1.1.0` lets a receipt carry a batch accepted on a sample (`batch`, below); `copyClaimsOf` refuses one.
+- **`batch`** — a batch accepted on a sample ([`specs/attestation/batch.md`](../../specs/attestation/batch.md)): one root over
+  many items (`itemTree`, `verifyItemPath`, `verifyBatchItems`; the leaf `kash-batch-item-v1`), the seal (`sealDigestOf`),
+  the draw from a Bitcoin block named in the stamped seal (`checkDrawBlocks`, `drawSeed`, `drawPositions`; at least 76
+  bits of work per header; the draw block's height from its first transaction, BIP34 — `checkDrawCoinbase`,
+  `heightPush`), the exact arithmetic (`boundOf`, `isExactBound`, `boundVerdict`, `limitOf`, `limitVerdict`, `planFor` —
+  BigInt, no floating point; a checker certifies with two evaluations and never searches), the hashing checks
+  `verifyAttestationRecord` runs for a batch (`verifyBatch`), and the words a person reads (`batchWords`). The fetchers
+  for the tip, the headers and the draw block's coinbase take `fetch` injected; no check calls them. Reads
+  `@kashscript/lexicons` too.
 - **`compat`** — verify shipped venture formats: the Duedale Every-Rupee report, Indus tokens, and the
   presented revocation of a Tehzeeb mark.
 - **`ed25519`** — raw Ed25519 over arbitrary bytes (WebCrypto; the layer identity-core doesn't expose).

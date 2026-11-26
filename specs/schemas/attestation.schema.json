@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kashscript.com/lexicons/kash.attestation@1.0.0",
-  "title": "An attestation",
-  "description": "A signed outcome — accepted, not yet, refused or finding — against a content-addressed reference, by a party who answers for it (d91(a)). A receipt, a finding, an assurance or a contest; a decision keeps kash.decision. Held by its holder and its issuer's book; never published.",
+  "$id": "https://kashscript.com/lexicons/kash.attestation@1.1.0",
+  "title": "An attestation, which may accept a batch on a sample",
+  "description": "kash.attestation@1.0.0, whose receipt may carry a batch accepted on a sample (PY-5): the seal over the items' root, size and plan, fixed before the draw; the OpenTimestamps stamp and the Bitcoin headers that drew the positions; the positions found short; and the exact bound. A 1.0.0 body is a 1.1.0 body. Held by its holder and its issuer's book; never published.",
   "type": "object",
   "properties": {
     "issuer": {
@@ -176,6 +176,163 @@
     },
     "practice": {
       "type": "boolean"
+    },
+    "batch": {
+      "type": "object",
+      "properties": {
+        "seal": {
+          "type": "object",
+          "properties": {
+            "format": {
+              "const": "kash-batch-seal/1"
+            },
+            "root": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "size": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            },
+            "plan": {
+              "type": "object",
+              "properties": {
+                "sample": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 10000
+                },
+                "accept": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 10000
+                },
+                "alpha": {
+                  "type": "object",
+                  "properties": {
+                    "num": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "maximum": 1000000
+                    },
+                    "den": {
+                      "type": "integer",
+                      "minimum": 2,
+                      "maximum": 1000000
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "num",
+                    "den"
+                  ]
+                },
+                "limit": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 1000000
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "sample",
+                "accept",
+                "alpha",
+                "limit"
+              ]
+            },
+            "draw": {
+              "type": "object",
+              "properties": {
+                "source": {
+                  "const": "bitcoin/1"
+                },
+                "height": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100000000
+                }
+              },
+              "additionalProperties": false,
+              "required": [
+                "source",
+                "height"
+              ]
+            },
+            "previous": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "format",
+            "root",
+            "size",
+            "plan"
+          ]
+        },
+        "stamp": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 24000,
+          "pattern": "^[A-Za-z0-9+/]+={0,2}$"
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{160}$"
+          },
+          "minItems": 2,
+          "maxItems": 145
+        },
+        "coinbase": {
+          "type": "object",
+          "properties": {
+            "tx": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 200000,
+              "pattern": "^(?:[0-9a-f]{2})+$"
+            },
+            "path": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "maxItems": 24
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "tx",
+            "path"
+          ]
+        },
+        "found": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 999999
+          },
+          "maxItems": 10000
+        },
+        "bound": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000000
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "seal",
+        "found",
+        "bound"
+      ]
     }
   },
   "additionalProperties": false,

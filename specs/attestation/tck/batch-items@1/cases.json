@@ -1,0 +1,146 @@
+{
+  "format": "batch-items@1",
+  "about": "One root over many items, kash-items/1 (specs/attestation/batch.md §1). Each item's digest is SHA-256 of its UTF-8 bytes. Its leaf is SHA-256(0x00 ‖ \"kash-batch-item-v1\\n\" ‖ size as 8 bytes big-endian ‖ salt ‖ digest). Leaves are sorted ascending; the root is RFC 6962's Merkle tree hash over them in that order; a position's path is its RFC 6962 audit path, nearest sibling first. leaves lists the leaves in order. Reference: @kashscript/attest/batch's itemTree.",
+  "cases": [
+    {
+      "name": "one item",
+      "salt": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "items": [
+        "SAMPLE item one"
+      ],
+      "digests": [
+        "19c341c24b454c114dc199938a5478a67a23e8a87b1019a50a3f8f590a1f333d"
+      ],
+      "leaves": [
+        "5d2874a63c688fecad4481f378dd0627c0e97559ed1e313e6805c891a53f913b"
+      ],
+      "root": "5d2874a63c688fecad4481f378dd0627c0e97559ed1e313e6805c891a53f913b",
+      "paths": [
+        {
+          "position": 0,
+          "path": []
+        }
+      ]
+    },
+    {
+      "name": "two items",
+      "salt": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "items": [
+        "SAMPLE item one",
+        "SAMPLE item two"
+      ],
+      "digests": [
+        "19c341c24b454c114dc199938a5478a67a23e8a87b1019a50a3f8f590a1f333d",
+        "475dc31eb9b23e5c33318e28d39bb04ea375cf62605a596615a338cbf71f858d"
+      ],
+      "leaves": [
+        "2d29aa0b24baec443849047fa027a7d2a892b5254af9a51790ff56e77bb50842",
+        "5db5d95683efa823f0b92f3d12efe2cc03836dc0dfdafb554b2cca5d094a5455"
+      ],
+      "root": "4e53448223e8b9fbdb62bb2644ce99a4ee8814b1a55749809c3b18ed17dcb8dd",
+      "paths": [
+        {
+          "position": 0,
+          "path": [
+            "5db5d95683efa823f0b92f3d12efe2cc03836dc0dfdafb554b2cca5d094a5455"
+          ]
+        },
+        {
+          "position": 1,
+          "path": [
+            "2d29aa0b24baec443849047fa027a7d2a892b5254af9a51790ff56e77bb50842"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "seven items",
+      "salt": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+      "items": [
+        "SAMPLE line 1 of 7",
+        "SAMPLE line 2 of 7",
+        "SAMPLE line 3 of 7",
+        "SAMPLE line 4 of 7",
+        "SAMPLE line 5 of 7",
+        "SAMPLE line 6 of 7",
+        "SAMPLE line 7 of 7"
+      ],
+      "digests": [
+        "775ec6f1decd332774268a4e802774e7b6de8a9e453ce2016b2e4573fa9f6a40",
+        "7cc47668a2624d54987037efaa6b8cc7cd9a2cc341d3ea37ae212b015107f8a8",
+        "0e10f1dfa3d1cc405ecf28597c9feccb9c9d9e1c22c30d4e4942537e44f62db8",
+        "07341025fa189fb65f60ee19e3eb71f0deb1c09e4aeb9b67aa5332bc6a2c4444",
+        "8298eee6130af57c847b9be1fe3155e246af7936c2075c7543ea8241c1526dc8",
+        "124655ec3241bc1c471fce90ac6316d320f87f9846327d496c2a035573586ea7",
+        "398842e0b6e766cfd62747e6c5921293f6fd758d30ba2990315ae18ef046cb0f"
+      ],
+      "leaves": [
+        "0d76d09787da7c9efa489562963e6d3692fa9934b52f18cf4136877d1fc030f7",
+        "3831e5ef2ead7b6d523a0cfd00b4992db7052d8b9a267634c18a4eecc3cb3dfe",
+        "4d63e8ceba98962cdf905187da5e60cfc8038ea5a3ae85e612fed296441f2fac",
+        "91f3e2074da675dbf625669f987a3b73653c770ae239a2c93739464d2bbd078c",
+        "b37a7acbc721db95050fb94c6780660889c92f4a1d3c731c0ea32e15126ed4b5",
+        "bf54469272fe8a10fcf0d10055cbcecf63b7e92268325ec5000c3683d251c3bc",
+        "da31937e84411819ba2048bde4dcac596a0642f7edfd43df1a0a26139e5e34c3"
+      ],
+      "root": "08a75180c211abfdc2439e7e5ce971516692d157096b5673b8426e6a31b10da0",
+      "paths": [
+        {
+          "position": 0,
+          "path": [
+            "3831e5ef2ead7b6d523a0cfd00b4992db7052d8b9a267634c18a4eecc3cb3dfe",
+            "89d31024a04aed021893ab30c5fa0aadf22cc36cbbfeac0e512aff720acdff43",
+            "945b29bfe73804f33c625880f08e85f7ae3bacfcddbd3be3d32a931ea26453fd"
+          ]
+        },
+        {
+          "position": 1,
+          "path": [
+            "0d76d09787da7c9efa489562963e6d3692fa9934b52f18cf4136877d1fc030f7",
+            "89d31024a04aed021893ab30c5fa0aadf22cc36cbbfeac0e512aff720acdff43",
+            "945b29bfe73804f33c625880f08e85f7ae3bacfcddbd3be3d32a931ea26453fd"
+          ]
+        },
+        {
+          "position": 2,
+          "path": [
+            "91f3e2074da675dbf625669f987a3b73653c770ae239a2c93739464d2bbd078c",
+            "9a9266f648c570938e620667138d904f5408ecfe74b9eaab8c8cd65302b8e263",
+            "945b29bfe73804f33c625880f08e85f7ae3bacfcddbd3be3d32a931ea26453fd"
+          ]
+        },
+        {
+          "position": 3,
+          "path": [
+            "4d63e8ceba98962cdf905187da5e60cfc8038ea5a3ae85e612fed296441f2fac",
+            "9a9266f648c570938e620667138d904f5408ecfe74b9eaab8c8cd65302b8e263",
+            "945b29bfe73804f33c625880f08e85f7ae3bacfcddbd3be3d32a931ea26453fd"
+          ]
+        },
+        {
+          "position": 4,
+          "path": [
+            "bf54469272fe8a10fcf0d10055cbcecf63b7e92268325ec5000c3683d251c3bc",
+            "da31937e84411819ba2048bde4dcac596a0642f7edfd43df1a0a26139e5e34c3",
+            "0b93671463a5642f44adda4a6fe3f9857d31fe40781082157cd992cb62cf4efb"
+          ]
+        },
+        {
+          "position": 5,
+          "path": [
+            "b37a7acbc721db95050fb94c6780660889c92f4a1d3c731c0ea32e15126ed4b5",
+            "da31937e84411819ba2048bde4dcac596a0642f7edfd43df1a0a26139e5e34c3",
+            "0b93671463a5642f44adda4a6fe3f9857d31fe40781082157cd992cb62cf4efb"
+          ]
+        },
+        {
+          "position": 6,
+          "path": [
+            "01a77eb00cc309c981803acfa0bd844ddf084cfd2456e63f125cec287e8fbb0b",
+            "0b93671463a5642f44adda4a6fe3f9857d31fe40781082157cd992cb62cf4efb"
+          ]
+        }
+      ]
+    }
+  ]
+}

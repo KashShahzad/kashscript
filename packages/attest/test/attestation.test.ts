@@ -24,8 +24,9 @@ import {
   ATTESTATION_VCT,
   COPY_LIFETIME_DAYS,
   COPY_SD_SLOTS,
+  KASH_ATTESTATION_1_1_ID,
+  KASH_ATTESTATION_1_1_LEXICON,
   KASH_ATTESTATION_ID,
-  KASH_ATTESTATION_LEXICON,
   KASH_MANDATE_ID,
   KASH_MANDATE_LEXICON,
   MANDATE_DST,
@@ -73,9 +74,9 @@ const RECORDS = Object.keys(OPTIONS);
 const THREE_FORMS = ["finding-under-mandate", "receipt-booking", "supersession"];
 
 describe("the worked examples are what the spec says", () => {
-  test("five records; three are shown in all three forms, two stay with their parties; RW-15 adds a countersigned record's copies", () => {
+  test("five records; three are shown in all three forms, two stay with their parties; RW-15 adds a countersigned record's copies; PY-5 two batches, checked in batch-cli.test.ts", () => {
     const dirs = readdirSync(EXAMPLES).sort();
-    expect(dirs).toEqual(["decision-person-mandate", "finding-under-mandate", "mandate-seat", "receipt-booking", "receipt-booking-countersigned", "receipt-client-signoff", "receipt-not-yet", "supersession"]);
+    expect(dirs).toEqual(["decision-person-mandate", "finding-under-mandate", "mandate-seat", "receipt-batch-all", "receipt-batch-sampled", "receipt-booking", "receipt-booking-countersigned", "receipt-client-signoff", "receipt-not-yet", "supersession"]);
     for (const d of THREE_FORMS) expect(readdirSync(join(EXAMPLES, d))).toEqual(expect.arrayContaining(["copy.sd-jwt.txt", "presentation.sd-jwt.txt", "projection.vc.json"]));
     for (const d of ["receipt-client-signoff", "receipt-not-yet"]) expect(readdirSync(join(EXAMPLES, d))).not.toContain("copy.sd-jwt.txt");
   });
@@ -364,8 +365,9 @@ describe("the conformance cases (specs/attestation/tck)", () => {
 
 describe("the published JSON Schemas stay in step with the definitions", () => {
   const published = (name: string) => readJson(SPECS, "schemas", name);
-  test("attestation.schema.json", () => {
-    expect(published("attestation.schema.json")).toEqual(JSON.parse(JSON.stringify(getSchemaDefinition(KASH_ATTESTATION_ID, new LexiconRegistry().register(KASH_ATTESTATION_LEXICON)))));
+  // The newest version, 1.1.0 (PY-5), as the decision's file follows its newest; every 1.0.0 body is a 1.1.0 body.
+  test("attestation.schema.json — the newest version, 1.1.0", () => {
+    expect(published("attestation.schema.json")).toEqual(JSON.parse(JSON.stringify(getSchemaDefinition(KASH_ATTESTATION_1_1_ID, new LexiconRegistry().register(KASH_ATTESTATION_1_1_LEXICON)))));
   });
   test("mandate.schema.json", () => {
     expect(published("mandate.schema.json")).toEqual(JSON.parse(JSON.stringify(getSchemaDefinition(KASH_MANDATE_ID, new LexiconRegistry().register(KASH_MANDATE_LEXICON)))));

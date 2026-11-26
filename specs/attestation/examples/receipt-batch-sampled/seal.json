@@ -1,0 +1,18 @@
+{
+  "format": "kash-batch-seal/1",
+  "root": "7e348acf79b2b03bfe34afbc560f392fa3167e6d37de8d06340c8c9db416947f",
+  "size": 2000,
+  "plan": {
+    "sample": 140,
+    "accept": 0,
+    "alpha": {
+      "num": 1,
+      "den": 20
+    },
+    "limit": 40
+  },
+  "draw": {
+    "source": "bitcoin/1",
+    "height": 977713
+  }
+}

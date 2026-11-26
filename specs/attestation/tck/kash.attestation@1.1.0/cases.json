@@ -1,0 +1,1125 @@
+{
+  "lexicon": "kash.attestation@1.1.0",
+  "about": "Conformance cases for the attestation record with a batch accepted on a sample (specs/attestation/batch.md §5). Each case is a body; a reader runs the shape (KASH_ATTESTATION_1_1_BODY_SCHEMA, or specs/schemas/attestation.schema.json) and then the cross-field rules, and must reach `valid` with exactly the listed fault codes. These are the rules that need no hashing; the stamp, the block headers and the draw block's coinbase here are placeholders, and the checks of the seal's digest, the stamp, the headers, the coinbase and the draw are in the worked examples. The DIDs are SAMPLE strings that match the patterns; nothing here is signed. Reference implementation: @kashscript/attest/attestation's checkAttestation. Written again by the fresh-session review (PY-5r, 2026-11-26), before anything was exported: a sampled batch carries the draw block's coinbase, which names its height (BIP34); a not yet within the plan does not give the over-the-plan reason.",
+  "cases": [
+    {
+      "name": "a batch accepted on a sample: 140 of 2,000 drawn, none found short",
+      "valid": true,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 40
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [],
+          "bound": 40
+        }
+      }
+    },
+    {
+      "name": "a census of 40: one found short within the plan, accepted — the acceptance does not cover it",
+      "valid": true,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "d9aa9702772ea57dd9aa9702772ea57dd9aa9702772ea57dd9aa9702772ea57d",
+            "size": 40,
+            "plan": {
+              "sample": 40,
+              "accept": 1,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 1
+            }
+          },
+          "found": [
+            17
+          ],
+          "bound": 1
+        }
+      }
+    },
+    {
+      "name": "a not yet over the plan, saying so",
+      "valid": true,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "not-yet",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 40
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [
+            12,
+            400
+          ],
+          "bound": 86
+        },
+        "reasons": [
+          "batch-over-plan"
+        ]
+      }
+    },
+    {
+      "name": "a 1.0.0 body, with no batch, still reads",
+      "valid": true,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z"
+      }
+    },
+    {
+      "name": "a batch on an assurance",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "assurance",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 40
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [],
+          "bound": 40
+        }
+      },
+      "faults": [
+        "BATCH_KIND"
+      ]
+    },
+    {
+      "name": "a batch made against an agreement, not the seal",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "agreement",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 40
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [],
+          "bound": 40
+        }
+      },
+      "faults": [
+        "BATCH_REFERENCE"
+      ]
+    },
+    {
+      "name": "answered by an organisation's own key, at grade 3",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:web:client.example",
+        "grade": 3,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 40
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [],
+          "bound": 40
+        }
+      },
+      "faults": [
+        "BATCH_BY_A_PERSON"
+      ]
+    },
+    {
+      "name": "answered at grade 3 with a key",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 3,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 40
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [],
+          "bound": 40
+        }
+      },
+      "faults": [
+        "BATCH_BY_A_PERSON"
+      ]
+    },
+    {
+      "name": "a plan that accepts as many as it draws",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 140,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 2000
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [],
+          "bound": 40
+        }
+      },
+      "faults": [
+        "BATCH_LIMITS"
+      ]
+    },
+    {
+      "name": "a chance above 1 in 2",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 3,
+                "den": 4
+              },
+              "limit": 40
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [],
+          "bound": 0
+        }
+      },
+      "faults": [
+        "BATCH_LIMITS"
+      ]
+    },
+    {
+      "name": "a census carrying a draw",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "d9aa9702772ea57dd9aa9702772ea57dd9aa9702772ea57dd9aa9702772ea57d",
+            "size": 40,
+            "plan": {
+              "sample": 40,
+              "accept": 1,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 1
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "found": [
+            17
+          ],
+          "bound": 1
+        }
+      },
+      "faults": [
+        "BATCH_CENSUS"
+      ]
+    },
+    {
+      "name": "a census carrying a coinbase",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "d9aa9702772ea57dd9aa9702772ea57dd9aa9702772ea57dd9aa9702772ea57d",
+            "size": 40,
+            "plan": {
+              "sample": 40,
+              "accept": 1,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 1
+            }
+          },
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [
+            17
+          ],
+          "bound": 1
+        }
+      },
+      "faults": [
+        "BATCH_CENSUS"
+      ]
+    },
+    {
+      "name": "a sampled batch without its stamp",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 40
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [],
+          "bound": 40
+        }
+      },
+      "faults": [
+        "BATCH_CENSUS"
+      ]
+    },
+    {
+      "name": "a sampled batch without the draw block's coinbase, which names its height",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 40
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "found": [],
+          "bound": 40
+        }
+      },
+      "faults": [
+        "BATCH_CENSUS"
+      ]
+    },
+    {
+      "name": "positions found short out of order",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "not-yet",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 40
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [
+            400,
+            12
+          ],
+          "bound": 86
+        },
+        "reasons": [
+          "batch-over-plan"
+        ]
+      },
+      "faults": [
+        "BATCH_FOUND"
+      ]
+    },
+    {
+      "name": "a position found short outside the batch",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "not-yet",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 40
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [
+            2000
+          ],
+          "bound": 65
+        },
+        "reasons": [
+          "batch-over-plan"
+        ]
+      },
+      "faults": [
+        "BATCH_FOUND"
+      ]
+    },
+    {
+      "name": "accepted with more found short than the plan accepts",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 40
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [
+            12
+          ],
+          "bound": 65
+        }
+      },
+      "faults": [
+        "BATCH_OVER_PLAN"
+      ]
+    },
+    {
+      "name": "a not yet over the plan that does not say so",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "not-yet",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 40
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [
+            12
+          ],
+          "bound": 65
+        },
+        "reasons": [
+          "wrong-dialect"
+        ]
+      },
+      "faults": [
+        "BATCH_OVER_PLAN"
+      ]
+    },
+    {
+      "name": "a not yet within the plan that gives the over-the-plan reason",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "not-yet",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 40
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [],
+          "bound": 40
+        },
+        "reasons": [
+          "batch-over-plan"
+        ]
+      },
+      "faults": [
+        "BATCH_OVER_PLAN"
+      ]
+    },
+    {
+      "name": "a plan's limit one too low",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 39
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [],
+          "bound": 40
+        }
+      },
+      "faults": [
+        "BATCH_PLAN"
+      ]
+    },
+    {
+      "name": "a bound one too high",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 40
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [],
+          "bound": 41
+        }
+      },
+      "faults": [
+        "BATCH_BOUND"
+      ]
+    },
+    {
+      "name": "one header is no draw",
+      "valid": false,
+      "body": {
+        "issuer": "did:kash:AgencyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+        "kind": "receipt",
+        "outcome": "accepted",
+        "reference": {
+          "kind": "artefact",
+          "sha256": "3f1c9a52e6b07d48a1e2c5f9b8d4a6017e3c2b9f5d8a1e4c7b0f3a6d9e2c5b81"
+        },
+        "statement": "Batch 14: product descriptions translated into Urdu.",
+        "profile": "client-signoff/1",
+        "counterparty": "did:kash:CounterpartyBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB",
+        "grade": 1,
+        "claimedAt": "2026-11-26T12:00:00Z",
+        "expiresAt": "2027-11-26T12:00:00Z",
+        "batch": {
+          "seal": {
+            "format": "kash-batch-seal/1",
+            "root": "7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b7e348acf79b2b03b",
+            "size": 2000,
+            "plan": {
+              "sample": 140,
+              "accept": 0,
+              "alpha": {
+                "num": 1,
+                "den": 20
+              },
+              "limit": 40
+            },
+            "draw": {
+              "source": "bitcoin/1",
+              "height": 977713
+            }
+          },
+          "stamp": "AA==",
+          "blocks": [
+            "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+          ],
+          "coinbase": {
+            "tx": "02000000010000000000000000000000000000000000000000000000000000000000000000ffffffff0f0331eb0e53414d504c4520706f6f6cffffffff0100f2052a01000000016a00000000",
+            "path": []
+          },
+          "found": [],
+          "bound": 40
+        }
+      },
+      "faults": [
+        "SHAPE"
+      ]
+    }
+  ]
+}

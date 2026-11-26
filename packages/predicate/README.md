@@ -6,7 +6,7 @@ A door is anywhere someone decides on evidence (ECOSYSTEM d84). It publishes a *
 
 | Subpath | What it does |
 |---|---|
-| `@kashscript/predicate/rule` | `validateRule` (the floor: P4's second rule, node rules 10–11, d43), `ruleHash`, `signRule` / `readRule` (DSSE, by the author), `ruleRequest` / `openRuleRequest` (OpenID4VP `direct_post`), sealed thresholds for private rules |
+| `@kashscript/predicate/rule` | `validateRule` (the floor: P4's second rule, node rules 10–11, d43 — and, since PY-5, no rule reads which items of a batch fell short, and a rule about a person reads nothing of a batch but its acceptance), `ruleHash`, `signRule` / `readRule` (DSSE, by the author), `ruleRequest` / `openRuleRequest` (OpenID4VP `direct_post`), sealed thresholds for private rules |
 | `@kashscript/predicate/checklist` | `checklist(rule, heldReceipts, {asOf, …})` — per criterion: **answered**, **missing** (and who the rule accepts), **own-word** or **sealed**. No number anywhere |
 | `@kashscript/predicate/packet` | `buildPacket` (one `vp_token`: SD-JWT copies with KB-JWT, the person's own word, `kash-artifact` with its binding) and `checkPacket` (the desk's free, offline check) |
 | `@kashscript/predicate/route` | `route` → `automatic-yes`, `not-yet` or `to-a-person`. **Never a refusal** |

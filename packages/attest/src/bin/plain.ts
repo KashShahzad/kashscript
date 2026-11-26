@@ -19,6 +19,7 @@ import type { CountersignVerifyReport } from "../countersign";
 import type { HolderExportReport, StatusListReport, TrustListReport } from "../holder";
 import type { SdJwtReport } from "../sd-jwt";
 import type { PageView } from "../attestation/copies";
+import type { RecordCheck } from "../attestation/forms";
 import type { PredicatePresentationReport, SessionReceiptReport, ThankYouReport } from "../exchange";
 import type { CohortRecordReport } from "../profiles";
 import type { CheckpointReport, LogAuditReport, LogConsistencyReport, LogInclusionReport } from "../log";
@@ -104,6 +105,30 @@ export function plainAttestationCopy(r: SdJwtReport, page: PageView | null): Pla
     notProven:
       "that the other side exists or is independent — a copy is the issuer's word, and the record of truth with both signatures is the proof; who holds it, unless a holder binding was presented" +
       (page !== null && page.shown !== null ? "" : "; what the artefact says — it is shown only to the holder of the disclosure"),
+  };
+}
+
+/** An attestation record of truth (RW-14), and a batch it accepts on a sample (PY-5). */
+export function plainAttestationRecord(r: RecordCheck, items: { readonly ok: boolean } | null): PlainLayer {
+  const b = r.body;
+  const batch = b?.batch !== undefined ? r.batch : undefined;
+  return {
+    signed: uniq([b?.issuer, b?.counterparty]),
+    checked:
+      (b?.counterparty === undefined ? "the issuer's signature over a canonical body, and its rules" : "the issuer's and the other side's signatures over one canonical body, and its rules") +
+      (batch === undefined
+        ? ""
+        : batch.census
+          ? "; the seal against the receipt's reference; the plan and the count found, exactly"
+          : "; the seal against the receipt's reference; the stamp and the block headers; the draw block's height, from its first transaction; the draw, recomputed from them; the plan and the bound, exactly") +
+      (items === null ? "" : "; every item against the seal's root"),
+    notProven:
+      `${KEY_NOT_PERSON}; when it was made — the times in it are the signers' own` +
+      (batch === undefined
+        ? ""
+        : (batch.census ? "" : "; that the headers are Bitcoin's own chain; that the asker sealed only this version, and put it to the approver before its draw was public") +
+          "; that the items are good — only what the approver saw in the ones checked" +
+          (items === null ? "; the items themselves — hand in their file with --batch" : "")),
   };
 }
 

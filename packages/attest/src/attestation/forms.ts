@@ -28,6 +28,7 @@ import { jwkOf } from "../sd-jwt/jws";
 import { canonicalSignerOf, resolveVerificationKey, type VerifyKey } from "../signing";
 import type { StatusListEntry } from "../holder/status-list";
 import { checkAttestation, checkMandate } from "./faults";
+import { verifyBatch, type BatchCheck } from "../batch/verify";
 import {
   ATTESTATION_KINDS,
   ATTESTATION_OUTCOMES,
@@ -86,7 +87,12 @@ export type RecordProblemCode =
   | "COUNTERPARTY_SIGNATURE"
   | "MANDATE_MISSING"
   | "MANDATE_INVALID"
-  | "SUPERSESSION";
+  | "SUPERSESSION"
+  // a batch accepted on a sample (1.1.0; specs/attestation/batch.md §5)
+  | "BATCH_REFERENCE"
+  | "BATCH_DRAW"
+  | "BATCH_FOUND"
+  | "BATCH_BY_A_PERSON";
 
 export interface RecordProblem {
   readonly code: RecordProblemCode;
@@ -102,6 +108,8 @@ export interface RecordCheckOptions {
   readonly counterpartyMandate?: DsseEnvelope;
   /** The record the body's `supersedes` cites, when the checker holds it. */
   readonly superseded?: DsseEnvelope;
+  /** Tests only: a lower work floor for a batch's draw headers they mine themselves. Reported in `notChecked` when lowered. */
+  readonly batchMinWorkBits?: number;
 }
 
 export interface RecordCheck {
@@ -112,6 +120,8 @@ export interface RecordCheck {
   readonly problems: readonly RecordProblem[];
   /** What this check could not decide, said in words — never a pass by silence. */
   readonly notChecked: readonly string[];
+  /** A batch's own report — its seal digest, the draw recomputed — when the record carries one. */
+  readonly batch?: BatchCheck;
 }
 
 const nameOf = (keyid: string): string => canonicalSignerOf(keyid) ?? keyid.split("#")[0]!;
@@ -227,7 +237,21 @@ export async function verifyAttestationRecord(record: DsseEnvelope, opts: Record
       }
     }
   }
-  return { ok: problems.length === 0, body, contentId, problems, notChecked };
+  if (body.batch === undefined) return { ok: problems.length === 0, body, contentId, problems, notChecked };
+
+  // A batch accepted on a sample (1.1.0): a person answers for it — a seat or a representative under a mandate,
+  // never an agent's, a desk's or another organisation's key (d84 P3; d88). The kind is the principal's word (§4.8).
+  if (body.counterpartyMandate !== undefined && opts.counterpartyMandate !== undefined) {
+    const cm = readPayload(opts.counterpartyMandate);
+    const mb = cm === null ? null : checkMandate(cm.json).body;
+    if (mb !== null && mb.delegate.kind !== "seat" && mb.delegate.kind !== "representative") {
+      problems.push({ code: "BATCH_BY_A_PERSON", message: `the counterparty's mandate is to ${mb.delegate.kind === "agent" ? "an agent" : `a ${mb.delegate.kind}`} — a person answers for a batch, never a rule or a model (d84 P3; d88)` });
+    }
+  }
+  const batch = await verifyBatch(body, opts.batchMinWorkBits === undefined ? {} : { minWorkBits: opts.batchMinWorkBits });
+  for (const p of batch.problems) problems.push(p);
+  notChecked.push(...batch.notChecked);
+  return { ok: problems.length === 0, body, contentId, problems, notChecked, batch };
 }
 
 /* ── 2. the presentation ───────────────────────────────────────────── */
@@ -285,6 +309,12 @@ export async function copyClaimsOf(record: DsseEnvelope, copy: CopyInput, opts: 
     throw new AttestError("INVALID_INPUT", `a copy is made only from a record of truth that checks: ${checked.problems.map((p) => p.code).join(", ")}`);
   }
   const body = checked.body;
+  if (body.batch !== undefined) {
+    throw new AttestError(
+      "INVALID_INPUT",
+      "a batch acceptance has no copy in this version: its holder is its issuer, so a copy would be the issuer's own word (§2.4), and its size and bound would make a class of one — a door reads the record of truth (batch.md §6)",
+    );
+  }
   const iat = dayOf(copy.iatUnix);
   const exp = iat + (copy.lifetimeDays ?? COPY_LIFETIME_DAYS) * DAY;
   if (!(exp > iat)) throw new AttestError("INVALID_INPUT", "a copy lives at least a day");

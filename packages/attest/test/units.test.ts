@@ -177,14 +177,14 @@ describe("dst registry", () => {
       expect(e?.reserved).toBeUndefined();
     }
   });
-  it("registers the session anchor's leaf (GP-6) and the trust log's leaf (KS-Q4) as the two merkle leaves, owned by attest", () => {
-    for (const tag of ["kash-session-head-v1\n", "kash-log-entry-v1\n"]) {
+  it("registers the session anchor's leaf (GP-6), the trust log's leaf (KS-Q4) and a batch item's leaf (PY-5) as the three merkle leaves, owned by attest", () => {
+    for (const tag of ["kash-session-head-v1\n", "kash-log-entry-v1\n", "kash-batch-item-v1\n"]) {
       const e = lookupDst(tag);
       expect(e?.family).toBe("merkle-leaf");
       expect(e?.owner).toBe("@kashscript/attest");
       expect(e?.reserved).toBeUndefined();
     }
-    expect(DST_REGISTRY.filter((x) => x.family === "merkle-leaf").map((x) => x.tag)).toEqual(["kash-session-head-v1\n", "kash-log-entry-v1\n"]);
+    expect(DST_REGISTRY.filter((x) => x.family === "merkle-leaf").map((x) => x.tag)).toEqual(["kash-session-head-v1\n", "kash-log-entry-v1\n", "kash-batch-item-v1\n"]);
     expect(lookupDst("application/vnd.kash.log-checkpoint+json")?.family).toBe("dsse-type");
   });
   it("holds every tag exactly once — a duplicate row would silently shadow another in the lookup map", () => {

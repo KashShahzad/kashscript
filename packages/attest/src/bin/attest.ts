@@ -59,7 +59,8 @@ import {
   type TrustListReport,
 } from "../holder";
 import { isSdJwt, verifySdJwt, type SdJwtReport } from "../sd-jwt";
-import { ATTESTATION_VCT, NOT_DISCLOSED, shownOnPage, viewOfCopy, type PageView } from "../attestation";
+import { ATTESTATION_DST, ATTESTATION_VCT, NOT_DISCLOSED, shownOnPage, verifyAttestationRecord, viewOfCopy, type PageView, type RecordCheck } from "../attestation";
+import { batchWords, readBatchItemsFile, verifyBatchItems, type BatchItemsFile } from "../batch";
 import { COHORT_PROFILE, isCohortRecord, verifyCohortRecord, type CohortRecordReport } from "../profiles";
 import {
   ASK_FORMAT,
@@ -98,6 +99,7 @@ import {
   plainThankYou,
   plainTrustList,
   plainAttestationCopy,
+  plainAttestationRecord,
   type PlainLayer,
 } from "./plain";
 
@@ -107,7 +109,7 @@ Usage:
   attest verify <file> [--key <hex|host-key.txt|jwks.json>] [--signer-did <did>] [--offline]
                        [--trust-publisher <did>]... [--check-status]
                        [--audience <id>] [--nonce <n>] [--at <unix>] [--max-age <s>]
-                       [--status-list <file>]... [--artifact <file>]
+                       [--status-list <file>]... [--artifact <file>] [--batch <file>]
                        [--header <file>]... [--tsa-root <pem>] [--max-batch-delay <s>]
   attest log verify <dir> [--mirror <dir>] [--header <file>]... [--tsa-root <pem>]
 
@@ -121,6 +123,13 @@ class and what its holder disclosed. --artifact hands in the record it is a copy
 of — the countersigned record, or the attestation record of truth. The artefact
 is shown only when the copy discloses its record and that record names the
 file: the page's rule (RW-15). Without the disclosure it is simply not shown.
+
+An attestation record of truth (kash.attestation) prints both signatures and
+its rules. When it accepts a batch on a sample (PY-5), the checker recomputes
+the draw from the seal and the Bitcoin block it named, checks the stamp, the
+headers and the draw block's height (named in its first transaction, BIP34),
+and certifies the plan and the bound exactly; --batch hands in the batch's
+items file and checks every item against the seal's root.
 
 The trust log (KS-Q4): a checkpoint, an inclusion proof and a consistency
 proof are auto-detected. --header hands in a Bitcoin block header for an
@@ -143,6 +152,8 @@ Auto-detected, verified offline:
                          presentation against the --audience and --nonce you sent)
   - Attestation copy    (a receipt's copy; with --artifact, whether the disclosed
                          record names the file — shown to the holder of the disclosure)
+  - Attestation record  (the record of truth: both signatures and its rules; a batch's
+                         draw, plan and bound recomputed; with --batch, every item)
   - Session receipt     (both parties' signatures on every line; pending or complete)
   - Ask                 (the eight rules and the forbidden needs)
   - Log checkpoint      (the trust log's signed head)
@@ -211,6 +222,8 @@ interface Args {
   readonly maxAge?: number;
   /** The record an attestation copy is a copy of — shown only to the holder of its disclosure (RW-15). */
   readonly artifact?: string;
+  /** A batch's items file, checked against the seal's root (PY-5). */
+  readonly batch?: string;
   readonly headerFiles: readonly string[];
   readonly tsaRoot?: string;
   readonly maxBatchDelay?: number;
@@ -241,6 +254,7 @@ function parseArgs(argv: readonly string[]): Args {
   let maxBatchDelay: number | undefined;
   let mirror: string | undefined;
   let artifact: string | undefined;
+  let batch: string | undefined;
   const trustPublishers: string[] = [];
   const statusListFiles: string[] = [];
   const headerFiles: string[] = [];
@@ -266,6 +280,7 @@ function parseArgs(argv: readonly string[]): Args {
     else if (a === "--max-batch-delay") maxBatchDelay = seconds(a, argv[++i]);
     else if (a === "--mirror") mirror = need(a, argv[++i]);
     else if (a === "--artifact") artifact = need(a, argv[++i]);
+    else if (a === "--batch") batch = need(a, argv[++i]);
     else if (a === "--offline") continue; // verify never touches the network unless --check-status asks
     else die(2, `unknown argument: ${a}\n\n${USAGE}`);
   }
@@ -279,6 +294,7 @@ function parseArgs(argv: readonly string[]): Args {
     ...(at !== undefined ? { at } : {}),
     ...(maxAge !== undefined ? { maxAge } : {}),
     ...(artifact !== undefined ? { artifact } : {}),
+    ...(batch !== undefined ? { batch } : {}),
     ...(tsaRoot !== undefined ? { tsaRoot } : {}),
     ...(maxBatchDelay !== undefined ? { maxBatchDelay } : {}),
     ...(mirror !== undefined ? { mirror } : {}),
@@ -521,6 +537,42 @@ function printAttestationCopy(r: SdJwtReport, page: PageView | null, ok: boolean
   if (r.reason !== null) out(`  reason             : ${r.reason}`);
   for (const n of r.notes) out(`  note               : ${n}`);
   printPlain(plainAttestationCopy(r, page), ok);
+  out(`RESULT: ${ok ? "PASS" : "FAIL"}`);
+}
+
+/** An attestation record of truth (RW-14) — and, when it accepts a batch on a sample, the draw and the bound recomputed and the batch's words (PY-5). */
+function printAttestationRecord(r: RecordCheck, items: { readonly ok: boolean; readonly problems: readonly string[] } | null, ok: boolean): void {
+  const b = r.body;
+  out(`Attestation record (${ATTESTATION_DST})`);
+  if (b !== null) {
+    out(`  issuer             : ${b.issuer}`);
+    out(`  counterparty       : ${b.counterparty ?? "none"}`);
+    out(`  attests            : ${b.kind} — ${b.outcome}${b.profile !== undefined ? `, ${b.profile}` : ""}${b.grade !== undefined ? `, grade ${b.grade}` : ""}${b.practice === true ? " (practice)" : ""}`);
+    out(`  statement          : ${b.statement}`);
+    out(`  content id         : ${r.contentId ?? "unknown"}`);
+  }
+  if (b !== null && b.batch !== undefined && r.batch !== undefined) {
+    const s = b.batch.seal;
+    const bc = r.batch;
+    out(`  batch              : ${s.size} items, root ${s.root.slice(0, 16)}…, seal ${bc.sealDigest.slice(0, 16)}…`);
+    out(`  plan               : ${bc.census ? "every item checked (a census)" : `${s.plan.sample} drawn`}; accepted with up to ${s.plan.accept} short; chance ${s.plan.alpha.num} in ${s.plan.alpha.den}; limit ${s.plan.limit}`);
+    if (!bc.census) {
+      out(`  draw block         : ${s.draw?.height ?? "none named"} — ${bc.drawBlockHash ?? "no header to read"}${bc.blocksStand ? "" : " (the headers do not stand: see the problems below)"}`);
+      out(`  stamp              : ${bc.stampHeight === null ? "not read" : bc.blocksStand ? `reaches block ${bc.stampHeight}, below the draw block` : `checked against block ${bc.stampHeight}: see the problems below`}`);
+      out(`  drawn              : ${bc.drawn === null ? "not recomputed" : `${bc.drawn.length} positions, recomputed from the seal and the draw block: ${bc.drawn.slice(0, 8).join(", ")}${bc.drawn.length > 8 ? ", …" : ""}`}`);
+    }
+    out(`  found short        : ${b.batch.found.length === 0 ? "none" : b.batch.found.join(", ")}`);
+    out(`  bound              : ${b.batch.bound} of ${s.size}`);
+    if (items !== null) out(`  items              : ${items.ok ? `all ${s.size} make the seal's root` : `DO NOT MATCH — ${items.problems.join("; ")}`}`);
+    // The words say what a record that checks shows; for one that does not, they would claim what was not shown.
+    if (ok) {
+      const words = batchWords(b);
+      for (const l of [...words.lines, ...words.doesNotProve]) out(`  in words           : ${l}`);
+    } else out("  in words           : shown only for a record that checks");
+  }
+  for (const p of r.problems) out(`  problem            : ${p.code} — ${p.message}`);
+  for (const n of r.notChecked) out(`  not checked        : ${n}`);
+  printPlain(plainAttestationRecord(r, items), ok);
   out(`RESULT: ${ok ? "PASS" : "FAIL"}`);
 }
 
@@ -878,6 +930,27 @@ async function main(): Promise<void> {
     printPlain(plainStatusList(report), report.ok);
     out(`RESULT: ${report.ok ? "PASS" : "FAIL"}`);
     process.exit(report.ok ? 0 : 1);
+  }
+
+  // 2a'''''. An attestation record of truth (RW-14; a batch accepted on a sample, PY-5). A DSSE envelope, so
+  // before 2b, which would otherwise read it as an audit bundle.
+  if (o.payloadType === ATTESTATION_DST) {
+    const r = await verifyAttestationRecord(obj as DsseEnvelope);
+    let items: { ok: boolean; problems: readonly string[] } | null = null;
+    if (args.batch !== undefined) {
+      const batch = r.body?.batch;
+      if (batch === undefined) die(2, "--batch is for a record that accepts a batch on a sample");
+      let file: BatchItemsFile;
+      try {
+        file = readBatchItemsFile(JSON.parse(readFileSync(args.batch, "utf8")));
+      } catch (e) {
+        die(2, `cannot read --batch ${args.batch}: ${(e as Error).message}`);
+      }
+      items = await verifyBatchItems(batch, file);
+    }
+    const ok = r.ok && (items === null || items.ok);
+    printAttestationRecord(r, items, ok);
+    process.exit(ok ? 0 : 1);
   }
 
   // 2b. DSSE audit bundle.

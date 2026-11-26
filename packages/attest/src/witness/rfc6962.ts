@@ -16,6 +16,8 @@ import { AttestError } from "../errors";
 
 /** No real path is longer: a tree of 2^53 leaves has 53 levels. Anything longer is refused unread. */
 const MAX_PATH = 64;
+/** How many hashes of one level are in flight at once. */
+const HASH_CHUNK = 4096;
 
 async function sha256(...parts: Uint8Array[]): Promise<Uint8Array> {
   let length = 0;
@@ -64,9 +66,18 @@ export async function rfc6962Tree(leafHashes: readonly Uint8Array[]): Promise<Rf
   }
   const levels: Uint8Array[][] = [[...leafHashes]];
   for (let below = levels[0]!; below.length > 1; below = levels[levels.length - 1]!) {
-    const above: Uint8Array[] = [];
-    for (let i = 0; i < below.length; i += 2) {
-      above.push(i + 1 < below.length ? await nodeHash(below[i]!, below[i + 1]!) : below[i]!);
+    // Each level's pairs are hashed concurrently, in chunks: Web Crypto's per-call cost dominates one at a time
+    // (PY-5 measured about five times faster). The order of the results, and so the tree, is unchanged.
+    const above: Uint8Array[] = new Array(Math.ceil(below.length / 2));
+    for (let start = 0; start < above.length; start += HASH_CHUNK) {
+      const end = Math.min(above.length, start + HASH_CHUNK);
+      const chunk: Promise<Uint8Array>[] = [];
+      for (let j = start; j < end; j++) {
+        const i = 2 * j;
+        chunk.push(i + 1 < below.length ? nodeHash(below[i]!, below[i + 1]!) : Promise.resolve(below[i]!));
+      }
+      const done = await Promise.all(chunk);
+      for (let j = start; j < end; j++) above[j] = done[j - start]!;
     }
     levels.push(above);
   }

@@ -282,6 +282,15 @@ export function validateRule(body: unknown): RuleValidation {
         if (outcome === undefined || outcome.values === undefined || outcome.values.length !== 1 || outcome.values[0] !== "accepted") {
           refuse("ASKS_FOR_A_REFUSAL", `${at}.answer.query[${j}]`, `${PLAIN.ASKS_FOR_A_REFUSAL}: an attestation is read only as accepted — its claim ${JSON.stringify(path)} takes values ["accepted"]`);
         }
+        // A batch accepted on a sample (attest 1.1.0, PY-5): what was found short is a count of faults in someone's
+        // work, and its bound a rate of them (d43: no personal error counts). No rule reads which positions fell
+        // short; a rule about a person reads nothing of a batch but that it was accepted.
+        (q.claims ?? []).forEach((cl, k) => {
+          if (cl.path[0] !== "batch") return;
+          // The whole batch, or a wildcard under it, carries `found` as surely as naming it does.
+          if (cl.path.length < 2 || cl.path[1] === null || cl.path[1] === "found") refuse("READS_A_SCORE", `${at}.answer.query[${j}].claims[${k}]`, `${PLAIN.READS_A_SCORE}: no rule reads which items of a batch were found short`);
+          else if (subject === "person") refuse("READS_A_SCORE", `${at}.answer.query[${j}].claims[${k}]`, `${PLAIN.READS_A_SCORE}: a rule about a person reads nothing of a batch but that it was accepted`);
+        });
       });
       // One issuer is a proxy risk.
       const issuers = new Set<string>();

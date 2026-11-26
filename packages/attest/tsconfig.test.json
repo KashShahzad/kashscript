@@ -1,5 +1,5 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": { "noEmit": true, "types": ["bun"] },
-  "include": ["src/**/*", "test/**/*", "scripts/attestation-examples.ts", "scripts/countersigned-copy-example.ts"]
+  "include": ["src/**/*", "test/**/*", "scripts/attestation-examples.ts", "scripts/countersigned-copy-example.ts", "scripts/batch-example.ts", "scripts/batch-vectors.ts"]
 }

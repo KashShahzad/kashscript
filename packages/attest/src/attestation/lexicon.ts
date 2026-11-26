@@ -1,6 +1,7 @@
 /**
  * `kash.attestation@1.0.0` and `kash.mandate@1.0.0` — d91(a)'s one record type and its mandate, as
- * closed shapes (RW-14; `specs/attestation/README.md` §1–§2).
+ * closed shapes (RW-14; `specs/attestation/README.md` §1–§2) — and `kash.attestation@1.1.0`, whose receipt may
+ * carry a batch accepted on a sample (PY-5; `specs/attestation/batch.md`).
  *
  * **Why here.** Both are held records — an attestation is kept by its holder and its issuer's book, a
  * mandate is presented beside what it authorised — never public, organisation-authored records, which
@@ -16,6 +17,7 @@ import { DID_WEB_SOURCE } from "@kashscript/identity-core";
 import type { LexiconDef } from "@kashscript/lexicons/registry";
 import { S, type ObjectSchema, type Schema } from "@kashscript/lexicons/schema";
 import { STATUS_PURPOSES, type StatusListEntry } from "../holder/status-list";
+import { BATCH_SCHEMA, type Batch } from "../batch/seal";
 
 /* ── the vocabulary (d91(a)) ───────────────────────────────────────── */
 
@@ -151,8 +153,14 @@ export interface AttestationBody {
   /** Codes: what is missing for a not yet, the grounds of a contest, a finding's class. */
   readonly reasons?: readonly string[];
   readonly practice?: boolean;
+  /**
+   * 1.1.0 (PY-5): a receipt for a batch accepted on a sample — the seal fixed before the draw, its stamp and the
+   * blocks that drew, what was found short and the bound (`specs/attestation/batch.md`). A 1.0.0 body never has one.
+   */
+  readonly batch?: Batch;
 }
 
+/** The 1.0.0 shape, frozen: it refuses `batch`. The newest is {@link KASH_ATTESTATION_1_1_BODY_SCHEMA}. */
 export const KASH_ATTESTATION_BODY_SCHEMA: ObjectSchema = S.object(
   {
     issuer: PARTY,
@@ -185,6 +193,31 @@ export const KASH_ATTESTATION_LEXICON: LexiconDef = {
   title: "An attestation",
   description:
     "A signed outcome — accepted, not yet, refused or finding — against a content-addressed reference, by a party who answers for it (d91(a)). A receipt, a finding, an assurance or a contest; a decision keeps kash.decision. Held by its holder and its issuer's book; never published.",
+};
+
+/* ── kash.attestation@1.1.0 — a batch accepted on a sample (PY-5) ──── */
+
+/**
+ * 1.1.0 adds `batch` to a receipt: one person's acceptance of many items on a drawn sample, with the seal fixed
+ * before the draw, the stamp and blocks that drew it, the positions found short and the exact bound
+ * (`specs/attestation/batch.md`). Every 1.0.0 body is a 1.1.0 body; 1.0.0 stays frozen and refuses the field.
+ */
+export const KASH_ATTESTATION_1_1_ID = "kash.attestation@1.1.0" as const;
+
+export const KASH_ATTESTATION_1_1_BODY_SCHEMA: ObjectSchema = S.object(
+  { ...KASH_ATTESTATION_BODY_SCHEMA.properties, batch: S.optional(BATCH_SCHEMA) },
+  KASH_ATTESTATION_BODY_SCHEMA.required,
+);
+
+/** For JSON Schema export and tooling only — like 1.0.0, a held record, never published. */
+export const KASH_ATTESTATION_1_1_LEXICON: LexiconDef = {
+  id: KASH_ATTESTATION_1_1_ID,
+  nsid: KASH_ATTESTATION_NSID,
+  semver: { major: 1, minor: 1, patch: 0 },
+  bodySchema: KASH_ATTESTATION_1_1_BODY_SCHEMA,
+  title: "An attestation, which may accept a batch on a sample",
+  description:
+    "kash.attestation@1.0.0, whose receipt may carry a batch accepted on a sample (PY-5): the seal over the items' root, size and plan, fixed before the draw; the OpenTimestamps stamp and the Bitcoin headers that drew the positions; the positions found short; and the exact bound. A 1.0.0 body is a 1.1.0 body. Held by its holder and its issuer's book; never published.",
 };
 
 /* ── kash.mandate@1.0.0 ────────────────────────────────────────────── */

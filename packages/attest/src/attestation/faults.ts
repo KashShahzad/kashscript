@@ -12,8 +12,10 @@
 
 import { findPersonIdentity } from "@kashscript/lexicons/extensions/public";
 import { validate } from "@kashscript/lexicons/schema";
+import { alphaProblem, boundVerdict, limitVerdict } from "../batch/chance";
+import { OVER_PLAN_REASON } from "../batch/seal";
 import {
-  KASH_ATTESTATION_BODY_SCHEMA,
+  KASH_ATTESTATION_1_1_BODY_SCHEMA,
   KASH_MANDATE_BODY_SCHEMA,
   KEY_DID_PATTERN,
   isPublicReference,
@@ -42,7 +44,17 @@ export type AttestationFaultCode =
   | "GRADE_ZERO_PRACTICE"
   | "DATES"
   | "MANDATE_PRINCIPAL"
-  | "PERSON_IDENTITY";
+  | "PERSON_IDENTITY"
+  // 1.1.0 — a batch accepted on a sample (PY-5; specs/attestation/batch.md §5)
+  | "BATCH_KIND"
+  | "BATCH_REFERENCE"
+  | "BATCH_BY_A_PERSON"
+  | "BATCH_LIMITS"
+  | "BATCH_CENSUS"
+  | "BATCH_FOUND"
+  | "BATCH_OVER_PLAN"
+  | "BATCH_PLAN"
+  | "BATCH_BOUND";
 
 export type MandateFaultCode =
   | "SHAPE"
@@ -114,7 +126,7 @@ export function statementProblem(text: string): string | null {
   return hit === null ? null : hit.what;
 }
 
-/** The cross-field rules of `kash.attestation@1.0.0`, on a body whose shape already validates. */
+/** The cross-field rules of `kash.attestation@1.0.0` and, for a batch, 1.1.0's — on a body whose shape already validates. */
 export function attestationFaults(body: AttestationBody): readonly Fault<AttestationFaultCode>[] {
   const out: Fault<AttestationFaultCode>[] = [];
   const add = (code: AttestationFaultCode, message: string): void => {
@@ -171,7 +183,84 @@ export function attestationFaults(body: AttestationBody): readonly Fault<Attesta
     const hit = findPersonIdentity(body.reference.id);
     if (hit !== null) add("PERSON_IDENTITY", `the reference's id holds ${hit.what} — a library id names a rule or a standard, never a person`);
   }
+  if (body.batch !== undefined) batchFaults(body, add);
   return out;
+}
+
+/**
+ * The rules of a batch accepted on a sample (1.1.0; specs/attestation/batch.md §5) that need no hashing: who may
+ * answer, the plan's limits, census or draw, the positions found, and the exact plan and bound. The seal's
+ * digest, the stamp, the blocks and whether each found position was drawn are `verifyAttestationRecord`'s.
+ */
+function batchFaults(body: AttestationBody, add: (code: AttestationFaultCode, message: string) => void): void {
+  const b = body.batch!;
+  const seal = b.seal;
+  const plan = seal.plan;
+  if (body.kind !== "receipt") add("BATCH_KIND", "a batch rides only on a receipt: the other side's acceptance of the items (d91(a))");
+  if (body.reference.kind !== "artefact") add("BATCH_REFERENCE", "a batch's receipt is made against the batch itself: an artefact reference naming the seal's digest");
+  if (body.counterparty !== undefined && !KEY_DID_PATTERN.test(body.counterparty)) {
+    add("BATCH_BY_A_PERSON", "a person answers for a batch, with a key made for this relationship — never an organisation's own key, which a machine can hold (d84 P3; d88)");
+  }
+  if (body.grade === 3) add("BATCH_BY_A_PERSON", "grade 3 is the organisation signing as itself, which a machine can do — a person answers for a batch (d84 P3; d88)");
+
+  let sane = true;
+  const limit = (message: string): void => {
+    sane = false;
+    add("BATCH_LIMITS", message);
+  };
+  if (plan.sample > seal.size) limit("a draw takes at most every item in the batch");
+  if (plan.accept >= plan.sample) limit("a plan accepts fewer short items than it draws — one that accepts as many passes anything, and bounds nothing");
+  const a = alphaProblem(plan.alpha);
+  if (a !== null) limit(a);
+
+  const census = plan.sample === seal.size;
+  if (census && (seal.draw !== undefined || b.stamp !== undefined || b.blocks !== undefined || b.coinbase !== undefined)) {
+    add("BATCH_CENSUS", "a census checks every item: it carries no draw, stamp, blocks or coinbase");
+  }
+  // The coinbase is the draw block's own word for its height (BIP34; PY-5r): without it, the headers could end at any block.
+  if (!census && (seal.draw === undefined || b.stamp === undefined || b.blocks === undefined || b.coinbase === undefined)) {
+    add("BATCH_CENSUS", "a sampled batch names its draw block in the seal and carries the stamp, the blocks, and the draw block's coinbase that names its height");
+  }
+
+  let foundSane = true;
+  for (let k = 0; k < b.found.length; k++) {
+    const pos = b.found[k]!;
+    if (pos >= seal.size || (k > 0 && pos <= b.found[k - 1]!)) {
+      foundSane = false;
+      add("BATCH_FOUND", "the positions found short are listed once each, ascending, each inside the batch");
+      break;
+    }
+  }
+  if (b.found.length > plan.sample) {
+    foundSane = false;
+    add("BATCH_FOUND", "more positions are found short than the plan draws");
+  }
+
+  if (b.found.length > plan.accept) {
+    if (body.outcome === "accepted") {
+      add("BATCH_OVER_PLAN", `${b.found.length} were found short and the plan accepts at most ${plan.accept}: the batch can only be answered not yet — never accepted, and never an automatic no (d84 P3)`);
+    } else if (!(body.reasons ?? []).includes(OVER_PLAN_REASON)) {
+      add("BATCH_OVER_PLAN", `a not yet over the plan says so: its reasons include ${OVER_PLAN_REASON}`);
+    }
+  } else if ((body.reasons ?? []).includes(OVER_PLAN_REASON)) {
+    // PY-5r: the converse — the record would say of itself what is not so.
+    add("BATCH_OVER_PLAN", `${b.found.length} found short is within the plan, which accepts up to ${plan.accept}: the reason ${OVER_PLAN_REASON} would say otherwise — a not yet within the plan gives its own reasons`);
+  }
+
+  if (!sane) return;
+  // Two evaluations each, never a search (batch.md §4): a fault says which way a figure is off; the maker's
+  // limitOf and boundOf find the exact one. A search here let a record shaped to be wrong hold a checker for
+  // minutes (PY-5r).
+  const chance = `a chance of ${plan.alpha.num} in ${plan.alpha.den}`;
+  const lv = limitVerdict({ size: seal.size, sample: plan.sample, accept: plan.accept, alpha: plan.alpha, limit: plan.limit });
+  if (lv !== "exact") {
+    add("BATCH_PLAN", `the plan's limit, ${plan.limit}, is ${lv}: with ${plan.sample} drawn, ${plan.accept} accepted and ${chance}, the exact limit is ${lv === "too high" ? "lower" : "higher"} — limitOf finds it; a checker never searches`);
+  }
+  if (!foundSane) return;
+  const bv = boundVerdict({ size: seal.size, sample: plan.sample, found: b.found.length, alpha: plan.alpha, bound: b.bound });
+  if (bv !== "exact") {
+    add("BATCH_BOUND", `the bound, ${b.bound}, is ${bv}: with ${b.found.length} found short among ${plan.sample} drawn and ${chance}, the exact bound is ${bv === "too high" ? "lower" : "higher"} — boundOf finds it; a checker never searches`);
+  }
 }
 
 /** The cross-field rules of `kash.mandate@1.0.0`, on a body whose shape already validates. */
@@ -214,9 +303,9 @@ export interface Checked<B, C extends string> {
   readonly faults: readonly Fault<C>[];
 }
 
-/** The shape, then the cross-field rules. */
+/** The shape — the newest, 1.1.0, of which every 1.0.0 body is one — then the cross-field rules. */
 export function checkAttestation(value: unknown): Checked<AttestationBody, AttestationFaultCode> {
-  const v = validate<AttestationBody>(KASH_ATTESTATION_BODY_SCHEMA, value);
+  const v = validate<AttestationBody>(KASH_ATTESTATION_1_1_BODY_SCHEMA, value);
   if (!v.ok) return { ok: false, body: null, faults: v.errors.map((e) => ({ code: "SHAPE" as const, message: `$.${e.path.join(".")}: ${e.message}` })) };
   const faults = attestationFaults(v.value);
   return { ok: faults.length === 0, body: v.value, faults };

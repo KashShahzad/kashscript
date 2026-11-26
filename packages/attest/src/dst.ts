@@ -172,10 +172,17 @@ const ENTRIES: DstEntry[] = [
   // who answers for it; a mandate is a principal's grant to one key, which every signature that is not the
   // principal's own cites. New tags rather than a profile (d59(e)): the only candidate type is an engine's
   // work record, and the open protocol does not pin its one record type to one engine's shape (d91(e)).
-  // The shapes are kash.attestation@1.0.0 and kash.mandate@1.0.0 (./attestation, ADR-0031).
-  { tag: "application/vnd.kash.attestation+json", owner: "@kashscript/attest", family: "dsse-type", kind: "DSSE attestation — the record of truth: kash.attestation@1.0.0, canonical, signed by its issuer or by a delegate under a cited mandate" },
+  // The shapes are kash.attestation@1.0.0 and kash.mandate@1.0.0 (./attestation, ADR-0031); 1.1.0 adds a batch
+  // accepted on a sample under the same tag (PY-5, ADR-0036) — a new version of the body, never a new type.
+  { tag: "application/vnd.kash.attestation+json", owner: "@kashscript/attest", family: "dsse-type", kind: "DSSE attestation — the record of truth: kash.attestation@1.0.0 or 1.1.0 (a receipt may carry a batch accepted on a sample), canonical, signed by its issuer or by a delegate under a cited mandate" },
   { tag: "application/vnd.kash.mandate+json", owner: "@kashscript/attest", family: "dsse-type", kind: "DSSE mandate — kash.mandate@1.0.0: a principal grants one key the authority to sign within a scope until a date; signed by the principal" },
   { tag: "https://kashscript.com/vct/attestation/1", owner: "@kashscript/attest", family: "sd-jwt-vct", kind: "SD-JWT VC attestation copy — one per verifier, issued by the attestation's issuer; what could join two copies (a private reference, the exact time, the record id, a mandate) is selectively disclosable" },
+  // One root over many items (PY-5; specs/attestation/batch.md §1). Not a signature: SHA-256(0x00 ‖ tag ‖ size ‖
+  // salt ‖ item digest) — the batch's item count as 8 bytes big-endian, so a tree of one size never passes as one
+  // of another; a 32-byte salt kept with the batch and never in a record; the SHA-256 of the item's bytes. Leaves
+  // are sorted, so the order is the items' own. A sampled batch seals its items with it before the draw; a page of
+  // many answers fixes the records one passkey step covers.
+  { tag: "kash-batch-item-v1\n", owner: "@kashscript/attest", family: "merkle-leaf", kind: "batch item leaf — one item of a kash-items/1 tree: the size, the batch's salt and the item's digest; the root is what a batch's seal fixes before its draw" },
   // An establishment's ledger (Oreoasis's OS-3 and OS-3b; ECOSYSTEM d99, d100; its packages/core/src/ledger/format.ts).
   // An entry is one act of a seat — or of the host — in an establishment's own ledger: a DSSE envelope the seat's device
   // key signs, carried inside an oreoasis-ledger-v1 row the host signs for that one establishment. The row's tag is

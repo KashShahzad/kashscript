@@ -1,0 +1,36 @@
+{
+  "issuer": "did:kash:GiufNaYx79PfxHDRVzSqCV7ZR3B6PFFjFiYhf9HJD5Qn",
+  "kind": "receipt",
+  "outcome": "accepted",
+  "reference": {
+    "kind": "artefact",
+    "sha256": "a197af71c5cf84e57d680a4eda8ea0e7f73cc4e24a7b78e8943c7fd18e4e0e5e"
+  },
+  "statement": "SAMPLE: 40 labelled photographs for the catalogue, delivery 3",
+  "profile": "client-signoff/1",
+  "counterparty": "did:kash:QLsNRCmfTXSFdZEYHzL6yxiRMUzsvNcnLp6MthoXbx6",
+  "grade": 1,
+  "claimedAt": "2026-11-26T09:00:00Z",
+  "expiresAt": "2027-11-26T09:00:00Z",
+  "practice": true,
+  "batch": {
+    "seal": {
+      "format": "kash-batch-seal/1",
+      "root": "9def32d5ce4d57fe67de4d8009766a7b93b41037edebd5f4f0e10bb2ac7125ad",
+      "size": 40,
+      "plan": {
+        "sample": 40,
+        "accept": 1,
+        "alpha": {
+          "num": 1,
+          "den": 20
+        },
+        "limit": 1
+      }
+    },
+    "found": [
+      17
+    ],
+    "bound": 1
+  }
+}

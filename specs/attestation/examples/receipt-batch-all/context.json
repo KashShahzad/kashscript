@@ -1,0 +1,16 @@
+{
+  "note": "SAMPLE parties, practice only. Public identifiers; no key material.",
+  "sealDigest": "a197af71c5cf84e57d680a4eda8ea0e7f73cc4e24a7b78e8943c7fd18e4e0e5e",
+  "found": [
+    17
+  ],
+  "words": [
+    "The approver checked every one of the 40 items in the asker's batch.",
+    "1 of the 40 falls short of the agreed words; the plan accepts up to 1.",
+    "The acceptance does not cover that one.",
+    "The plan accepts the batch if at most 1 falls short.",
+    "This says what was seen in these 40 items, and nothing more.",
+    "It does not show that the items are good — only that the approver checked them and answered.",
+    "It says nothing about who made the items."
+  ]
+}
