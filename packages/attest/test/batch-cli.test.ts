@@ -55,6 +55,17 @@ describe("attest verify — a batch accepted on a sample (PY-5)", () => {
     expect(r.stdout).toContain("in words           : The approver checked every one of the 40 items in the asker's batch.");
     expect(r.stdout).toContain("in words           : The acceptance does not cover that one.");
     expect(r.stdout).toContain("what was checked   : the issuer's and the other side's signatures over one canonical body, and its rules; the seal against the receipt's reference; the plan and the count found, exactly; every item against the seal's root");
+    // The items were checked, so they are not also listed as not checked.
+    expect(r.stdout).not.toContain("not checked        : the items themselves");
+    expect(r.stdout.trim().endsWith("RESULT: PASS")).toBe(true);
+  }, 60_000);
+
+  it("without --batch, the items are named as not checked, and the record still passes on what was (exit 0)", () => {
+    const r = runNode(["verify", `${CENSUS}/record.dsse.json`]);
+    expect(r.status).toBe(0);
+    expect(r.stdout).not.toContain("items              :");
+    expect(r.stdout).toContain("not checked        : the items themselves — given the batch's items file");
+    expect(r.stdout).toContain("the items themselves — hand in their file with --batch");
     expect(r.stdout.trim().endsWith("RESULT: PASS")).toBe(true);
   }, 60_000);
 
@@ -92,10 +103,13 @@ describe("attest verify — a batch accepted on a sample (PY-5)", () => {
 
   it("the real worked example: once its draw block is mined, it passes at the default floor; until then the seal waits, stamped", () => {
     if (existsSync(join(PKG, SAMPLED, "record.dsse.json"))) {
+      const ctx = JSON.parse(readFileSync(join(PKG, SAMPLED, "context.json"), "utf8")) as { drawHeight: number; drawBlockHash: string; stampHeight: number };
       const r = runNode(["verify", `${SAMPLED}/record.dsse.json`, "--batch", `${SAMPLED}/items.json`]);
       expect(r.status).toBe(0);
-      expect(r.stdout).toContain("stamp              : reaches block");
+      expect(r.stdout).toContain(`draw block         : ${ctx.drawHeight} — ${ctx.drawBlockHash}`);
+      expect(r.stdout).toContain(`stamp              : reaches block ${ctx.stampHeight}, below the draw block`);
       expect(r.stdout).toContain("items              : all 2000 make the seal's root");
+      expect(r.stdout).not.toContain("not checked        : the items themselves");
       expect(r.stdout.trim().endsWith("RESULT: PASS")).toBe(true);
     } else {
       // Not a pass by silence: the pending state is what the folder must hold until `batch-example.ts finish` runs.

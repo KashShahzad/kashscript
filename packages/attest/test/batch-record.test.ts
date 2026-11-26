@@ -362,6 +362,32 @@ describe("the worked examples (generated once by scripts/batch-example.ts)", () 
     expect([...w.lines, ...w.doesNotProve]).toEqual(ctx.words);
     expect(JSON.stringify(record)).not.toMatch(/"(?:seed|secretKey|privateKey|d)"\s*:/);
   });
+
+  test("the sampled batch: the record verifies at the default floor on real Bitcoin headers, the draw recomputes to the positions written, its items make the root, its words are the ones written", async () => {
+    const b = read<AttestationBody>("receipt-batch-sampled", "body.json");
+    const record = read<Parameters<typeof verifyAttestationRecord>[0]>("receipt-batch-sampled", "record.dsse.json");
+    expect(Buffer.from(record.payload, "base64").equals(Buffer.from(canonicalizeBytes(b)))).toBe(true);
+    const r = await verifyAttestationRecord(record);
+    expect(r.problems).toEqual([]);
+    expect(r.ok).toBe(true);
+    const ctx = read<{ sealDigest: string; drawHeight: number; drawBlockHash: string; stampHeight: number; drawn: number[]; found: number[]; words: string[] }>("receipt-batch-sampled", "context.json");
+    expect(b.batch!.seal).toEqual(read<BatchSeal>("receipt-batch-sampled", "seal.json"));
+    expect(b.batch!.seal.draw?.height).toBe(ctx.drawHeight);
+    expect(r.batch?.census).toBe(false);
+    expect(r.batch?.minWorkBits).toBe(SEED_MIN_WORK_BITS);
+    expect(r.batch?.blocksStand).toBe(true);
+    expect(r.batch?.sealDigest).toBe(ctx.sealDigest);
+    expect(r.batch?.drawBlockHash).toBe(ctx.drawBlockHash);
+    expect(r.batch?.stampHeight).toBe(ctx.stampHeight);
+    expect(r.batch?.drawn).toEqual(ctx.drawn);
+    expect(b.batch!.found).toEqual(ctx.found);
+    const items = read<{ format: "kashscript-batch-items/1"; salt: string; digests: string[] }>("receipt-batch-sampled", "items.json");
+    expect((await verifyBatchItems(b.batch!, items)).ok).toBe(true);
+    const { batchWords } = await import("../src/batch");
+    const w = batchWords(b);
+    expect([...w.lines, ...w.doesNotProve]).toEqual(ctx.words);
+    expect(JSON.stringify(record)).not.toMatch(/"(?:seed|secretKey|privateKey|d)"\s*:/);
+  });
 });
 
 void hexToBytes;

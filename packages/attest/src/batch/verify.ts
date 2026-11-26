@@ -41,6 +41,13 @@ export interface BatchCheckOptions {
   readonly minWorkBits?: number;
 }
 
+/**
+ * The line `verifyBatch` always adds to `notChecked`, since it never sees the items. A caller that does check
+ * them with `verifyBatchItems` — `attest verify --batch` — drops this line, and says what the items check found.
+ */
+export const BATCH_ITEMS_NOT_CHECKED =
+  "the items themselves — given the batch's items file, `verifyBatchItems` (attest verify --batch <file>) checks every item against the root";
+
 async function displayHashOf(headerHex: string): Promise<string | null> {
   if (!/^[0-9a-f]{160}$/.test(headerHex)) return null;
   const once = await crypto.subtle.digest("SHA-256", hexToBytes(headerHex) as unknown as BufferSource);
@@ -56,10 +63,9 @@ export async function verifyBatch(body: AttestationBody, opts: BatchCheckOptions
   const notChecked: string[] = [];
   const sealDigest = await sealDigestOf(seal);
   if (body.reference.sha256 !== sealDigest) problems.push({ code: "BATCH_REFERENCE", message: "the receipt's reference does not name this seal's digest" });
-  const items = "the items themselves — given the batch's items file, `verifyBatchItems` (attest verify --batch <file>) checks every item against the root";
   const census = isCensus(seal);
   if (census) {
-    notChecked.push(items);
+    notChecked.push(BATCH_ITEMS_NOT_CHECKED);
     return { ok: problems.length === 0, problems, notChecked, sealDigest, census, drawn: null, drawBlockHash: null, blocksStand: true, stampHeight: null, minWorkBits };
   }
 
@@ -81,7 +87,7 @@ export async function verifyBatch(body: AttestationBody, opts: BatchCheckOptions
   notChecked.push(
     `that these headers are Bitcoin's own chain — each claims the floor's work and the last names height ${height} in its first transaction, but a costly private chain could do both; compare block ${height}'s hash${drawBlockHash !== null ? ` (${drawBlockHash})` : ""} with any copy of the chain`,
     `that the batch was put to the approver before block ${height} was mined, and that the asker sealed no other version of it first — the asker's own engine refuses an ask whose draw is already public; a stranger cannot see either`,
-    items,
+    BATCH_ITEMS_NOT_CHECKED,
   );
   return { ok: problems.length === 0, problems, notChecked, sealDigest, census, drawn, drawBlockHash, blocksStand: standing.ok, stampHeight: standing.stampHeight, minWorkBits };
 }

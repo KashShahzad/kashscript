@@ -60,7 +60,7 @@ import {
 } from "../holder";
 import { isSdJwt, verifySdJwt, type SdJwtReport } from "../sd-jwt";
 import { ATTESTATION_DST, ATTESTATION_VCT, NOT_DISCLOSED, shownOnPage, verifyAttestationRecord, viewOfCopy, type PageView, type RecordCheck } from "../attestation";
-import { batchWords, readBatchItemsFile, verifyBatchItems, type BatchItemsFile } from "../batch";
+import { BATCH_ITEMS_NOT_CHECKED, batchWords, readBatchItemsFile, verifyBatchItems, type BatchItemsFile } from "../batch";
 import { COHORT_PROFILE, isCohortRecord, verifyCohortRecord, type CohortRecordReport } from "../profiles";
 import {
   ASK_FORMAT,
@@ -571,7 +571,8 @@ function printAttestationRecord(r: RecordCheck, items: { readonly ok: boolean; r
     } else out("  in words           : shown only for a record that checks");
   }
   for (const p of r.problems) out(`  problem            : ${p.code} — ${p.message}`);
-  for (const n of r.notChecked) out(`  not checked        : ${n}`);
+  // With --batch the items were checked, and the items line above says what was found.
+  for (const n of r.notChecked) if (items === null || n !== BATCH_ITEMS_NOT_CHECKED) out(`  not checked        : ${n}`);
   printPlain(plainAttestationRecord(r, items), ok);
   out(`RESULT: ${ok ? "PASS" : "FAIL"}`);
 }
